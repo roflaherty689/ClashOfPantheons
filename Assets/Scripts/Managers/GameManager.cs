@@ -26,6 +26,13 @@ public class GameManager : MonoBehaviour
 
     public bool IsGameOver => gameOver;
 
+    [SerializeField] private float gameSpeed = 1f;
+
+    private void Start()
+    {
+        Time.timeScale = gameSpeed;
+    }
+
     private void Update()
     {
         if (gameOver) return;
