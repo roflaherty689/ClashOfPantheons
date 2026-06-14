@@ -1,13 +1,11 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Clash of Pantheons/Unit Data")]
+[CreateAssetMenu(fileName = "UnitData", menuName = "ClashOfPantheons/Unit Data")]
 public class UnitData : ScriptableObject
 {
-    public string unitName;
-    public int maxHealth = 100;
-    public int damage = 10;
-    public float attackRange = 1.2f;
-    public float attackCooldown = 1f;
-    public float moveSpeed = 2f;
-    public int goldCost = 25;
+    public float maxHealth = 10;
+    public float damage = 1;
+    public float attackRange = 0.5f;
+    public float attackSpeed = 1;
+    public float moveSpeed = 2;
 }

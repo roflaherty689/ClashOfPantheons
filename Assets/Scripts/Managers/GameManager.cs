@@ -1,0 +1,79 @@
+using UnityEngine;
+using TMPro;
+
+public class GameManager : MonoBehaviour
+{
+    [Header("Unit Prefabs")]
+    [SerializeField] private Unit basicUnitPrefab;
+
+    [Header("Spawn Points")]
+    [SerializeField] private Transform leftSpawnPoint;
+    [SerializeField] private Transform rightSpawnPoint;
+
+    [Header("Targets")]
+    [SerializeField] private Transform leftTargetPoint;
+    [SerializeField] private Transform rightTargetPoint;
+
+    [Header("Spawn Settings")]
+    [SerializeField] private float spawnInterval = 3f;
+    [SerializeField] private int maxMeleeUnitsPerTeam = 5;
+
+    [Header("UI")]
+    [SerializeField] private TextMeshProUGUI victoryText;
+
+    private float spawnTimer;
+    private bool gameOver;
+
+    public bool IsGameOver => gameOver;
+
+    private void Update()
+    {
+        if (gameOver) return;
+
+        spawnTimer += Time.deltaTime;
+
+        if (spawnTimer >= spawnInterval)
+        {
+            spawnTimer = 0f;
+
+            TrySpawnUnit(Team.Left, leftSpawnPoint, leftTargetPoint);
+            TrySpawnUnit(Team.Right, rightSpawnPoint, rightTargetPoint);
+        }
+    }
+
+    private void TrySpawnUnit(Team team, Transform spawnPoint, Transform targetPoint)
+    {
+        Unit[] allUnits = FindObjectsByType<Unit>(FindObjectsSortMode.None);
+
+        int teamUnitCount = 0;
+
+        foreach (Unit unit in allUnits)
+        {
+            if (unit.Team == team)
+            {
+                teamUnitCount++;
+            }
+        }
+
+        if (teamUnitCount >= maxMeleeUnitsPerTeam) return;
+
+        Unit unitInstance = Instantiate(
+            basicUnitPrefab,
+            spawnPoint.position,
+            Quaternion.identity
+        );
+
+        unitInstance.Initialize(team, targetPoint);
+    }
+
+    public void EndGame(string winningTeam)
+    {
+        gameOver = true;
+
+        if (victoryText != null)
+        {
+            victoryText.gameObject.SetActive(true);
+            victoryText.text = $"{winningTeam} Team Wins!";
+        }
+    }
+}
