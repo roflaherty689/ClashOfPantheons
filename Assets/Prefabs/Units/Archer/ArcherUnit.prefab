@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 4507551543713247816}
   - component: {fileID: 7833208681658150961}
   - component: {fileID: 4707872448201973211}
-  - component: {fileID: 6544274908755567055}
+  - component: {fileID: 643887454051965650}
   m_Layer: 0
-  m_Name: MeleeUnit
+  m_Name: ArcherUnit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -108,7 +108,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &6544274908755567055
+--- !u!114 &643887454051965650
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -117,16 +117,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 1766547236379750519}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4cc7a49a5c80da4db186107c2a91ea3, type: 3}
+  m_Script: {fileID: 11500000, guid: 7ca5846a60911e94a87092e9a4f03ba1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Unit
-  unitData: {fileID: 11400000, guid: 5e56eb212175d1c43a426b24c10465ac, type: 2}
-  friendlyStopRange: 0.6
+  m_EditorClassIdentifier: Assembly-CSharp::ArcherUnit
+  unitData: {fileID: 11400000, guid: 99b2a7e3e2e6d854580f8909c79db339, type: 2}
   healthBarPrefab: {fileID: 7140927305658623058, guid: 4197aadd5c42f5841bcb5fcf0eddaa39, type: 3}
-  attackTiltAngle: 15
-  attackTiltDuration: 0.1
+  healthBarOffset: {x: 0, y: 0.8, z: 0}
   visualTransform: {fileID: 8278404244199056422}
   spriteRenderer: {fileID: 6173799969213007168}
+  friendlyStopRange: 0.6
+  attackTiltAngle: 15
+  attackTiltDuration: 0.2
+  projectilePrefab: {fileID: 2364576383394483315, guid: 8f77a874314decd4dadb197965aef2ef, type: 3}
+  projectileSpawnPoint: {fileID: 8278404244199056422}
+  projectileTravelTime: 0.4
+  projectileArcHeight: 0.5
+  usesProjectile: 1
 --- !u!1 &4395075430361738477
 GameObject:
   m_ObjectHideFlags: 0
@@ -138,7 +144,7 @@ GameObject:
   - component: {fileID: 8278404244199056422}
   - component: {fileID: 6173799969213007168}
   m_Layer: 0
-  m_Name: Triangle
+  m_Name: Circle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -208,7 +214,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
+  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

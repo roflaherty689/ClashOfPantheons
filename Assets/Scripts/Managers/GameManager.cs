@@ -4,7 +4,8 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
     [Header("Unit Prefabs")]
-    [SerializeField] private Unit basicUnitPrefab;
+    [SerializeField] private BaseUnit meleePrefab;
+    [SerializeField] private BaseUnit archerPrefab;
 
     [Header("Spawn Points")]
     [SerializeField] private Transform leftSpawnPoint;
@@ -50,11 +51,11 @@ public class GameManager : MonoBehaviour
 
     private void TrySpawnUnit(Team team, Transform spawnPoint, Transform targetPoint)
     {
-        Unit[] allUnits = FindObjectsByType<Unit>(FindObjectsSortMode.None);
+        BaseUnit[] allUnits = FindObjectsByType<BaseUnit>(FindObjectsSortMode.None);
 
         int teamUnitCount = 0;
 
-        foreach (Unit unit in allUnits)
+        foreach (BaseUnit unit in allUnits)
         {
             if (unit.Team == team)
             {
@@ -64,8 +65,12 @@ public class GameManager : MonoBehaviour
 
         if (teamUnitCount >= maxMeleeUnitsPerTeam) return;
 
-        Unit unitInstance = Instantiate(
-            basicUnitPrefab,
+        BaseUnit prefabToSpawn = Random.value < 0.5f
+            ? meleePrefab
+            : archerPrefab;
+
+        BaseUnit unitInstance = Instantiate(
+            prefabToSpawn,
             spawnPoint.position,
             Quaternion.identity
         );

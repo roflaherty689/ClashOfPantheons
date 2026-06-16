@@ -273,7 +273,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b41dde6de5c40c4c8ad2078429a85a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  basicUnitPrefab: {fileID: 6544274908755567055, guid: eacd60b078804db4cbb48dc99e84f61e, type: 3}
+  meleePrefab: {fileID: 7886269566354373400, guid: eacd60b078804db4cbb48dc99e84f61e, type: 3}
+  archerPrefab: {fileID: 643887454051965650, guid: 677f2c8b82739054094fa93e6cc7d6d2, type: 3}
   leftSpawnPoint: {fileID: 893962611}
   rightSpawnPoint: {fileID: 1386099994}
   leftTargetPoint: {fileID: 1706114285}
