@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class ArcherUnit : BaseUnit
 {
-    [SerializeField] private Transform visualTransform;
-
     private Vector3 originalPosition;
 
     protected void Start()

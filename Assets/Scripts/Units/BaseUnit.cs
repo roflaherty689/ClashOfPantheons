@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class BaseUnit : MonoBehaviour
+public abstract class BaseUnit : MonoBehaviour, IDamageable
 {
     [Header("Data")]
     [SerializeField] protected UnitData unitData;
@@ -10,7 +10,7 @@ public abstract class BaseUnit : MonoBehaviour
     [SerializeField] private Vector3 healthBarOffset = new Vector3(0, 0.8f, 0);
 
     [Header("Visuals")]
-    [SerializeField] private Transform visualTransform;
+    [SerializeField] protected Transform visualTransform;
     [SerializeField] private SpriteRenderer spriteRenderer;
 
     [Header("Friendly Blocking")]
@@ -45,6 +45,8 @@ public abstract class BaseUnit : MonoBehaviour
     [SerializeField] private float projectileArcHeight = 0.5f;
     [SerializeField] private bool usesProjectile;
 
+    public Transform Transform => transform;
+
     public virtual void Initialize(Team team, Transform targetPoint)
     {
         gameManager = FindFirstObjectByType<GameManager>();
@@ -56,7 +58,19 @@ public abstract class BaseUnit : MonoBehaviour
         originalVisualRotation = visualTransform.rotation;
 
         SpawnHealthBar();
+        SetFacingDirection();
         SetTeamColour();
+    }
+
+    private void SetFacingDirection()
+    {
+        float xScale = team == Team.Left ? 1f : -1f;
+
+        visualTransform.localScale = new Vector3(
+            xScale,
+            1f,
+            1f
+        );
     }
 
     private void Update()
@@ -221,7 +235,7 @@ public abstract class BaseUnit : MonoBehaviour
         PlayAttackAnimation();
     }
 
-    private void FireProjectileAt(BaseUnit target)
+    private void FireProjectileAt(IDamageable target)
     {
         if (projectilePrefab == null || projectileSpawnPoint == null)
         {
@@ -251,7 +265,15 @@ public abstract class BaseUnit : MonoBehaviour
 
         attackTimer = 0f;
 
-        currentBaseTarget.TakeDamage(unitData.damage);
+        if (usesProjectile)
+        {
+            FireProjectileAt(currentBaseTarget);
+        }
+        else
+        {
+            currentBaseTarget.TakeDamage(unitData.damage);
+        }
+
         PlayAttackAnimation();
     }
 

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Base : MonoBehaviour
+public class Base : MonoBehaviour, IDamageable
 {
     [SerializeField] private Team team;
     [SerializeField] private float maxHealth = 50f;
@@ -24,6 +24,8 @@ public class Base : MonoBehaviour
     private bool isShaking;
     private float shakeTimer;
     private Vector3 originalVisualPosition;
+
+    public Transform Transform => transform;
 
     private void Awake()
     {

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    private BaseUnit target;
+    private IDamageable target;
     private float damage;
 
     private Vector3 startPosition;
@@ -13,7 +13,7 @@ public class Projectile : MonoBehaviour
 
     private float arcHeight;
 
-    public void Initialize(BaseUnit target, float damage, float travelTime, float arcHeight)
+    public void Initialize(IDamageable target, float damage, float travelTime, float arcHeight)
     {
         this.target = target;
         this.damage = damage;
@@ -21,7 +21,14 @@ public class Projectile : MonoBehaviour
         this.arcHeight = arcHeight;
 
         startPosition = transform.position;
-        targetPosition = target.transform.position;
+        targetPosition = target.Transform.position;
+
+
+        Vector3 direction = target.Transform.position - transform.position;
+
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+        transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
     private void Update()
