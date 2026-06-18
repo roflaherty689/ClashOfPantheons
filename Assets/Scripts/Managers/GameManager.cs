@@ -4,8 +4,11 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
     [Header("Unit Prefabs")]
-    [SerializeField] private BaseUnit meleePrefab;
-    [SerializeField] private BaseUnit archerPrefab;
+    [SerializeField] private BaseUnit leftMeleePrefab;
+    [SerializeField] private BaseUnit rightMeleePrefab;
+
+    [SerializeField] private BaseUnit leftArcherPrefab;
+    [SerializeField] private BaseUnit rightArcherPrefab;
 
     [Header("Spawn Points")]
     [SerializeField] private Transform leftSpawnPoint;
@@ -65,9 +68,7 @@ public class GameManager : MonoBehaviour
 
         if (teamUnitCount >= maxMeleeUnitsPerTeam) return;
 
-        BaseUnit prefabToSpawn = Random.value < 0.5f
-            ? meleePrefab
-            : archerPrefab;
+        BaseUnit prefabToSpawn = GetRandomUnitPrefab(team);
 
         BaseUnit unitInstance = Instantiate(
             prefabToSpawn,
@@ -76,6 +77,22 @@ public class GameManager : MonoBehaviour
         );
 
         unitInstance.Initialize(team, targetPoint);
+    }
+
+    private BaseUnit GetRandomUnitPrefab(Team team)
+    {
+        bool spawnMelee = Random.value < 0.5f;
+
+        if (team == Team.Left)
+        {
+            return spawnMelee
+                ? leftMeleePrefab
+                : leftArcherPrefab;
+        }
+
+        return spawnMelee
+            ? rightMeleePrefab
+            : rightArcherPrefab;
     }
 
     public void EndGame(string winningTeam)

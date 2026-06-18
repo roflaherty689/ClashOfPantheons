@@ -273,8 +273,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b41dde6de5c40c4c8ad2078429a85a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  meleePrefab: {fileID: 7886269566354373400, guid: eacd60b078804db4cbb48dc99e84f61e, type: 3}
-  archerPrefab: {fileID: 643887454051965650, guid: 677f2c8b82739054094fa93e6cc7d6d2, type: 3}
+  leftMeleePrefab: {fileID: 7886269566354373400, guid: e517b07cf6bf05448ac4ec5250d01c11, type: 3}
+  rightMeleePrefab: {fileID: 7886269566354373400, guid: f02d77ff54c838c46bb75979dae0f657, type: 3}
+  leftArcherPrefab: {fileID: 643887454051965650, guid: 54e0c3da30750334db58cfc59850080c, type: 3}
+  rightArcherPrefab: {fileID: 643887454051965650, guid: eeb6d9d52173f284aaf4a0db1b3851d7, type: 3}
   leftSpawnPoint: {fileID: 893962611}
   rightSpawnPoint: {fileID: 1386099994}
   leftTargetPoint: {fileID: 1706114285}
@@ -389,7 +391,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 6
+  orthographic size: 3.2
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -666,7 +668,7 @@ Transform:
   m_GameObject: {fileID: 893962610}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -9.5, y: 0, z: 0}
+  m_LocalPosition: {x: -4.5, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -758,7 +760,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 20, y: 0.25, z: 1}
+  m_LocalScale: {x: 10, y: 0.25, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -789,7 +791,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7853746771260587578, guid: 984db670955470943b97319442394a59, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7853746771260587578, guid: 984db670955470943b97319442394a59, type: 3}
       propertyPath: m_LocalPosition.y
@@ -835,6 +837,10 @@ PrefabInstance:
       propertyPath: team
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8315014160421980010, guid: 984db670955470943b97319442394a59, type: 3}
+      propertyPath: healthBarOffset.y
+      value: 0.8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -865,7 +871,7 @@ Transform:
   m_GameObject: {fileID: 1386099993}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.5, y: 0, z: 0}
+  m_LocalPosition: {x: 4.5, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1063,7 +1069,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7853746771260587578, guid: 984db670955470943b97319442394a59, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -10
+      value: -5
       objectReference: {fileID: 0}
     - target: {fileID: 7853746771260587578, guid: 984db670955470943b97319442394a59, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1104,6 +1110,10 @@ PrefabInstance:
     - target: {fileID: 8084084781756338509, guid: 984db670955470943b97319442394a59, type: 3}
       propertyPath: m_Name
       value: LeftBase
+      objectReference: {fileID: 0}
+    - target: {fileID: 8315014160421980010, guid: 984db670955470943b97319442394a59, type: 3}
+      propertyPath: healthBarOffset.y
+      value: 0.8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
