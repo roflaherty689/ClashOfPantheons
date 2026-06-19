@@ -59,7 +59,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         SpawnHealthBar();
         SetFacingDirection();
-        // SetTeamColour();
+        SetTeamColour();
     }
 
     private void SetFacingDirection()

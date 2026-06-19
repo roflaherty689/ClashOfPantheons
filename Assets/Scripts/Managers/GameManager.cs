@@ -10,6 +10,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private BaseUnit leftArcherPrefab;
     [SerializeField] private BaseUnit rightArcherPrefab;
 
+    [SerializeField] private BaseUnit leftCavalryPrefab;
+    [SerializeField] private BaseUnit rightCavalryPrefab;
+
+    [SerializeField] private BaseUnit leftSiegePrefab;
+    [SerializeField] private BaseUnit rightSiegePrefab;
+
     [Header("Spawn Points")]
     [SerializeField] private Transform leftSpawnPoint;
     [SerializeField] private Transform rightSpawnPoint;
@@ -25,6 +31,28 @@ public class GameManager : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI victoryText;
 
+private int _leftSpawnIndex = 0;
+private int _rightSpawnIndex = 0;
+
+private BaseUnit GetNextUnitPrefab(Team team)
+{
+    int index = team == Team.Left ? _leftSpawnIndex : _rightSpawnIndex;
+
+    BaseUnit prefab = index switch
+    {
+        0 => team == Team.Left ? leftMeleePrefab : rightMeleePrefab,
+        1 => team == Team.Left ? leftArcherPrefab : rightArcherPrefab,
+        2 => team == Team.Left ? leftCavalryPrefab : rightCavalryPrefab,
+        _ => team == Team.Left ? leftSiegePrefab : rightSiegePrefab
+    };
+
+    if (team == Team.Left)
+        _leftSpawnIndex = (_leftSpawnIndex + 1) % 4;
+    else
+        _rightSpawnIndex = (_rightSpawnIndex + 1) % 4;
+
+    return prefab;
+}
     private float spawnTimer;
     private bool gameOver;
 
@@ -68,7 +96,7 @@ public class GameManager : MonoBehaviour
 
         if (teamUnitCount >= maxMeleeUnitsPerTeam) return;
 
-        BaseUnit prefabToSpawn = GetRandomUnitPrefab(team);
+        BaseUnit prefabToSpawn = GetNextUnitPrefab(team);
 
         BaseUnit unitInstance = Instantiate(
             prefabToSpawn,
@@ -81,18 +109,19 @@ public class GameManager : MonoBehaviour
 
     private BaseUnit GetRandomUnitPrefab(Team team)
     {
-        bool spawnMelee = Random.value < 0.5f;
+        float randomValue = Random.value;
+        
+        bool spawnMelee = randomValue < 0.25f;
+        bool spawnArcher = randomValue >= 0.25f && randomValue < 0.5f;
+        bool spawnCavalry = randomValue >= 0.5f && randomValue < 0.75f;
+
 
         if (team == Team.Left)
         {
-            return spawnMelee
-                ? leftMeleePrefab
-                : leftArcherPrefab;
+            return spawnMelee ? leftMeleePrefab : spawnArcher ? leftArcherPrefab : spawnCavalry ? leftCavalryPrefab : leftSiegePrefab;
         }
 
-        return spawnMelee
-            ? rightMeleePrefab
-            : rightArcherPrefab;
+        return spawnMelee ? rightMeleePrefab : spawnArcher ? rightArcherPrefab : spawnCavalry ? rightCavalryPrefab : rightSiegePrefab;
     }
 
     public void EndGame(string winningTeam)
