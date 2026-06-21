@@ -273,7 +273,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b41dde6de5c40c4c8ad2078429a85a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  leftFactionData: {fileID: 11400000, guid: d58b1e7b6032d73409571ed2ce866e75, type: 2}
+  leftFactionData: {fileID: 11400000, guid: 336823918643e8f4b889b42b3e533ef5, type: 2}
   rightFactionData: {fileID: 11400000, guid: d58b1e7b6032d73409571ed2ce866e75, type: 2}
   leftSpawnPoint: {fileID: 893962611}
   rightSpawnPoint: {fileID: 1386099994}

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CatapultUnitData
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
   maxHealth: 180
-  damage: 25
+  damage: 45
   attackRange: 5.5
   attackSpeed: 0.4
   moveSpeed: 1

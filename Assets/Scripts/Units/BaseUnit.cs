@@ -13,6 +13,12 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     [SerializeField] protected Transform visualTransform;
     [SerializeField] private SpriteRenderer spriteRenderer;
 
+    [Header("Animation")]
+    [SerializeField] protected Animator animator;
+    
+    private static readonly int IsMovingHash = Animator.StringToHash("isMoving");
+    private static readonly int AttackHash = Animator.StringToHash("Attack");
+
     [Header("Friendly Blocking")]
     [SerializeField] private float friendlyStopRange = 0.6f;
 
@@ -77,12 +83,14 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         if (currentTarget != null)
         {
+            SetMovingAnimation(false);
             AttackTarget(currentTarget);
             return;
         }
 
         if (IsFriendlyUnitBlockingAhead())
         {
+            SetMovingAnimation(false);
             return;
         }
 
@@ -124,11 +132,20 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     {
         if (targetPoint == null) return;
 
+        SetMovingAnimation(true);
+
         transform.position = Vector3.MoveTowards(
             transform.position,
             targetPoint.position,
             unitData.moveSpeed * Time.deltaTime
         );
+    }
+
+    private void SetMovingAnimation(bool isMoving)
+    {
+        if (animator == null) return;
+
+        animator.SetBool(IsMovingHash, isMoving);
     }
 
     private IDamageable FindTargetInRange()
@@ -220,6 +237,8 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         float finalDamage = unitData.GetDamageAgainst(target.TargetType);
 
+        PlayAttackAnimation();
+
         if (usesProjectile)
         {
             FireProjectileAt(target, finalDamage);
@@ -228,8 +247,6 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         {
             target.TakeDamage(finalDamage);
         }
-
-        PlayAttackAnimation();
     }
 
     private void FireProjectileAt(IDamageable target, float damage)
@@ -271,6 +288,15 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
     protected virtual void PlayAttackAnimation()
     {
+        Debug.Log($"{name} attack animation triggered");
+
+        if (animator != null)
+        {
+            animator.ResetTrigger(AttackHash);
+            animator.SetTrigger(AttackHash);
+            return;
+        }
+
         if (visualTransform == null) return;
 
         isAttackAnimating = true;
