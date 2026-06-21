@@ -273,14 +273,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b41dde6de5c40c4c8ad2078429a85a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  leftMeleePrefab: {fileID: 7886269566354373400, guid: eacd60b078804db4cbb48dc99e84f61e, type: 3}
-  rightMeleePrefab: {fileID: 7886269566354373400, guid: eacd60b078804db4cbb48dc99e84f61e, type: 3}
-  leftArcherPrefab: {fileID: 643887454051965650, guid: 677f2c8b82739054094fa93e6cc7d6d2, type: 3}
-  rightArcherPrefab: {fileID: 643887454051965650, guid: 677f2c8b82739054094fa93e6cc7d6d2, type: 3}
-  leftCavalryPrefab: {fileID: 5211855096962333619, guid: 5ccd9e0bc4262db44b2f19b311425303, type: 3}
-  rightCavalryPrefab: {fileID: 5211855096962333619, guid: 5ccd9e0bc4262db44b2f19b311425303, type: 3}
-  leftSiegePrefab: {fileID: 521288771715210349, guid: bc038acb326e54b4b9757ac5cf73e186, type: 3}
-  rightSiegePrefab: {fileID: 521288771715210349, guid: bc038acb326e54b4b9757ac5cf73e186, type: 3}
+  leftFactionData: {fileID: 11400000, guid: d58b1e7b6032d73409571ed2ce866e75, type: 2}
+  rightFactionData: {fileID: 11400000, guid: d58b1e7b6032d73409571ed2ce866e75, type: 2}
   leftSpawnPoint: {fileID: 893962611}
   rightSpawnPoint: {fileID: 1386099994}
   leftTargetPoint: {fileID: 1706114285}
@@ -289,6 +283,7 @@ MonoBehaviour:
   maxMeleeUnitsPerTeam: 5
   victoryText: {fileID: 661233212}
   gameSpeed: 1
+  randomiseSpawns: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

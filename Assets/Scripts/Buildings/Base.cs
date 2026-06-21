@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class Base : MonoBehaviour, IDamageable
 {
+
+    [SerializeField]
+    private FactionData faction;
+
     [SerializeField] private Team team;
     [SerializeField] private float maxHealth = 50f;
 
@@ -20,6 +24,7 @@ public class Base : MonoBehaviour, IDamageable
 
     [SerializeField] private float shakeDuration = 0.1f;
     [SerializeField] private float shakeStrength = 0.05f;
+    public TargetType TargetType => TargetType.Building;
 
     private bool isShaking;
     private float shakeTimer;
