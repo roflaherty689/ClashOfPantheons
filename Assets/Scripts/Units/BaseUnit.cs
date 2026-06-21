@@ -15,7 +15,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
     [Header("Animation")]
     [SerializeField] protected Animator animator;
-    
+
     private static readonly int IsMovingHash = Animator.StringToHash("isMoving");
     private static readonly int AttackHash = Animator.StringToHash("Attack");
 
@@ -50,6 +50,9 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     private float attackAnimationTimer;
     private bool isAttackAnimating;
     private Quaternion originalVisualRotation;
+    [SerializeField] private float blockedPauseDuration = 0.2f;
+    private float blockedPauseTimer;
+    [SerializeField] private float projectileSpawnDelay = 0.15f;
 
     public virtual void Initialize(Team team, Transform targetPoint)
     {
@@ -67,7 +70,11 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         SpawnHealthBar();
         SetFacingDirection();
-        SetTeamColour();
+        
+        if (gameManager.setTeamColour)
+        {
+            SetTeamColour();
+        }
     }
 
     private void Update()
@@ -90,6 +97,14 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         if (IsFriendlyUnitBlockingAhead())
         {
+            blockedPauseTimer = blockedPauseDuration;
+            SetMovingAnimation(false);
+            return;
+        }
+
+        if (blockedPauseTimer > 0f)
+        {
+            blockedPauseTimer -= Time.deltaTime;
             SetMovingAnimation(false);
             return;
         }
@@ -241,12 +256,24 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         if (usesProjectile)
         {
-            FireProjectileAt(target, finalDamage);
+            StartCoroutine(DelayedProjectile(target, finalDamage));
         }
         else
         {
             target.TakeDamage(finalDamage);
         }
+    }
+
+    private System.Collections.IEnumerator DelayedProjectile(IDamageable target, float damage)
+    {
+        yield return new WaitForSeconds(projectileSpawnDelay);
+
+        if (target == null)
+        {
+            yield break;
+        }
+
+        FireProjectileAt(target, damage);
     }
 
     private void FireProjectileAt(IDamageable target, float damage)

@@ -15,7 +15,7 @@ MonoBehaviour:
   factionName: Default
   units:
   - role: 0
-    prefab: {fileID: 7886269566354373400, guid: eacd60b078804db4cbb48dc99e84f61e, type: 3}
+    prefab: {fileID: 7886269566354373400, guid: 53f2b4457387d4540bc2552b51586d62, type: 3}
   - role: 1
     prefab: {fileID: 643887454051965650, guid: fddd104b752818f49a7ed7ed10d806c9, type: 3}
   - role: 2

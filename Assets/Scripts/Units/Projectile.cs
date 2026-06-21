@@ -3,6 +3,8 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     private IDamageable target;
+    private Transform targetTransform;
+
     private float damage;
 
     private Vector3 startPosition;
@@ -12,34 +14,40 @@ public class Projectile : MonoBehaviour
     private float timer;
 
     private float arcHeight;
+    private bool initialized;
+
+    [SerializeField] private float hitRadius = 0.2f;
 
     public void Initialize(IDamageable target, float damage, float travelTime, float arcHeight)
     {
-        this.target = target;
-        this.damage = damage;
-        this.travelTime = travelTime;
-        this.arcHeight = arcHeight;
+        Destroy(gameObject, 2f);
 
-        startPosition = transform.position;
-        targetPosition = target.Transform.position;
-
-
-        Vector3 direction = target.Transform.position - transform.position;
-
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-
-        transform.rotation = Quaternion.Euler(0, 0, angle);
-
-        Destroy(gameObject, 2f); // Auto-destroy after 2 seconds
-    }
-
-    private void Update()
-    {
-        if (target == null)
+        if (target == null || target.Transform == null)
         {
             Destroy(gameObject);
             return;
         }
+
+        this.target = target;
+        this.targetTransform = target.Transform;
+        this.damage = damage;
+        this.travelTime = Mathf.Max(0.01f, travelTime);
+        this.arcHeight = arcHeight;
+
+        startPosition = transform.position;
+        targetPosition = targetTransform.position;
+
+        Vector3 direction = targetPosition - transform.position;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0, 0, angle);
+
+        initialized = true;
+    }
+
+    private void Update()
+    {
+        if (!initialized)
+            return;
 
         timer += Time.deltaTime;
 
@@ -47,15 +55,27 @@ public class Projectile : MonoBehaviour
 
         if (progress >= 1f)
         {
-            target.TakeDamage(damage);
+            TryApplyDamage();
             Destroy(gameObject);
             return;
         }
 
         Vector3 flatPosition = Vector3.Lerp(startPosition, targetPosition, progress);
-
         float arc = Mathf.Sin(progress * Mathf.PI) * arcHeight;
 
         transform.position = flatPosition + new Vector3(0, arc, 0);
+    }
+
+    private void TryApplyDamage()
+    {
+        if (targetTransform == null)
+            return;
+
+        float distanceToImpactPoint = Vector3.Distance(targetTransform.position, targetPosition);
+
+        if (distanceToImpactPoint <= hitRadius && target != null)
+        {
+            target.TakeDamage(damage);
+        }
     }
 }

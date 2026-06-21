@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     [Header("Game Settings")]
     [SerializeField] private float gameSpeed = 1f;
     [SerializeField] private bool randomiseSpawns = false;
+    [SerializeField] public bool setTeamColour = true;
     
     private float spawnTimer;
     private bool gameOver;
@@ -90,39 +91,51 @@ public class GameManager : MonoBehaviour
 
     private void GetRandomUnitPrefab(Team team)
     {
-        float randomValue = Random.value;
-        
-        bool spawnMelee = randomValue < 0.25f;
-        bool spawnArcher = randomValue >= 0.25f && randomValue < 0.5f;
-        bool spawnCavalry = randomValue >= 0.5f && randomValue < 0.75f;
-        bool spawnSiege = randomValue >= 0.5f && randomValue < 0.75f;
+        float meleeWeight = 1f / 50f;
+        float archerWeight = 1f / 60f;
+        float cavalryWeight = 1f / 100f;
+        float siegeWeight = 1f / 130f;
+        float mythicWeight = 1f / 220f;
 
+        float totalWeight =
+            meleeWeight +
+            archerWeight +
+            cavalryWeight +
+            siegeWeight +
+            mythicWeight;
 
-        if (team == Team.Left)
+        float roll = Random.Range(0f, totalWeight);
+
+        UnitRole selectedRole;
+
+        if (roll < meleeWeight)
         {
-            if (spawnMelee)
-                SpawnLeftUnit(UnitRole.Melee);
-            else if (spawnArcher)
-                SpawnLeftUnit(UnitRole.Archer);
-            else if (spawnCavalry)
-                SpawnLeftUnit(UnitRole.Cavalry);            
-            else if (spawnSiege)
-                SpawnLeftUnit(UnitRole.Siege);
-            else
-                SpawnLeftUnit(UnitRole.Mythic);
+            selectedRole = UnitRole.Melee;
+        }
+        else if ((roll -= meleeWeight) < archerWeight)
+        {
+            selectedRole = UnitRole.Archer;
+        }
+        else if ((roll -= archerWeight) < cavalryWeight)
+        {
+            selectedRole = UnitRole.Cavalry;
+        }
+        else if ((roll -= cavalryWeight) < siegeWeight)
+        {
+            selectedRole = UnitRole.Siege;
         }
         else
         {
-            if (spawnMelee)
-                SpawnRightUnit(UnitRole.Melee);
-            else if (spawnArcher)
-                SpawnRightUnit(UnitRole.Archer);
-            else if (spawnCavalry)
-                SpawnRightUnit(UnitRole.Cavalry);            
-            else if (spawnSiege)
-                SpawnRightUnit(UnitRole.Siege);
-            else
-                SpawnRightUnit(UnitRole.Mythic);
+            selectedRole = UnitRole.Mythic;
+        }
+
+        if (team == Team.Left)
+        {
+            SpawnLeftUnit(selectedRole);
+        }
+        else
+        {
+            SpawnRightUnit(selectedRole);
         }
     }
 

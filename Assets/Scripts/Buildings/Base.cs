@@ -39,13 +39,16 @@ public class Base : MonoBehaviour, IDamageable
 
         originalVisualPosition = visualTransform.localPosition;
 
-        if (team == Team.Left)
+        if (gameManager.setTeamColour)
         {
-            spriteRenderer.color = Color.red;
-        }
-        else
-        {
-            spriteRenderer.color = Color.blue;
+            if (team == Team.Left)
+            {
+                spriteRenderer.color = Color.red;
+            }
+            else
+            {
+                spriteRenderer.color = Color.blue;
+            }            
         }
 
         healthBar = Instantiate(
