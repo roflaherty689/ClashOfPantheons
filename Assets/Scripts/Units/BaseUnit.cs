@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public abstract class BaseUnit : MonoBehaviour, IDamageable
@@ -15,14 +16,6 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
     [Header("Animation")]
     [SerializeField] protected Animator animator;
-
-    private static readonly int IsMovingHash = Animator.StringToHash("isMoving");
-    private static readonly int AttackHash = Animator.StringToHash("Attack");
-
-    [Header("Friendly Blocking")]
-    [SerializeField] private float friendlyStopRange = 0.6f;
-
-    [Header("Attack Animation")]
     [SerializeField] private float attackTiltAngle = 15f;
     [SerializeField] private float attackTiltDuration = 0.1f;
 
@@ -31,7 +24,33 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     [SerializeField] private Transform projectileSpawnPoint;
     [SerializeField] private float projectileTravelTime = 0.4f;
     [SerializeField] private float projectileArcHeight = 0.5f;
+    [SerializeField] private float projectileSpawnDelay = 0.15f;
     [SerializeField] private bool usesProjectile;
+
+    [Header("Combat Positioning")]
+    [SerializeField] private float attackPositionTolerance = 0.05f;
+    [SerializeField] private float minLaneY = -0.7f;
+    [SerializeField] private float maxLaneY = 0.7f;
+
+    [Header("Friendly Blocking")]
+    [SerializeField] private float friendlyStopRange = 0.6f;
+    [SerializeField] private float blockedPauseDuration = 0.2f;
+
+    private static readonly int IsMovingHash = Animator.StringToHash("isMoving");
+    private static readonly int AttackHash = Animator.StringToHash("Attack");
+
+    private static readonly float[] AttackSlotOffsets =
+    {
+        0f,
+        0.35f,
+        -0.35f,
+        0.7f,
+        -0.7f
+    };
+    private bool wasInCombat;
+    private float assignedAttackY;
+
+    [SerializeField] private float combatSpreadStartX = -1f;
 
     public TargetType TargetType => TargetType.Unit;
     public Team Team => team;
@@ -40,9 +59,9 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     private Team team;
     private Transform targetPoint;
     private IDamageable currentTarget;
-
     private float currentHealth;
     private float attackTimer;
+    private float blockedPauseTimer;
 
     private HealthBar healthBar;
     private GameManager gameManager;
@@ -50,9 +69,9 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     private float attackAnimationTimer;
     private bool isAttackAnimating;
     private Quaternion originalVisualRotation;
-    [SerializeField] private float blockedPauseDuration = 0.2f;
-    private float blockedPauseTimer;
-    [SerializeField] private float projectileSpawnDelay = 0.15f;
+
+    private float assignedAttackYOffset;
+    private bool hasAssignedAttackSlot;
 
     public virtual void Initialize(Team team, Transform targetPoint)
     {
@@ -70,8 +89,8 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         SpawnHealthBar();
         SetFacingDirection();
-        
-        if (gameManager.setTeamColour)
+
+        if (gameManager != null && gameManager.setTeamColour)
         {
             SetTeamColour();
         }
@@ -81,6 +100,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     {
         if (gameManager != null && gameManager.IsGameOver)
         {
+            SetMovingAnimation(false);
             return;
         }
 
@@ -88,19 +108,29 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         currentTarget = FindTargetInRange();
 
-        if (currentTarget != null)
+        bool isInCombat = currentTarget != null;
+
+        if (isInCombat && !wasInCombat)
         {
-            SetMovingAnimation(false);
-            AttackTarget(currentTarget);
+            AssignRandomAttackSlot();
+        }
+
+        if (isInCombat)
+        {
+            HandleCombatMovement(currentTarget);
+            wasInCombat = true;
             return;
         }
 
-        if (IsFriendlyUnitBlockingAhead())
-        {
-            blockedPauseTimer = blockedPauseDuration;
-            SetMovingAnimation(false);
-            return;
-        }
+        ResetAttackSlot();
+        wasInCombat = false;
+
+        // if (IsFriendlyUnitBlockingAhead())
+        // {
+        //     blockedPauseTimer = blockedPauseDuration;
+        //     SetMovingAnimation(false);
+        //     return;
+        // }
 
         if (blockedPauseTimer > 0f)
         {
@@ -112,40 +142,67 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         MoveTowardsTargetPoint();
     }
 
-    private void SpawnHealthBar()
+    private void AssignRandomAttackSlot()
     {
-        if (healthBarPrefab == null) return;
+        if (hasAssignedAttackSlot)
+            return;
 
-        healthBar = Instantiate(
-            healthBarPrefab,
-            transform.position + healthBarOffset,
-            Quaternion.identity,
-            transform
+        bool canSpread =
+            team == Team.Left
+                ? transform.position.x > combatSpreadStartX
+                : transform.position.x < -combatSpreadStartX;
+
+        if (!canSpread)
+        {
+            assignedAttackY = 0f;
+        }
+        else
+        {
+            int index = Random.Range(0, AttackSlotOffsets.Length);
+
+            assignedAttackY = Mathf.Clamp(
+                transform.position.y + AttackSlotOffsets[index],
+                minLaneY,
+                maxLaneY
+            );
+        }
+
+        hasAssignedAttackSlot = true;
+    }
+
+    private void HandleCombatMovement(IDamageable target)
+    {
+        Vector3 attackPosition = GetAttackPosition(target);
+
+        float distanceToAttackPosition = Vector2.Distance(
+            transform.position,
+            attackPosition
         );
 
-        healthBar.SetHealth(currentHealth, unitData.maxHealth);
-    }
+        if (distanceToAttackPosition > attackPositionTolerance)
+        {
+            SetMovingAnimation(true);
 
-    private void SetFacingDirection()
-    {
-        if (visualTransform == null) return;
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                attackPosition,
+                unitData.moveSpeed * Time.deltaTime
+            );
 
-        float xScale = team == Team.Left ? 1f : -1f;
-        visualTransform.localScale = new Vector3(xScale, 1f, 1f);
-    }
+            return;
+        }
 
-    private void SetTeamColour()
-    {
-        if (spriteRenderer == null) return;
-
-        spriteRenderer.color = team == Team.Left
-            ? Color.red
-            : Color.blue;
+        SetMovingAnimation(false);
+        AttackTarget(target);
     }
 
     private void MoveTowardsTargetPoint()
     {
-        if (targetPoint == null) return;
+        if (targetPoint == null)
+        {
+            SetMovingAnimation(false);
+            return;
+        }
 
         SetMovingAnimation(true);
 
@@ -156,11 +213,41 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         );
     }
 
-    private void SetMovingAnimation(bool isMoving)
+    private Vector3 GetAttackPosition(IDamageable target)
     {
-        if (animator == null) return;
+        float directionToEnemy = team == Team.Left ? 1f : -1f;
 
-        animator.SetBool(IsMovingHash, isMoving);
+        float idealStopX = target.Transform.position.x - directionToEnemy * unitData.attackRange;
+
+        float stopX = team == Team.Left
+            ? Mathf.Max(transform.position.x, idealStopX)
+            : Mathf.Min(transform.position.x, idealStopX);
+
+        if (!hasAssignedAttackSlot)
+        {
+            AssignRandomAttackSlot();
+        }
+
+        return new Vector3(stopX, assignedAttackY, transform.position.z);
+    }
+
+    private float GetSlotOffsetForThisUnit()
+    {
+        if (!hasAssignedAttackSlot)
+        {
+            int index = Random.Range(0, AttackSlotOffsets.Length);
+            assignedAttackYOffset = AttackSlotOffsets[index];
+            hasAssignedAttackSlot = true;
+        }
+
+        return assignedAttackYOffset;
+    }
+
+    private void ResetAttackSlot()
+    {
+        hasAssignedAttackSlot = false;
+        assignedAttackYOffset = 0f;
+        assignedAttackY = 0f;
     }
 
     private IDamageable FindTargetInRange()
@@ -200,41 +287,12 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
             }
         }
 
-        // Prioritise units over base so units don't ignore defenders.
         if (closestEnemyUnit != null)
         {
             return closestEnemyUnit;
         }
 
         return enemyBase;
-    }
-
-    private bool IsFriendlyUnitBlockingAhead()
-    {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(
-            transform.position,
-            friendlyStopRange
-        );
-
-        foreach (Collider2D hit in hits)
-        {
-            BaseUnit unit = hit.GetComponent<BaseUnit>();
-
-            if (unit == null) continue;
-            if (unit == this) continue;
-            if (unit.Team != team) continue;
-
-            bool isAhead = team == Team.Left
-                ? unit.transform.position.x > transform.position.x
-                : unit.transform.position.x < transform.position.x;
-
-            if (isAhead)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private void AttackTarget(IDamageable target)
@@ -264,7 +322,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         }
     }
 
-    private System.Collections.IEnumerator DelayedProjectile(IDamageable target, float damage)
+    private IEnumerator DelayedProjectile(IDamageable target, float damage)
     {
         yield return new WaitForSeconds(projectileSpawnDelay);
 
@@ -313,6 +371,44 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         }
     }
 
+    private void SpawnHealthBar()
+    {
+        if (healthBarPrefab == null) return;
+
+        healthBar = Instantiate(
+            healthBarPrefab,
+            transform.position + healthBarOffset,
+            Quaternion.identity,
+            transform
+        );
+
+        healthBar.SetHealth(currentHealth, unitData.maxHealth);
+    }
+
+    private void SetFacingDirection()
+    {
+        if (visualTransform == null) return;
+
+        float xScale = team == Team.Left ? 1f : -1f;
+        visualTransform.localScale = new Vector3(xScale, 1f, 1f);
+    }
+
+    private void SetTeamColour()
+    {
+        if (spriteRenderer == null) return;
+
+        spriteRenderer.color = team == Team.Left
+            ? Color.red
+            : Color.blue;
+    }
+
+    private void SetMovingAnimation(bool isMoving)
+    {
+        if (animator == null) return;
+
+        animator.SetBool(IsMovingHash, isMoving);
+    }
+
     protected virtual void PlayAttackAnimation()
     {
         Debug.Log($"{name} attack animation triggered");
@@ -342,9 +438,37 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         attackAnimationTimer -= Time.deltaTime;
 
-        if (attackAnimationTimer > 0) return;
+        if (attackAnimationTimer > 0f) return;
 
         isAttackAnimating = false;
         visualTransform.rotation = originalVisualRotation;
+    }
+
+    private bool IsFriendlyUnitBlockingAhead()
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(
+            transform.position,
+            friendlyStopRange
+        );
+
+        foreach (Collider2D hit in hits)
+        {
+            BaseUnit unit = hit.GetComponent<BaseUnit>();
+
+            if (unit == null) continue;
+            if (unit == this) continue;
+            if (unit.Team != team) continue;
+
+            bool isAhead = team == Team.Left
+                ? unit.transform.position.x > transform.position.x
+                : unit.transform.position.x < transform.position.x;
+
+            if (isAhead)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
