@@ -23,4 +23,4 @@ MonoBehaviour:
   - role: 3
     prefab: {fileID: 521288771715210349, guid: bc038acb326e54b4b9757ac5cf73e186, type: 3}
   - role: 4
-    prefab: {fileID: 7886269566354373400, guid: 71cc01203f6a98b478fb15dfa6d21837, type: 3}
+    prefab: {fileID: 7886269566354373400, guid: 4ca44712d4a677443889e9f30c89c515, type: 3}
