@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 4507551543713247816}
   - component: {fileID: 7833208681658150961}
   - component: {fileID: 4707872448201973211}
+  - component: {fileID: 8120276743538827778}
   m_Layer: 7
   m_Name: PawnAnimatedUnit
   m_TagString: Untagged
@@ -139,6 +140,24 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!114 &8120276743538827778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1766547236379750519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3780fa46013f524dabfa74c42268edf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorkerUnit
+  moveSpeed: 2
+  arriveDistance: 0.05
+  mineDuration: 3
+  goldPerTrip: 5
+  animator: {fileID: 4662215782696359487}
+  spriteRenderer: {fileID: 9043023228783349391}
 --- !u!1 &8887094048003673539
 GameObject:
   m_ObjectHideFlags: 0

@@ -102,6 +102,7 @@ GameObject:
   - component: {fileID: 7853746771260587578}
   - component: {fileID: 8315014160421980010}
   - component: {fileID: -6979332650883868746}
+  - component: {fileID: 6148565740065437913}
   m_Layer: 0
   m_Name: Base
   m_TagString: Untagged
@@ -137,6 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3293133958b6c3479b07c90ba9b1da6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Base
+  faction: {fileID: 0}
   team: 0
   maxHealth: 100
   healthBarPrefab: {fileID: 7140927305658623058, guid: 4197aadd5c42f5841bcb5fcf0eddaa39, type: 3}
@@ -191,3 +193,23 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &6148565740065437913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8084084781756338509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f0ce304e8dfd4346bf57ecabe099bab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorkerManager
+  team: 0
+  workerPrefab: {fileID: 0}
+  workerSpawnPoint: {fileID: 0}
+  dropOffPoint: {fileID: 0}
+  goldVein: {fileID: 0}
+  startingWorkers: 1
+  maxWorkers: 5
+  startingGold: 0
