@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6417039856036563245}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 4507551543713247816}
   - component: {fileID: 7833208681658150961}
   - component: {fileID: 4707872448201973211}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PawnAnimatedUnit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -150,7 +150,7 @@ GameObject:
   - component: {fileID: 7825117682459260418}
   - component: {fileID: 9043023228783349391}
   - component: {fileID: 4662215782696359487}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Renderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}

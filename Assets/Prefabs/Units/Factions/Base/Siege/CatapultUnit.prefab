@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7833208681658150961}
   - component: {fileID: 4707872448201973211}
   - component: {fileID: 521288771715210349}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: CatapultUnit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,14 +125,22 @@ MonoBehaviour:
   healthBarOffset: {x: 0, y: 0.8, z: 0}
   visualTransform: {fileID: 7570392125970292133}
   spriteRenderer: {fileID: 2850380603657335395}
-  friendlyStopRange: 0.6
+  animator: {fileID: 0}
   attackTiltAngle: 15
   attackTiltDuration: 0.1
   projectilePrefab: {fileID: 2364576383394483315, guid: 28d38362ac3c7c143bc0c7cb02c31f22, type: 3}
   projectileSpawnPoint: {fileID: 4507551543713247816}
   projectileTravelTime: 0.4
   projectileArcHeight: 0.5
+  projectileSpawnDelay: 0.15
   usesProjectile: 1
+  attackPositionTolerance: 0.05
+  minLaneY: -0.7
+  maxLaneY: 0.7
+  combatSpreadStartX: -1
+  friendlySeparationRadius: 0.45
+  friendlySeparationStrength: 1.5
+  friendlySeparationDeadZone: 0.01
 --- !u!1 &4585994490901641033
 GameObject:
   m_ObjectHideFlags: 0
@@ -142,7 +150,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7570392125970292133}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -176,7 +184,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4352740763477033457}
   - component: {fileID: 2850380603657335395}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Circle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -267,7 +275,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8714355148102602094}
   - component: {fileID: 7020448926400871986}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Catapulta_basico_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}

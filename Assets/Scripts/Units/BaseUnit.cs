@@ -28,29 +28,16 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     [SerializeField] private bool usesProjectile;
 
     [Header("Combat Positioning")]
-    [SerializeField] private float attackPositionTolerance = 0.05f;
     [SerializeField] private float minLaneY = -0.7f;
     [SerializeField] private float maxLaneY = 0.7f;
 
-    [Header("Friendly Blocking")]
-    [SerializeField] private float friendlyStopRange = 0.6f;
-    [SerializeField] private float blockedPauseDuration = 0.2f;
+    [Header("Friendly Combat Separation")]
+    [SerializeField] private float friendlySeparationRadius = 0.45f;
+    [SerializeField] private float friendlySeparationStrength = 0.6f;
+    [SerializeField] private float friendlySeparationDeadZone = 0.01f;
 
     private static readonly int IsMovingHash = Animator.StringToHash("isMoving");
     private static readonly int AttackHash = Animator.StringToHash("Attack");
-
-    private static readonly float[] AttackSlotOffsets =
-    {
-        0f,
-        0.35f,
-        -0.35f,
-        0.7f,
-        -0.7f
-    };
-    private bool wasInCombat;
-    private float assignedAttackY;
-
-    [SerializeField] private float combatSpreadStartX = -1f;
 
     public TargetType TargetType => TargetType.Unit;
     public Team Team => team;
@@ -61,7 +48,6 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     private IDamageable currentTarget;
     private float currentHealth;
     private float attackTimer;
-    private float blockedPauseTimer;
 
     private HealthBar healthBar;
     private GameManager gameManager;
@@ -69,9 +55,6 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     private float attackAnimationTimer;
     private bool isAttackAnimating;
     private Quaternion originalVisualRotation;
-
-    private float assignedAttackYOffset;
-    private bool hasAssignedAttackSlot;
 
     public virtual void Initialize(Team team, Transform targetPoint)
     {
@@ -108,91 +91,21 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         currentTarget = FindTargetInRange();
 
-        bool isInCombat = currentTarget != null;
-
-        if (isInCombat && !wasInCombat)
+        if (currentTarget != null)
         {
-            AssignRandomAttackSlot();
-        }
-
-        if (isInCombat)
-        {
-            HandleCombatMovement(currentTarget);
-            wasInCombat = true;
-            return;
-        }
-
-        ResetAttackSlot();
-        wasInCombat = false;
-
-        // if (IsFriendlyUnitBlockingAhead())
-        // {
-        //     blockedPauseTimer = blockedPauseDuration;
-        //     SetMovingAnimation(false);
-        //     return;
-        // }
-
-        if (blockedPauseTimer > 0f)
-        {
-            blockedPauseTimer -= Time.deltaTime;
-            SetMovingAnimation(false);
+            HandleCombat(currentTarget);
             return;
         }
 
         MoveTowardsTargetPoint();
     }
 
-    private void AssignRandomAttackSlot()
+    private void HandleCombat(IDamageable target)
     {
-        if (hasAssignedAttackSlot)
-            return;
-
-        bool canSpread =
-            team == Team.Left
-                ? transform.position.x > combatSpreadStartX
-                : transform.position.x < -combatSpreadStartX;
-
-        if (!canSpread)
-        {
-            assignedAttackY = 0f;
-        }
-        else
-        {
-            int index = Random.Range(0, AttackSlotOffsets.Length);
-
-            assignedAttackY = Mathf.Clamp(
-                transform.position.y + AttackSlotOffsets[index],
-                minLaneY,
-                maxLaneY
-            );
-        }
-
-        hasAssignedAttackSlot = true;
-    }
-
-    private void HandleCombatMovement(IDamageable target)
-    {
-        Vector3 attackPosition = GetAttackPosition(target);
-
-        float distanceToAttackPosition = Vector2.Distance(
-            transform.position,
-            attackPosition
-        );
-
-        if (distanceToAttackPosition > attackPositionTolerance)
-        {
-            SetMovingAnimation(true);
-
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                attackPosition,
-                unitData.moveSpeed * Time.deltaTime
-            );
-
-            return;
-        }
-
         SetMovingAnimation(false);
+
+        ApplyFriendlyCombatSeparation();
+
         AttackTarget(target);
     }
 
@@ -206,48 +119,59 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         SetMovingAnimation(true);
 
-        transform.position = Vector3.MoveTowards(
+        float direction = team == Team.Left ? 1f : -1f;
+
+        Vector3 nextPosition = transform.position;
+        nextPosition.x += direction * unitData.moveSpeed * Time.deltaTime;
+
+        transform.position = nextPosition;
+    }
+
+    private void ApplyFriendlyCombatSeparation()
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
-            targetPoint.position,
-            unitData.moveSpeed * Time.deltaTime
+            friendlySeparationRadius
         );
-    }
 
-    private Vector3 GetAttackPosition(IDamageable target)
-    {
-        float directionToEnemy = team == Team.Left ? 1f : -1f;
+        float totalYPush = 0f;
+        int pushCount = 0;
 
-        float idealStopX = target.Transform.position.x - directionToEnemy * unitData.attackRange;
-
-        float stopX = team == Team.Left
-            ? Mathf.Max(transform.position.x, idealStopX)
-            : Mathf.Min(transform.position.x, idealStopX);
-
-        if (!hasAssignedAttackSlot)
+        foreach (Collider2D hit in hits)
         {
-            AssignRandomAttackSlot();
+            BaseUnit otherUnit = hit.GetComponent<BaseUnit>();
+
+            if (otherUnit == null) continue;
+            if (otherUnit == this) continue;
+            if (otherUnit.Team != team) continue;
+
+            float yDifference = transform.position.y - otherUnit.transform.position.y;
+            float distance = Mathf.Abs(yDifference);
+
+            if (distance <= friendlySeparationDeadZone)
+            {
+                yDifference = Random.value > 0.5f ? 1f : -1f;
+                distance = friendlySeparationDeadZone;
+            }
+
+            if (distance > friendlySeparationRadius)
+                continue;
+
+            float closeness = 1f - Mathf.Clamp01(distance / friendlySeparationRadius);
+            totalYPush += Mathf.Sign(yDifference) * closeness;
+            pushCount++;
         }
 
-        return new Vector3(stopX, assignedAttackY, transform.position.z);
-    }
+        if (pushCount == 0)
+            return;
 
-    private float GetSlotOffsetForThisUnit()
-    {
-        if (!hasAssignedAttackSlot)
-        {
-            int index = Random.Range(0, AttackSlotOffsets.Length);
-            assignedAttackYOffset = AttackSlotOffsets[index];
-            hasAssignedAttackSlot = true;
-        }
+        float yPush = totalYPush / pushCount;
 
-        return assignedAttackYOffset;
-    }
+        Vector3 nextPosition = transform.position;
+        nextPosition.y += yPush * friendlySeparationStrength * Time.deltaTime;
+        nextPosition.y = Mathf.Clamp(nextPosition.y, minLaneY, maxLaneY);
 
-    private void ResetAttackSlot()
-    {
-        hasAssignedAttackSlot = false;
-        assignedAttackYOffset = 0f;
-        assignedAttackY = 0f;
+        transform.position = nextPosition;
     }
 
     private IDamageable FindTargetInRange()
@@ -411,8 +335,6 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
     protected virtual void PlayAttackAnimation()
     {
-        Debug.Log($"{name} attack animation triggered");
-
         if (animator != null)
         {
             animator.ResetTrigger(AttackHash);
@@ -442,33 +364,5 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         isAttackAnimating = false;
         visualTransform.rotation = originalVisualRotation;
-    }
-
-    private bool IsFriendlyUnitBlockingAhead()
-    {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(
-            transform.position,
-            friendlyStopRange
-        );
-
-        foreach (Collider2D hit in hits)
-        {
-            BaseUnit unit = hit.GetComponent<BaseUnit>();
-
-            if (unit == null) continue;
-            if (unit == this) continue;
-            if (unit.Team != team) continue;
-
-            bool isAhead = team == Team.Left
-                ? unit.transform.position.x > transform.position.x
-                : unit.transform.position.x < transform.position.x;
-
-            if (isAhead)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

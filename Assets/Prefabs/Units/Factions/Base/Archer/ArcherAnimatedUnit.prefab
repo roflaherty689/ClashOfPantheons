@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7833208681658150961}
   - component: {fileID: 4707872448201973211}
   - component: {fileID: 643887454051965650}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ArcherAnimatedUnit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,16 +126,21 @@ MonoBehaviour:
   visualTransform: {fileID: 7570392125970292133}
   spriteRenderer: {fileID: 0}
   animator: {fileID: 602104232319759185}
-  friendlyStopRange: 0.6
   attackTiltAngle: 15
   attackTiltDuration: 0.2
   projectilePrefab: {fileID: 2364576383394483315, guid: 8f77a874314decd4dadb197965aef2ef, type: 3}
   projectileSpawnPoint: {fileID: 5373559575329865765}
   projectileTravelTime: 0.4
   projectileArcHeight: 0.5
-  usesProjectile: 1
-  blockedPauseDuration: 0.2
   projectileSpawnDelay: 0.15
+  usesProjectile: 1
+  attackPositionTolerance: 0.05
+  minLaneY: -0.7
+  maxLaneY: 0.7
+  combatSpreadStartX: -1
+  friendlySeparationRadius: 0.45
+  friendlySeparationStrength: 1.5
+  friendlySeparationDeadZone: 0.01
 --- !u!1 &3100804947032255087
 GameObject:
   m_ObjectHideFlags: 0
@@ -147,7 +152,7 @@ GameObject:
   - component: {fileID: 5373559575329865765}
   - component: {fileID: 1044385510070065997}
   - component: {fileID: 602104232319759185}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Renderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -259,7 +264,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7570392125970292133}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}

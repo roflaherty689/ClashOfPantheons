@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6417039856036563245}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 7833208681658150961}
   - component: {fileID: 4707872448201973211}
   - component: {fileID: 7886269566354373400}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: MeleeAnimatedUnit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -158,14 +158,21 @@ MonoBehaviour:
   visualTransform: {fileID: 6417039856036563245}
   spriteRenderer: {fileID: 0}
   animator: {fileID: 4662215782696359487}
-  friendlyStopRange: 0.6
   attackTiltAngle: 15
   attackTiltDuration: 0.1
   projectilePrefab: {fileID: 0}
   projectileSpawnPoint: {fileID: 0}
   projectileTravelTime: 0.4
   projectileArcHeight: 0.5
+  projectileSpawnDelay: 0.15
   usesProjectile: 0
+  attackPositionTolerance: 0.05
+  minLaneY: -0.7
+  maxLaneY: 0.7
+  combatSpreadStartX: -1
+  friendlySeparationRadius: 0.45
+  friendlySeparationStrength: 1.5
+  friendlySeparationDeadZone: 0.01
 --- !u!1 &8887094048003673539
 GameObject:
   m_ObjectHideFlags: 0
@@ -177,7 +184,7 @@ GameObject:
   - component: {fileID: 7825117682459260418}
   - component: {fileID: 9043023228783349391}
   - component: {fileID: 4662215782696359487}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Renderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
