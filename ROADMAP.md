@@ -43,7 +43,7 @@ Checked entry conditions are based on repository inspection, not a new Unity lau
 - [x] Autonomous horizontal movement, target acquisition, melee/ranged combat, projectiles, health, and unit death are represented in source.
 - [x] Two strongholds and base-destruction victory handling are represented in source and the battle scene.
 - [x] Melee, archer, cavalry, siege, and mythic role mappings and prototype assets exist.
-- [x] Workers can mine and deposit gold; worker purchase logic exists below the UI layer.
+- [x] Workers can mine and deposit gold; the player HUD displays live worker economy state and can buy workers up to capacity.
 - [x] Faction data can map roles to faction-specific prefabs.
 - [x] Prototype health, hit, animation, projectile, and victory feedback exists.
 

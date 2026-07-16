@@ -15,6 +15,7 @@ Git history remains the exact implementation record.
 - A game-specific ordered Prototype task sequence with explicit acceptance and verification criteria.
 - Per-role production cadence fields on `UnitData`, with initial melee, archer, cavalry, siege, and mythic timing values.
 - A selectable `GameManager` spawn pattern for legacy global spawning or independent per-role timers.
+- Live player-economy HUD bindings for gold, aggregate gold per trip, worker count, worker purchasing, and worker-cap button state.
 
 ### Changed
 
@@ -32,9 +33,12 @@ Git history remains the exact implementation record.
 - Encapsulated serialized faction and unit configuration behind read-only runtime properties while preserving existing Unity field names and asset data.
 - Consolidated ranged recoil feedback in `BaseUnit`, preserving authored visual scale and preventing animation code from stopping unrelated combat coroutines.
 - Changed match-result reporting from colour strings to typed left/right team values and moved result presentation into `GameManager`.
+- Moved worker gold-rate ownership to `WorkerManager`, with configurable base income and upgrade multiplier, and changed the active scene to start the player with one worker.
+- Set the current prototype starting gold to 200 to support economy-flow testing.
 
 ### Fixed
 
+- Generated HUD buttons now accept pointer input by enabling raycasts on their target graphics; the live worker binding also repairs the already-generated Buy Worker button at runtime.
 - Worker purchases no longer spend gold or report success when worker creation fails, and negative purchase costs are rejected.
 - Mining slots now have exclusive reservations; waiting workers retry when a slot becomes available, and disable/game-over cleanup updates reservation and active-miner state exactly once.
 - Workers unregister when destroyed, preventing stale worker counts from blocking later purchases.
@@ -58,10 +62,11 @@ Git history remains the exact implementation record.
 - Compiled both runtime and Editor assemblies externally with zero warnings and errors after the cleanup.
 - User-verified the cleanup pass in Unity and confirmed the current gameplay behavior is working correctly.
 - Resaved the active scene after removing the stray `GoldVein` component from `Tilemap_Water`.
+- User-verified live worker deposits, worker purchasing, gold and worker HUD updates, and five-worker capacity behavior in Play Mode.
 
 ### Known Issues
 
-- Player gold, worker purchasing, independent unit production, upgrades, strategic AI, timer/tiebreak results, restart, and live HUD integration are not yet complete.
+- Independent unit production purchases, upgrades, strategic AI, timer/tiebreak results, restart, and remaining live HUD integration are not yet complete.
 - Independent cadence spawning currently starts all five role timers immediately; purchase-slot activation remains future work.
 - Exact role values and matchups remain subject to implementation and playtest tuning.
 - Targeted projectile/worker edge cases and stale serialized fields on the non-animated archer prefab remain to be verified or cleaned.

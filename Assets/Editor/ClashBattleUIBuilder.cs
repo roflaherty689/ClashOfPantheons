@@ -47,6 +47,8 @@ public static class ClashBattleUIBuilder
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
 
+        root.AddComponent<BattleEconomyUI>();
+
         RectTransform safe = CreateRect("Safe Area", root.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
         safe.gameObject.AddComponent<BattleSafeArea>();
 
@@ -149,8 +151,8 @@ public static class ClashBattleUIBuilder
 
         RectTransform coin = CreateRect("Gold Icon", economy, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-100, 66), new Vector2(54, 54));
         AddSpriteOrPanel(coin.gameObject, UiRoot + "/Icons/Icon_03.png", "Icon_03_0", Gold, true);
-        AddText(economy, "540", 36, TextAlignmentOptions.Left, new Vector2(12, 72), new Vector2(170, 48));
-        AddText(economy, "+12 PER TRIP", 17, TextAlignmentOptions.Left, new Vector2(16, 43), new Vector2(180, 28), Gold);
+        AddText(economy, "540", 36, TextAlignmentOptions.Left, new Vector2(12, 72), new Vector2(170, 48)).gameObject.name = "Gold Total";
+        AddText(economy, "+12 PER TRIP", 17, TextAlignmentOptions.Left, new Vector2(16, 43), new Vector2(180, 28), Gold).gameObject.name = "Gold Per Trip";
 
         RectTransform divider = CreateRect("Divider", economy, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 16), new Vector2(270, 2));
         AddPanel(divider.gameObject, new Color32(133, 112, 71, 255));
@@ -158,7 +160,7 @@ public static class ClashBattleUIBuilder
         RectTransform worker = CreateRect("Worker Icon", economy, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-100, -39), new Vector2(68, 68));
         AddSpriteOrPanel(worker.gameObject, TinySwords + "/Pawn and Resources/Pawn/Blue Pawn/Pawn_Idle.png", "Pawn_Idle_0", Color.white, true);
         AddText(economy, "WORKERS", 18, TextAlignmentOptions.Left, new Vector2(19, -22), new Vector2(170, 28), Muted);
-        AddText(economy, "2 / 5", 32, TextAlignmentOptions.Left, new Vector2(19, -54), new Vector2(170, 42));
+        AddText(economy, "2 / 5", 32, TextAlignmentOptions.Left, new Vector2(19, -54), new Vector2(170, 42)).gameObject.name = "Worker Total";
         CreateWorkerButton(economy);
     }
 
@@ -173,6 +175,7 @@ public static class ClashBattleUIBuilder
             false);
         Button selectable = button.gameObject.AddComponent<Button>();
         selectable.targetGraphic = buttonImage;
+        buttonImage.raycastTarget = true;
 
         AddText(button, "BUY WORKER  100", 14, TextAlignmentOptions.Center, new Vector2(-18, 0), new Vector2(155, 30));
         RectTransform coin = CreateRect("Gold Icon", button, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(72, 0), new Vector2(24, 24));
@@ -222,6 +225,7 @@ public static class ClashBattleUIBuilder
         Image buttonImage = AddSpriteOrPanel(button.gameObject, UiRoot + "/Buttons/BigBlueButton_Regular.png", "BigBlueButton_Regular_4", new Color32(43, 102, 127, 255), false);
         Button selectable = button.gameObject.AddComponent<Button>();
         selectable.targetGraphic = buttonImage;
+        buttonImage.raycastTarget = true;
         RectTransform coin = CreateRect("Gold Icon", button, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-48, 0), new Vector2(30, 30));
         AddSpriteOrPanel(coin.gameObject, UiRoot + "/Icons/Icon_03.png", "Icon_03_0", Gold, true);
         AddText(button, cost, 22, TextAlignmentOptions.Left, new Vector2(31, 0), new Vector2(90, 32), Color.white);
@@ -254,7 +258,7 @@ public static class ClashBattleUIBuilder
     {
         RectTransform summary = CreateRect("Battle Summary", parent, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 15), new Vector2(1230, 34));
         AddText(summary, "WORKERS  2 / 5     |     FRIENDLY UNITS  8     |     ENEMY UNITS  8", 19,
-            TextAlignmentOptions.Center, Vector2.zero, new Vector2(1100, 30), Muted);
+            TextAlignmentOptions.Center, Vector2.zero, new Vector2(1100, 30), Muted).gameObject.name = "Worker Battle Summary";
 
         RectTransform crossedSwords = CreateRect("Battle Icon", summary, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 25), new Vector2(54, 54));
         AddSpriteOrPanel(crossedSwords.gameObject, UiRoot + "/Swords/Swords 1.png", "Swords_2", Color.white, true);
@@ -286,6 +290,7 @@ public static class ClashBattleUIBuilder
         Image image = AddSpriteOrPanel(button.gameObject, path, sprite, red ? new Color32(135, 52, 48, 255) : new Color32(42, 111, 138, 255), false);
         Button selectable = button.gameObject.AddComponent<Button>();
         selectable.targetGraphic = image;
+        image.raycastTarget = true;
         AddText(button, label, round ? 22 : 19, TextAlignmentOptions.Center, Vector2.zero, size);
     }
 

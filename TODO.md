@@ -45,7 +45,7 @@ Tasks are ordered by dependency and prototype value.
 **Acceptance criteria:**
 
 - [ ] Player gold is the authoritative currency for worker purchases, all five production types, and upgrades.
-- [ ] Buying a worker uses the existing worker limit and updates visible gold/worker state.
+- [x] Buying a worker uses the existing worker limit and updates visible gold/worker state.
 - [ ] Every unit type follows the approved independent recurring-production contract without a shared FIFO queue.
 - [ ] A role begins locked; its first purchase unlocks continuous one-star production and its next two purchases upgrade only future spawns to two and three stars.
 - [ ] Favourable matchups apply a 1.2× damage multiplier.
@@ -60,7 +60,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** `DEC-004` and `DEC-007`; initial values require balance tuning during implementation
 
-**Progress:** `UnitData` now owns a serialized spawn interval, and `GameManager` has selectable legacy-global and independent-per-role test patterns. The five initial role cadences are configured and user-verified in Play Mode on 2026-07-16. Purchase/unlock state, star tiers, UI, and tests remain.
+**Progress:** `UnitData` now owns a serialized spawn interval, and `GameManager` has selectable legacy-global and independent-per-role test patterns. The five initial role cadences are configured and user-verified in Play Mode on 2026-07-16. The player economy HUD is wired to live gold and worker state, buys workers through `WorkerManager`, disables at the five-worker capacity, and starts the active scene with one player worker. Aggregate income uses base gold per trip × upgrade multiplier × worker count. Worker deposits, purchasing, visible state updates, and capacity behavior were user-verified in Play Mode on 2026-07-16 after correcting the generated button's raycast target. Runtime and Editor assemblies compile externally with zero warnings and errors. Production purchase/unlock state, star tiers, broader UI bindings, and tests remain.
 
 **Status:** Partially implemented
 
@@ -123,7 +123,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** Tasks 1–3
 
-**Progress:** The editor-authored battle HUD has been redesigned around the accepted Tiny Swords direction. The builder now presents gold and workers, five independent locked/tiered production cards, mirrored stronghold health, a match timer, battle summary, selected-role detail, and result/restart presentation while removing favour, essence, category tabs, speed controls, and the shared queue. Runtime values and actions are not yet bound, and the generated HUD still requires regeneration plus multi-resolution Unity inspection and Play Mode verification. The attempted three-part Tiny Swords stronghold health-bar frame did not produce an acceptable result; its stretched middle segment is temporarily commented out pending a later UI pass.
+**Progress:** The editor-authored battle HUD has been redesigned around the accepted Tiny Swords direction. The builder presents gold and workers, five independent locked/tiered production cards, mirrored stronghold health, a match timer, battle summary, selected-role detail, and result/restart presentation while removing favour, essence, category tabs, speed controls, and the shared queue. Player gold and worker values/actions are now live in the active scene; all other runtime values and actions remain unbound. The generated HUD still requires multi-resolution Unity inspection and Play Mode verification. The attempted three-part Tiny Swords stronghold health-bar frame did not produce an acceptable result; its stretched middle segment is temporarily commented out pending a later UI pass.
 
 **Status:** Partially implemented
 

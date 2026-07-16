@@ -155,7 +155,6 @@ MonoBehaviour:
   moveSpeed: 2
   arriveDistance: 0.05
   mineDuration: 3
-  goldPerTrip: 5
   animator: {fileID: 4662215782696359487}
   spriteRenderer: {fileID: 9043023228783349391}
 --- !u!1 &8887094048003673539

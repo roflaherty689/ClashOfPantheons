@@ -17,7 +17,10 @@ public class WorkerManager : MonoBehaviour
     [SerializeField, Min(1)] private int maxWorkers = 5;
 
     [Header("Resources")]
-    [SerializeField] private int startingGold = 0;
+    [SerializeField] private int startingGold = 200;
+    [SerializeField, Min(0)] private int workerCost = 100;
+    [SerializeField, Min(0)] private int baseGoldPerTrip = 5;
+    [SerializeField, Min(0f)] private float goldUpgradeMultiplier = 1f;
 
     private GameManager gameManager;
 
@@ -28,6 +31,11 @@ public class WorkerManager : MonoBehaviour
     public int CurrentGold => currentGold;
     public int WorkerCount => workers.Count;
     public int MaxWorkers => maxWorkers;
+    public int WorkerCost => workerCost;
+    public float GoldUpgradeMultiplier => goldUpgradeMultiplier;
+    public int GoldPerWorkerTrip => Mathf.RoundToInt(baseGoldPerTrip * goldUpgradeMultiplier);
+    public int TotalGoldPerTrip => Mathf.RoundToInt(baseGoldPerTrip * goldUpgradeMultiplier * WorkerCount);
+    public bool HasWorkerCapacity => WorkerCount < maxWorkers;
 
     private void Awake()
     {
@@ -48,6 +56,11 @@ public class WorkerManager : MonoBehaviour
         }
     }
 
+    public bool TryBuyWorker()
+    {
+        return TryBuyWorker(workerCost);
+    }
+
     public bool TryBuyWorker(int cost)
     {
         if (gameManager != null && gameManager.IsGameOver) return false;
@@ -66,6 +79,11 @@ public class WorkerManager : MonoBehaviour
         if (amount <= 0) return;
 
         currentGold += amount;
+    }
+
+    public void DepositWorkerGold()
+    {
+        AddGold(GoldPerWorkerTrip);
     }
 
     internal void UnregisterWorker(WorkerUnit worker)

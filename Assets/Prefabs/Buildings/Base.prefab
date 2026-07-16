@@ -213,3 +213,6 @@ MonoBehaviour:
   startingWorkers: 1
   maxWorkers: 5
   startingGold: 0
+  workerCost: 100
+  baseGoldPerTrip: 5
+  goldUpgradeMultiplier: 1

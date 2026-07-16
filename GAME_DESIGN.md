@@ -62,7 +62,7 @@ There is no direct unit control. The prototype is primarily single-player agains
 3. Workers independently mine and deposit gold.
 4. Destroying a base ends the match and displays the winner.
 
-Gold is not connected to military spawning, the runtime UI does not select production, and no timer, AI strategy, timeout tiebreaker, upgrade, or restart flow exists.
+The player HUD now presents live gold and worker state and can buy workers, but gold is not connected to military spawning, the runtime UI does not select production, and no timer, AI strategy, timeout tiebreaker, upgrade, or restart flow exists.
 
 **Short-loop rhythm:** Worker trips and independent recurring production cadences. Buying a locked role unlocks its continuous production; later purchases advance that role to two and three stars.
 
@@ -109,7 +109,7 @@ The result must support a restart or rematch without Editor intervention.
 
 ### Economy and production
 
-**Implemented:** Workers repeatedly travel to a gold vein, mine, return, and deposit gold. Starting and maximum worker counts are configurable, and the underlying manager can spend a supplied gold cost to buy a worker.
+**Implemented:** Workers repeatedly travel to a gold vein, mine, return, and deposit gold. Starting and maximum worker counts, worker cost, base gold per trip, and a future-facing income-upgrade multiplier are configurable on `WorkerManager`. The player starts with one worker in the active scene, and the live HUD can buy workers up to the five-worker capacity while displaying current gold, worker count, and aggregate income per trip.
 
 **Accepted but not implemented:** Gold is the only prototype currency. It funds workers, five independent unit-production types, and three star tiers of in-match upgrades. Favour and essence shown in the rough HUD are not prototype systems.
 
@@ -138,7 +138,7 @@ The AI should use the same economy, production, upgrade, and match rules as the 
 
 **Implemented:** Units and bases display damage health bars; base hits shake the base visual; animated attacks and projectile arcs provide combat feedback; victory text identifies the winning team.
 
-**Rough concept only:** The scene HUD includes static base health, timer, gold/favour/essence, workers, unit cards, a shared queue, category tabs, battle information, and speed controls. Its values and buttons are mostly disconnected. Favour, essence, and the shared FIFO queue conflict with accepted prototype direction.
+**Partially implemented:** The redesigned scene HUD presents the accepted single-gold economy and independent role cards. Its player gold, aggregate worker income, worker count, and buy-worker button are live; production, stronghold health, timer, result, and restart bindings remain disconnected.
 
 The functional prototype HUD must communicate gold, worker purchase state, independent production, star tiers, remaining time, base health, and the final result. A results/restart flow is required. Menus, onboarding, and most feedback remain unimplemented.
 

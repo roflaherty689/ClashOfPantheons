@@ -20,7 +20,6 @@ public class WorkerUnit : MonoBehaviour
 
     [Header("Mining")]
     [SerializeField] private float mineDuration = 3f;
-    [SerializeField] private int goldPerTrip = 5;
 
     [Header("Visuals")]
     [SerializeField] private Animator animator;
@@ -158,7 +157,7 @@ public class WorkerUnit : MonoBehaviour
 
     private void DepositGold()
     {
-        manager.AddGold(goldPerTrip);
+        manager.DepositWorkerGold();
         isCarrying = false;
     }
 
