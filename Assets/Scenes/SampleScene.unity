@@ -3864,8 +3864,8 @@ MonoBehaviour:
   spawnInterval: 1
   maxUnitsPerTeam: 60
   randomiseSpawns: 1
-  victoryText: {fileID: 661233212}
   gameSpeed: 1
+  matchDurationSeconds: 300
   setTeamColour: 0
 --- !u!1 &519420028
 GameObject:
@@ -10437,7 +10437,7 @@ GameObject:
   - component: {fileID: 1286726518}
   - component: {fileID: 1286726517}
   m_Layer: 0
-  m_Name: 03:00 Text
+  m_Name: Time Remaining
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10482,7 +10482,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 03:00
+  m_text: 05:00
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

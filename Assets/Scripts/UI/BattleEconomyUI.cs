@@ -7,10 +7,12 @@ public class BattleEconomyUI : MonoBehaviour
     private const string EconomyPath = "Safe Area/Bottom HUD/Economy/";
     private const string PlayerHealthPath = "Safe Area/Top HUD/Player Stronghold/Health Bar/";
     private const string EnemyHealthPath = "Safe Area/Top HUD/Enemy Stronghold/Health Bar/";
+    private const string ResultPath = "Safe Area/Game Over Overlay/Result Panel/";
 
     [SerializeField] private Team playerTeam = Team.Left;
 
     private WorkerManager workerManager;
+    private GameManager gameManager;
     private Base playerBase;
     private Base enemyBase;
     private TextMeshProUGUI goldTotalText;
@@ -22,10 +24,16 @@ public class BattleEconomyUI : MonoBehaviour
     private TextMeshProUGUI enemyHealthText;
     private Image playerHealthFill;
     private Image enemyHealthFill;
+    private TextMeshProUGUI timerText;
+    private CanvasGroup gameOverOverlay;
+    private TextMeshProUGUI resultTitleText;
+    private TextMeshProUGUI resultReasonText;
+    private Button restartButton;
     private string battleSummarySuffix = string.Empty;
 
     private void Awake()
     {
+        ResolveGameManager();
         ResolveWorkerManager();
         ResolveBases();
         ResolveUI();
@@ -40,11 +48,28 @@ public class BattleEconomyUI : MonoBehaviour
             buyWorkerButton.onClick.AddListener(BuyWorker);
         }
 
+        if (restartButton != null)
+        {
+            if (restartButton.targetGraphic != null)
+            {
+                restartButton.targetGraphic.raycastTarget = true;
+            }
+
+            restartButton.onClick.AddListener(RestartMatch);
+        }
+
+        SetResultOverlayVisible(false);
+
         Refresh();
     }
 
     private void LateUpdate()
     {
+        if (gameManager == null)
+        {
+            ResolveGameManager();
+        }
+
         if (workerManager == null)
         {
             ResolveWorkerManager();
@@ -64,6 +89,16 @@ public class BattleEconomyUI : MonoBehaviour
         {
             buyWorkerButton.onClick.RemoveListener(BuyWorker);
         }
+
+        if (restartButton != null)
+        {
+            restartButton.onClick.RemoveListener(RestartMatch);
+        }
+    }
+
+    private void ResolveGameManager()
+    {
+        gameManager = FindAnyObjectByType<GameManager>();
     }
 
     private void ResolveWorkerManager()
@@ -110,9 +145,22 @@ public class BattleEconomyUI : MonoBehaviour
         enemyHealthText = FindText(EnemyHealthPath + "Stronghold Health Total", EnemyHealthPath + "50 / 50 Text");
         playerHealthFill = FindImage(PlayerHealthPath + "Health Fill");
         enemyHealthFill = FindImage(EnemyHealthPath + "Health Fill");
+        timerText = FindText(
+            "Safe Area/Top HUD/Match Timer/Time Remaining",
+            "Safe Area/Top HUD/Match Timer/03:00 Text");
+        resultTitleText = FindText(ResultPath + "VICTORY Text");
+        resultReasonText = FindText(ResultPath + "ENEMY STRONGHOLD DESTROYED Text");
+
+        Transform overlayTransform = transform.Find("Safe Area/Game Over Overlay");
+        gameOverOverlay = overlayTransform != null
+            ? overlayTransform.GetComponent<CanvasGroup>()
+            : null;
 
         Transform buttonTransform = transform.Find(EconomyPath + "Buy Worker");
         buyWorkerButton = buttonTransform != null ? buttonTransform.GetComponent<Button>() : null;
+
+        Transform restartTransform = transform.Find(ResultPath + "Restart Match");
+        restartButton = restartTransform != null ? restartTransform.GetComponent<Button>() : null;
 
         if (battleSummaryText != null)
         {
@@ -152,6 +200,11 @@ public class BattleEconomyUI : MonoBehaviour
         }
     }
 
+    private void RestartMatch()
+    {
+        gameManager?.RestartMatch();
+    }
+
     private void Refresh()
     {
         if (workerManager != null && goldTotalText != null)
@@ -185,6 +238,72 @@ public class BattleEconomyUI : MonoBehaviour
 
         RefreshBaseHealth(playerBase, playerHealthText, playerHealthFill);
         RefreshBaseHealth(enemyBase, enemyHealthText, enemyHealthFill);
+        RefreshMatchState();
+    }
+
+    private void RefreshMatchState()
+    {
+        if (gameManager == null) return;
+
+        if (timerText != null)
+        {
+            int totalSeconds = Mathf.CeilToInt(gameManager.TimeRemaining);
+            int minutes = totalSeconds / 60;
+            int seconds = totalSeconds % 60;
+            timerText.text = $"{minutes}:{seconds:00}";
+        }
+
+        if (!gameManager.IsGameOver)
+        {
+            SetResultOverlayVisible(false);
+            return;
+        }
+
+        SetResultOverlayVisible(true);
+
+        bool playerWon = gameManager.HasWinner && gameManager.WinningTeam == playerTeam;
+        if (resultTitleText != null)
+        {
+            resultTitleText.text = !gameManager.HasWinner
+                ? "DRAW"
+                : playerWon ? "VICTORY" : "DEFEAT";
+        }
+
+        if (resultReasonText != null)
+        {
+            resultReasonText.text = GetResultReason(playerWon);
+        }
+    }
+
+    private string GetResultReason(bool playerWon)
+    {
+        Team enemyTeam = playerTeam == Team.Left ? Team.Right : Team.Left;
+
+        return gameManager.EndReason switch
+        {
+            MatchEndReason.StrongholdDestroyed => playerWon
+                ? "ENEMY STRONGHOLD DESTROYED"
+                : "YOUR STRONGHOLD WAS DESTROYED",
+            MatchEndReason.TimeoutHealth => playerWon
+                ? "TIME EXPIRED · YOUR STRONGHOLD HAD MORE HEALTH"
+                : "TIME EXPIRED · ENEMY STRONGHOLD HAD MORE HEALTH",
+            MatchEndReason.TimeoutUnitLossValue =>
+                $"TIME EXPIRED · LOSSES {gameManager.GetTotalUnitLossValue(playerTeam)} vs " +
+                $"{gameManager.GetTotalUnitLossValue(enemyTeam)} GOLD",
+            MatchEndReason.TimeoutDraw =>
+                $"TIME EXPIRED · HEALTH AND LOSSES TIED AT " +
+                $"{gameManager.GetTotalUnitLossValue(playerTeam)} GOLD",
+            _ => "MATCH COMPLETE"
+        };
+    }
+
+    private void SetResultOverlayVisible(bool visible)
+    {
+        if (gameOverOverlay == null) return;
+
+        gameOverOverlay.alpha = visible ? 1f : 0f;
+        gameOverOverlay.interactable = visible;
+        gameOverOverlay.blocksRaycasts = visible;
     }
 
     private static void RefreshBaseHealth(Base battleBase, TextMeshProUGUI healthText, Image healthFill)

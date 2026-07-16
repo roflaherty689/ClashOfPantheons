@@ -1,11 +1,20 @@
-using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 public enum SpawnPattern
 {
     GlobalInterval,
     PerUnitInterval
+}
+
+public enum MatchEndReason
+{
+    None,
+    StrongholdDestroyed,
+    TimeoutHealth,
+    TimeoutUnitLossValue,
+    TimeoutDraw
 }
 
 public class GameManager : MonoBehaviour
@@ -38,15 +47,15 @@ public class GameManager : MonoBehaviour
     [SerializeField, Min(1)] private int maxUnitsPerTeam = 5;
     [SerializeField] private bool randomiseSpawns;
 
-    [Header("UI")]
-    [SerializeField] private TextMeshProUGUI victoryText;
-
     [Header("Game Settings")]
     [SerializeField, Min(0f)] private float gameSpeed = 1f;
+    [SerializeField, Min(1f)] private float matchDurationSeconds = 300f;
     [SerializeField] private bool setTeamColour = true;
 
     private readonly float[] leftUnitSpawnTimers = new float[SpawnRoles.Length];
     private readonly float[] rightUnitSpawnTimers = new float[SpawnRoles.Length];
+    private readonly int[,] unitLossCounts = new int[2, SpawnRoles.Length];
+    private readonly int[] totalUnitLossValues = new int[2];
 
     private float globalSpawnTimer;
     private int leftReadySpawnIndex;
@@ -54,13 +63,25 @@ public class GameManager : MonoBehaviour
     private int leftSpawnIndex;
     private int rightSpawnIndex;
     private bool gameOver;
+    private bool hasWinner;
+    private Team winningTeam;
+    private MatchEndReason endReason;
+    private float timeRemaining;
+    private Base leftBase;
+    private Base rightBase;
 
     public bool IsGameOver => gameOver;
+    public bool HasWinner => hasWinner;
+    public Team WinningTeam => winningTeam;
+    public MatchEndReason EndReason => endReason;
+    public float TimeRemaining => Mathf.Max(0f, timeRemaining);
     public bool SetTeamColour => setTeamColour;
 
     private void Start()
     {
         Time.timeScale = Mathf.Max(0f, gameSpeed);
+        timeRemaining = Mathf.Max(1f, matchDurationSeconds);
+        ResolveBases();
         ValidateConfiguration();
     }
 
@@ -86,17 +107,138 @@ public class GameManager : MonoBehaviour
         UpdateGlobalSpawns();
     }
 
+    private void LateUpdate()
+    {
+        if (gameOver) return;
+
+        timeRemaining = Mathf.Max(0f, timeRemaining - Time.deltaTime);
+        if (timeRemaining <= 0f)
+        {
+            ResolveTimeout();
+        }
+    }
+
     public void EndGame(Team winningTeam)
+    {
+        CompleteMatch(winningTeam, MatchEndReason.StrongholdDestroyed);
+    }
+
+    public void RegisterUnitDeath(Team team, UnitRole role, int unitCost)
+    {
+        if (gameOver) return;
+
+        int teamIndex = GetTeamIndex(team);
+        int roleIndex = GetRoleIndex(role);
+        if (roleIndex < 0) return;
+
+        unitLossCounts[teamIndex, roleIndex]++;
+        totalUnitLossValues[teamIndex] += Mathf.Max(0, unitCost);
+    }
+
+    public int GetUnitLossCount(Team team, UnitRole role)
+    {
+        int roleIndex = GetRoleIndex(role);
+        return roleIndex < 0 ? 0 : unitLossCounts[GetTeamIndex(team), roleIndex];
+    }
+
+    public int GetTotalUnitLossValue(Team team)
+    {
+        return totalUnitLossValues[GetTeamIndex(team)];
+    }
+
+    public void RestartMatch()
+    {
+        Time.timeScale = 1f;
+        Scene activeScene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(activeScene.buildIndex);
+    }
+
+    private void ResolveTimeout()
+    {
+        if (leftBase == null || rightBase == null)
+        {
+            ResolveBases();
+        }
+
+        if (leftBase == null || rightBase == null)
+        {
+            Debug.LogError($"{name}: Cannot resolve match timeout without both team strongholds.", this);
+            CompleteDraw(MatchEndReason.TimeoutDraw);
+            return;
+        }
+
+        int healthComparison = leftBase.CurrentHealth.CompareTo(rightBase.CurrentHealth);
+        if (healthComparison != 0)
+        {
+            CompleteMatch(
+                healthComparison > 0 ? Team.Left : Team.Right,
+                MatchEndReason.TimeoutHealth);
+            return;
+        }
+
+        int leftLossValue = GetTotalUnitLossValue(Team.Left);
+        int rightLossValue = GetTotalUnitLossValue(Team.Right);
+        if (leftLossValue != rightLossValue)
+        {
+            CompleteMatch(
+                leftLossValue < rightLossValue ? Team.Left : Team.Right,
+                MatchEndReason.TimeoutUnitLossValue);
+            return;
+        }
+
+        CompleteDraw(MatchEndReason.TimeoutDraw);
+    }
+
+    private void CompleteMatch(Team winner, MatchEndReason reason)
     {
         if (gameOver) return;
 
         gameOver = true;
+        hasWinner = true;
+        winningTeam = winner;
+        endReason = reason;
+    }
 
-        if (victoryText != null)
+    private void CompleteDraw(MatchEndReason reason)
+    {
+        if (gameOver) return;
+
+        gameOver = true;
+        hasWinner = false;
+        endReason = reason;
+    }
+
+    private void ResolveBases()
+    {
+        leftBase = null;
+        rightBase = null;
+
+        foreach (Base battleBase in FindObjectsByType<Base>())
         {
-            victoryText.gameObject.SetActive(true);
-            victoryText.text = $"{winningTeam} Team Wins!";
+            if (battleBase.Team == Team.Left)
+            {
+                leftBase = battleBase;
+            }
+            else
+            {
+                rightBase = battleBase;
+            }
         }
+    }
+
+    private static int GetTeamIndex(Team team)
+    {
+        return team == Team.Left ? 0 : 1;
+    }
+
+    private static int GetRoleIndex(UnitRole role)
+    {
+        for (int i = 0; i < SpawnRoles.Length; i++)
+        {
+            if (SpawnRoles[i] == role) return i;
+        }
+
+        return -1;
     }
 
     private void UpdateGlobalSpawns()
@@ -269,7 +411,7 @@ public class GameManager : MonoBehaviour
         }
 
         BaseUnit unitInstance = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
-        unitInstance.Initialize(team, targetPoint);
+        unitInstance.Initialize(team, targetPoint, role);
         return true;
     }
 

@@ -89,13 +89,13 @@ Tasks are ordered by dependency and prototype value.
 
 **Acceptance criteria:**
 
-- [ ] Match duration is configured around the five-minute target.
-- [ ] Stronghold destruction ends the match immediately.
-- [ ] Timeout compares stronghold health, then lower total value of lost units when health is equal.
-- [ ] Unit losses and their approved values are tracked per side.
-- [ ] Lost value uses production-slot purchase cost multiplied by the number of that unit type destroyed.
-- [ ] Exact equality after both timeout comparisons produces a draw with no winner or loser.
-- [ ] Result UI identifies the winner and resolution reason.
+- [x] Match duration is configured around the five-minute target.
+- [x] Stronghold destruction ends the match immediately.
+- [x] Timeout compares stronghold health, then lower total value of lost units when health is equal.
+- [x] Unit losses and their approved values are tracked per side.
+- [x] Lost value uses production-slot purchase cost multiplied by the number of that unit type destroyed.
+- [x] Exact equality after both timeout comparisons produces a draw with no winner or loser.
+- [x] Result UI identifies the winner and resolution reason.
 - [ ] Restart resets time, gold, workers, production, upgrades, units, AI, strongholds, and UI.
 - [ ] Base-destruction, health-tiebreak, value-tiebreak, and exact-equality behavior have tests or explicit verification cases.
 - [ ] Compilation and full Play Mode result/restart paths are verified.
@@ -104,7 +104,9 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** Tasks 1–2
 
-**Status:** Not started
+**Progress:** `GameManager` now owns a configurable 300-second countdown, typed match-end reasons, per-team/per-role death counts, total purchase-value losses, deterministic health/value/draw timeout resolution, and active-scene reload restart. Lethal unit damage records the destroyed unit's production-slot cost exactly once. The battle HUD shows live remaining time, player-relative victory/defeat/draw state, the resolution reason, loss totals for value tiebreaks, and a functional restart action in source. Runtime and Editor assemblies compile externally with zero warnings and errors. The user Play Mode verified countdown expiry and correct lost-gold resolution with a shortened 20-second match on 2026-07-17. Targeted coverage of base destruction, the health tiebreak, exact draw, overlay input, and complete reset behavior remains required, so this task is not complete.
+
+**Status:** Partially implemented
 
 ### 4. Replace the static HUD with a functional prototype HUD and validate the loop
 
@@ -123,7 +125,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** Tasks 1–3
 
-**Progress:** The editor-authored battle HUD has been redesigned around the accepted Tiny Swords direction. The builder presents gold and workers, five independent locked/tiered production cards, mirrored stronghold health, a match timer, battle summary, selected-role detail, and result/restart presentation while removing favour, essence, category tabs, speed controls, and the shared queue. Player gold and worker values/actions and both stronghold current/maximum health values and proportional bars are now live in the active scene. Base world-space health bars have been removed while unit health bars remain. The stronghold text, proportional fill reduction, fixed UI colours, and removal of the base world-space bars were user-verified in Play Mode on 2026-07-16. Production, timer, result, and restart bindings remain disconnected. The generated HUD still requires multi-resolution Unity inspection and complete-loop Play Mode verification. The attempted three-part Tiny Swords stronghold health-bar frame did not produce an acceptable result; its stretched middle segment is temporarily commented out pending a later UI pass.
+**Progress:** The editor-authored battle HUD has been redesigned around the accepted Tiny Swords direction. The builder presents gold and workers, five independent locked/tiered production cards, mirrored stronghold health, a match timer, battle summary, selected-role detail, and result/restart presentation while removing favour, essence, category tabs, speed controls, and the shared queue. Player gold and worker values/actions and both stronghold current/maximum health values and proportional bars are live and were user-verified in Play Mode on 2026-07-16. The timer, player-relative result/reason overlay, and restart action are now bound in source; countdown expiry and the lost-gold result were user-verified in a shortened match on 2026-07-17. Production remains disconnected, and the other result/restart paths still need targeted verification. The generated HUD also requires multi-resolution Unity inspection and complete-loop Play Mode verification. The attempted three-part Tiny Swords stronghold health-bar frame did not produce an acceptable result; its stretched middle segment is temporarily commented out pending a later UI pass.
 
 **Status:** Partially implemented
 

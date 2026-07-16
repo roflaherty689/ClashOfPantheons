@@ -70,7 +70,7 @@ public static class ClashBattleUIBuilder
 
         RectTransform timer = CreateRect("Match Timer", top, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(330, 104));
         AddSpriteOrPanel(timer.gameObject, UiRoot + "/Banners/Banner.png", "Banner_4", new Color32(225, 207, 159, 255), false);
-        AddText(timer, "03:00", 46, TextAlignmentOptions.Center, new Vector2(0, 5), new Vector2(260, 58), new Color32(52, 39, 32, 255));
+        AddText(timer, "05:00", 46, TextAlignmentOptions.Center, new Vector2(0, 5), new Vector2(260, 58), new Color32(52, 39, 32, 255)).gameObject.name = "Time Remaining";
         AddText(timer, "MATCH TIME", 17, TextAlignmentOptions.Center, new Vector2(0, -30), new Vector2(180, 24), new Color32(78, 58, 40, 255));
     }
 

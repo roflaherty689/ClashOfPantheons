@@ -17,6 +17,9 @@ Git history remains the exact implementation record.
 - A selectable `GameManager` spawn pattern for legacy global spawning or independent per-role timers.
 - Live player-economy HUD bindings for gold, aggregate gold per trip, worker count, worker purchasing, and worker-cap button state.
 - Live player and enemy stronghold-health HUD bindings for current/maximum text and proportional fill.
+- A configurable five-minute match countdown with stronghold-health, lost-unit-value, and exact-draw timeout resolution.
+- Per-team and per-role unit-death counters, with destroyed production-slot costs accumulated for timeout tiebreaks.
+- Live result reasons and active-scene restart through the battle HUD.
 
 ### Changed
 
@@ -66,10 +69,13 @@ Git history remains the exact implementation record.
 - Resaved the active scene after removing the stray `GoldVein` component from `Tilemap_Water`.
 - User-verified live worker deposits, worker purchasing, gold and worker HUD updates, and five-worker capacity behavior in Play Mode.
 - User-verified live stronghold-health text and proportional HUD fills, fixed UI fill colours, and removal of duplicate world-space base health bars in Play Mode.
+- Compiled runtime and Editor assemblies externally with zero warnings and errors after the match-flow integration.
+- User-verified countdown expiry and correct lost-gold timeout resolution in a shortened 20-second Play Mode match.
 
 ### Known Issues
 
-- Independent unit production purchases, upgrades, strategic AI, timer/tiebreak results, restart, and remaining live HUD integration are not yet complete.
+- Independent unit production purchases, upgrades, strategic AI, and remaining live HUD integration are not yet complete.
+- Health-tiebreak, exact-draw, base-destruction result-overlay, and restart-reset paths still require targeted Play Mode verification.
 - Independent cadence spawning currently starts all five role timers immediately; purchase-slot activation remains future work.
 - Exact role values and matchups remain subject to implementation and playtest tuning.
 - Targeted projectile/worker edge cases and stale serialized fields on the non-animated archer prefab remain to be verified or cleaned.

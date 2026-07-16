@@ -60,9 +60,9 @@ There is no direct unit control. The prototype is primarily single-player agains
 1. Both sides automatically spawn free units using a selectable global fixed-cycle/weighted-random pattern or independent per-role `UnitData` cadences.
 2. Units march, acquire targets, and fight automatically.
 3. Workers independently mine and deposit gold.
-4. Destroying a base ends the match and displays the winner.
+4. Destroying a base or reaching the time limit ends the match and displays the result.
 
-The player HUD now presents live gold and worker state and can buy workers, but gold is not connected to military spawning, the runtime UI does not select production, and no timer, AI strategy, timeout tiebreaker, upgrade, or restart flow exists.
+The player HUD now presents live economy and stronghold state, a five-minute countdown, timeout results, and a restart action. Gold is not connected to military spawning, the runtime UI does not select production, and no AI strategy or upgrade flow exists. Countdown expiry and the lost-unit-value timeout resolver were Play Mode verified in a shortened 20-second match on 2026-07-17; the remaining result branches still need targeted verification.
 
 **Short-loop rhythm:** Worker trips and independent recurring production cadences. Buying a locked role unlocks its continuous production; later purchases advance that role to two and three stars.
 
@@ -103,9 +103,9 @@ Heroes and bosses are not prototype scope.
 
 **Implemented:** Units die at zero health. Destroying a stronghold immediately ends the match and stops autonomous units and workers.
 
-**Accepted but not implemented:** A match also ends when the timer expires. The healthier stronghold wins. If health is equal, the side with the lower total value of units lost wins. Lost-unit value is the purchase cost of that unit's production slot multiplied by the number of units of that type destroyed. If both comparisons are equal, the match is a draw with no winner or loser.
+**Implemented in source, partially Play Mode verified:** A match also ends when the configurable timer expires. The healthier stronghold wins. If health is equal, the side with the lower total value of units lost wins. Lost-unit value is accumulated from the purchase cost of each destroyed unit's production slot, with per-role death counts retained for inspection. If both comparisons are equal, the match is a draw with no winner or loser. Countdown expiry and the lost-value resolver were user-verified in a shortened match on 2026-07-17.
 
-The result must support a restart or rematch without Editor intervention.
+The result overlay identifies victory, defeat, or draw and its resolution condition. Its restart action reloads the active battle scene to reset current runtime state; this path still requires Play Mode verification.
 
 ### Economy and production
 
@@ -138,7 +138,7 @@ The AI should use the same economy, production, upgrade, and match rules as the 
 
 **Implemented:** Units display world-space damage health bars. Stronghold health is shown as live current/maximum text and proportional bars in the battle HUD, without duplicate world-space bars above the bases. Base hits shake the base visual; animated attacks and projectile arcs provide combat feedback; victory text identifies the winning team.
 
-**Partially implemented:** The redesigned scene HUD presents the accepted single-gold economy and independent role cards. Its player gold, aggregate worker income, worker count, buy-worker button, and both stronghold-health displays are live; production, timer, result, and restart bindings remain disconnected.
+**Partially implemented:** The redesigned scene HUD presents the accepted single-gold economy and independent role cards. Its player gold, aggregate worker income, worker count, buy-worker button, both stronghold-health displays, match timer, result overlay, resolution reason, and restart button are live in source. Production controls remain disconnected. The shortened countdown and lost-value result were Play Mode verified on 2026-07-17; the other result and restart paths remain targeted verification work.
 
 The functional prototype HUD must communicate gold, worker purchase state, independent production, star tiers, remaining time, base health, and the final result. A results/restart flow is required. Menus, onboarding, and most feedback remain unimplemented.
 

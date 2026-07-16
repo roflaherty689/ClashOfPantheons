@@ -45,6 +45,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     public UnitData UnitData => unitData;
 
     private Team team;
+    private UnitRole role;
     private Transform targetPoint;
     private float currentHealth;
     private float attackTimer;
@@ -60,12 +61,13 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     private Vector3 originalVisualPosition;
     private Coroutine recoilCoroutine;
 
-    public virtual void Initialize(Team team, Transform targetPoint)
+    public virtual void Initialize(Team team, Transform targetPoint, UnitRole role)
     {
         gameManager = FindAnyObjectByType<GameManager>();
 
         this.team = team;
         this.targetPoint = targetPoint;
+        this.role = role;
 
         if (unitData == null)
         {
@@ -312,6 +314,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         if (currentHealth > 0f) return;
 
         isDead = true;
+        gameManager?.RegisterUnitDeath(team, role, unitData.Cost);
         Destroy(gameObject);
     }
 
