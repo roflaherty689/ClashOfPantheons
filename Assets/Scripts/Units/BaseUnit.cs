@@ -42,6 +42,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     public TargetType TargetType => TargetType.Unit;
     public Team Team => team;
     public Transform Transform => transform;
+    public UnitData UnitData => unitData;
 
     private Team team;
     private Transform targetPoint;

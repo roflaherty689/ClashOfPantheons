@@ -10,6 +10,9 @@ public class UnitData : ScriptableObject
     public float moveSpeed = 2;
     public int cost = 50;
 
+    [Header("Production")]
+    [Min(0.1f)] public float spawnInterval = 3f;
+
     [Header("Damage Modifiers")]
     public float unitDamageMultiplier = 1f;
     public float buildingDamageMultiplier = 1f;

@@ -18,5 +18,6 @@ MonoBehaviour:
   attackSpeed: 1
   moveSpeed: 1.8
   cost: 220
+  spawnInterval: 12
   unitDamageMultiplier: 1
   buildingDamageMultiplier: 1.5

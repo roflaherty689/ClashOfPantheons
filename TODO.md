@@ -30,7 +30,7 @@ Tasks are ordered by dependency and prototype value.
 - [ ] A role begins locked; its first purchase unlocks continuous one-star production and its next two purchases upgrade only future spawns to two and three stars.
 - [ ] Favourable matchups apply a 1.2× damage multiplier.
 - [ ] Star tiers multiply every configured unit stat except purchase cost by 1×/1.5×/2× and affect future spawns only.
-- [ ] Each `UnitData` asset owns that role's purchase cost and recurring production cadence; the global spawn interval no longer defines all roles.
+- [x] Each `UnitData` asset owns that role's purchase cost and recurring production cadence; the global spawn interval no longer defines all roles.
 - [ ] Production stops correctly when the match ends and resets correctly for a new match.
 - [ ] Costs, failed purchases, and production state are visibly communicated.
 - [ ] Deterministic economy and production rules have focused automated tests where practical.
@@ -40,7 +40,9 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** `DEC-004` and `DEC-007`; initial values require balance tuning during implementation
 
-**Status:** Not started
+**Progress:** `UnitData` now owns a serialized spawn interval, and `GameManager` has selectable legacy-global and independent-per-role test patterns. The five initial role cadences are configured and user-verified in Play Mode on 2026-07-16. Purchase/unlock state, star tiers, UI, and tests remain.
+
+**Status:** Partially implemented
 
 ### 2. Implement the single-player AI economy and production opponent
 

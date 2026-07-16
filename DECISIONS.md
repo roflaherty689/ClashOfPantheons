@@ -249,7 +249,9 @@ One recurring track per role is easy to read, fits short matches, preserves comp
 - The UI must show locked, one-star, two-star, and three-star states without presenting a shared queue.
 - The AI must purchase and upgrade through the same contract.
 - Exact costs, cadences, and matchup values remain tuning inputs rather than production-contract ambiguity.
-- `UnitData` currently stores cost but must gain per-role production cadence; the global `GameManager` interval is stale relative to this decision.
+- `UnitData` stores both cost and per-role production cadence.
+- `GameManager` may retain the legacy global interval as a selectable prototype/debug pattern, but independent `UnitData` timers remain the intended production behavior.
+- Until purchase-slot activation is implemented, the independent-timer test pattern may produce all five roles from match start.
 
 ### Alternatives considered
 

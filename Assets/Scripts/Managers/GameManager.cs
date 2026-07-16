@@ -1,8 +1,24 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using TMPro;
+
+public enum SpawnPattern
+{
+    GlobalInterval,
+    PerUnitInterval
+}
 
 public class GameManager : MonoBehaviour
 {
+    private static readonly UnitRole[] SpawnRoles =
+    {
+        UnitRole.Melee,
+        UnitRole.Archer,
+        UnitRole.Cavalry,
+        UnitRole.Siege,
+        UnitRole.Mythic
+    };
+
     [Header("Team factions")]
     [SerializeField] private FactionData leftFactionData;
     [SerializeField] private FactionData rightFactionData;
@@ -16,8 +32,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform rightTargetPoint;
 
     [Header("Spawn Settings")]
+    [SerializeField] private SpawnPattern spawnPattern = SpawnPattern.GlobalInterval;
+    [Min(0.1f)]
     [SerializeField] private float spawnInterval = 3f;
-    [SerializeField] private int maxMeleeUnitsPerTeam = 5;
+    [FormerlySerializedAs("maxMeleeUnitsPerTeam")]
+    [Min(1)]
+    [SerializeField] private int maxUnitsPerTeam = 5;
 
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI victoryText;
@@ -27,7 +47,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private bool randomiseSpawns = false;
     [SerializeField] public bool setTeamColour = true;
     
-    private float spawnTimer;
+    private float globalSpawnTimer;
+    private readonly float[] leftUnitSpawnTimers = new float[SpawnRoles.Length];
+    private readonly float[] rightUnitSpawnTimers = new float[SpawnRoles.Length];
+    private int leftReadySpawnIndex;
+    private int rightReadySpawnIndex;
     private bool gameOver;
 
     public bool IsGameOver => gameOver;
@@ -45,14 +69,70 @@ public class GameManager : MonoBehaviour
     {
         if (gameOver) return;
 
-        spawnTimer += Time.deltaTime;
-
-        if (spawnTimer >= spawnInterval)
+        if (spawnPattern == SpawnPattern.PerUnitInterval)
         {
-            spawnTimer = 0f;
+            UpdatePerUnitSpawns(Team.Left, leftFactionData, leftUnitSpawnTimers, ref leftReadySpawnIndex);
+            UpdatePerUnitSpawns(Team.Right, rightFactionData, rightUnitSpawnTimers, ref rightReadySpawnIndex);
+            return;
+        }
+
+        UpdateGlobalSpawns();
+    }
+
+    private void UpdateGlobalSpawns()
+    {
+        globalSpawnTimer += Time.deltaTime;
+
+        if (globalSpawnTimer >= spawnInterval)
+        {
+            globalSpawnTimer -= spawnInterval;
 
             TrySpawnUnit(Team.Left);
             TrySpawnUnit(Team.Right);
+        }
+    }
+
+    private void UpdatePerUnitSpawns(
+        Team team,
+        FactionData factionData,
+        float[] timers,
+        ref int readySpawnIndex)
+    {
+        for (int i = 0; i < SpawnRoles.Length; i++)
+        {
+            timers[i] += Time.deltaTime;
+        }
+
+        int scanStartIndex = readySpawnIndex;
+        int availableSpawnSlots = GetAvailableSpawnSlots(team);
+
+        for (int offset = 0; offset < SpawnRoles.Length; offset++)
+        {
+            int roleIndex = (scanStartIndex + offset) % SpawnRoles.Length;
+            UnitRole role = SpawnRoles[roleIndex];
+            UnitData data = factionData.GetUnitData(role);
+
+            if (data == null)
+            {
+                continue;
+            }
+
+            float roleSpawnInterval = Mathf.Max(data.spawnInterval, 0.1f);
+            timers[roleIndex] = Mathf.Min(timers[roleIndex], roleSpawnInterval);
+
+            if (timers[roleIndex] < roleSpawnInterval)
+            {
+                continue;
+            }
+
+            if (availableSpawnSlots <= 0 || !SpawnUnit(team, role))
+            {
+                continue;
+            }
+
+            timers[roleIndex] -= roleSpawnInterval;
+            availableSpawnSlots--;
+            readySpawnIndex = (roleIndex + 1) % SpawnRoles.Length;
         }
     }
 
@@ -69,8 +149,22 @@ public class GameManager : MonoBehaviour
 
     private void TrySpawnUnit(Team team)
     {
-        BaseUnit[] allUnits = FindObjectsByType<BaseUnit>(FindObjectsSortMode.None);
+        if (!TeamHasSpawnCapacity(team)) return;
 
+        if (randomiseSpawns)
+            GetRandomUnitPrefab(team);
+        else
+            GetNextUnitPrefab(team);
+    }
+
+    private bool TeamHasSpawnCapacity(Team team)
+    {
+        return GetAvailableSpawnSlots(team) > 0;
+    }
+
+    private int GetAvailableSpawnSlots(Team team)
+    {
+        BaseUnit[] allUnits = FindObjectsByType<BaseUnit>(FindObjectsSortMode.None);
         int teamUnitCount = 0;
 
         foreach (BaseUnit unit in allUnits)
@@ -81,12 +175,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (teamUnitCount >= maxMeleeUnitsPerTeam) return;
-
-        if (randomiseSpawns)
-            GetRandomUnitPrefab(team);
-        else
-            GetNextUnitPrefab(team);
+        return Mathf.Max(0, maxUnitsPerTeam - teamUnitCount);
     }
 
     private void GetRandomUnitPrefab(Team team)
@@ -185,25 +274,27 @@ public class GameManager : MonoBehaviour
 
     public void SpawnLeftUnit(UnitRole role)
     {
-        BaseUnit prefab = leftFactionData.GetUnitPrefab(role);
-
-        if (prefab == null)
-            return;
-
-        BaseUnit unitInstance = Instantiate(prefab, leftSpawnPoint.position, leftSpawnPoint.rotation);
-
-        unitInstance.Initialize(Team.Left, leftTargetPoint);
+        SpawnUnit(Team.Left, role);
     }
 
     public void SpawnRightUnit(UnitRole role)
     {
-        BaseUnit prefab = rightFactionData.GetUnitPrefab(role);
+        SpawnUnit(Team.Right, role);
+    }
+
+    private bool SpawnUnit(Team team, UnitRole role)
+    {
+        FactionData factionData = team == Team.Left ? leftFactionData : rightFactionData;
+        Transform spawnPoint = team == Team.Left ? leftSpawnPoint : rightSpawnPoint;
+        Transform targetPoint = team == Team.Left ? leftTargetPoint : rightTargetPoint;
+        BaseUnit prefab = factionData.GetUnitPrefab(role);
 
         if (prefab == null)
-            return;
+            return false;
 
-        BaseUnit unitInstance = Instantiate(prefab, rightSpawnPoint.position, rightSpawnPoint.rotation);
+        BaseUnit unitInstance = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
+        unitInstance.Initialize(team, targetPoint);
 
-        unitInstance.Initialize(Team.Right, rightTargetPoint);
+        return true;
     }
 }

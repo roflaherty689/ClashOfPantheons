@@ -57,7 +57,7 @@ There is no direct unit control. The prototype is primarily single-player agains
 
 ### Current prototype loop — implemented, not Play Mode verified in this pass
 
-1. Both sides automatically spawn free units at a shared interval using a fixed cycle or weighted random selection.
+1. Both sides automatically spawn free units using a selectable global fixed-cycle/weighted-random pattern or independent per-role `UnitData` cadences.
 2. Units march, acquire targets, and fight automatically.
 3. Workers independently mine and deposit gold.
 4. Destroying a base ends the match and displays the winner.
@@ -117,7 +117,7 @@ The result must support a restart or rematch without Editor intervention.
 
 Each role begins locked. Its first purchase unlocks continuous one-star production; its next two purchases upgrade future spawns to two and three stars. Star tiers multiply all configured unit stats except purchase cost by 1×, 1.5×, and 2×. Existing fielded units do not change when a role is upgraded.
 
-Each role's purchase cost and recurring production cadence are configured in its `UnitData` asset. `UnitData` currently contains `cost`, but cadence is not yet represented there; the prototype currently uses a global spawn interval. Initial values remain balance tuning rather than an unresolved ownership decision.
+Each role's purchase cost and recurring production cadence are configured in its `UnitData` asset. `GameManager` can run either the legacy global spawn pattern or independent per-role timers for prototype testing. Purchase-slot activation is not yet connected, so the per-role test pattern currently produces all five roles from match start. Initial values remain balance tuning rather than an unresolved ownership decision.
 
 Campaign and persistent progression are deferred beyond the core prototype. No save system is required for the core loop.
 

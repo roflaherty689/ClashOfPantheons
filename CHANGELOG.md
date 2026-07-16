@@ -13,6 +13,8 @@ Git history remains the exact implementation record.
 - An accepted purchase-to-recurring-production contract for independent role tracks and three star tiers.
 - An accepted PC-first, mobile-second platform and input priority decision.
 - A game-specific ordered Prototype task sequence with explicit acceptance and verification criteria.
+- Per-role production cadence fields on `UnitData`, with initial melee, archer, cavalry, siege, and mythic timing values.
+- A selectable `GameManager` spawn pattern for legacy global spawning or independent per-role timers.
 
 ### Changed
 
@@ -23,7 +25,8 @@ Git history remains the exact implementation record.
 - Accepted the independent production contract: first purchase unlocks continuous one-star production, while later purchases upgrade future spawns to two and three stars.
 - Recorded initial 1.2× counter and 1×/1.5×/2× star-scaling defaults, timeout loss valuation, and future-spawn-only upgrade behavior.
 - Clarified that counters modify damage, star tiers scale every configured unit stat except cost, and exact timeout equality produces a draw.
-- Assigned per-role purchase cost and recurring production cadence to `UnitData`, noting that cadence is not yet represented there in the current implementation.
+- Implemented per-role cadence ownership in `UnitData` while retaining the global interval as an explicit prototype/debug option.
+- Renamed the misleading per-team unit-cap field while preserving the scene's configured 60-unit value and serialized compatibility.
 
 ### Fixed
 
@@ -37,10 +40,12 @@ Git history remains the exact implementation record.
 
 - Added persistent Codex project instructions through `AGENTS.md`.
 - Documented that no project-owned automated tests or test assemblies were found during the 2026-07-16 static review.
+- User-verified the selectable global and independent per-role spawn patterns in Play Mode.
 
 ### Known Issues
 
 - Player gold, worker purchasing, independent unit production, upgrades, strategic AI, timer/tiebreak results, restart, and live HUD integration are not yet complete.
+- Independent cadence spawning currently starts all five role timers immediately; purchase-slot activation remains future work.
 - Exact role values and matchups remain subject to implementation and playtest tuning.
 - Compilation and Play Mode behavior were not verified during the documentation-only reconciliation pass.
 

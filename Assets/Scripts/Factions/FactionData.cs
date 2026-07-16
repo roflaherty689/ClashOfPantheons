@@ -20,4 +20,10 @@ public class FactionData : ScriptableObject
         Debug.LogError($"No unit prefab found for role {role} in faction {factionName}");
         return null;
     }
+
+    public UnitData GetUnitData(UnitRole role)
+    {
+        BaseUnit prefab = GetUnitPrefab(role);
+        return prefab != null ? prefab.UnitData : null;
+    }
 }
