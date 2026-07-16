@@ -123,7 +123,9 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** Tasks 1–3
 
-**Status:** Not started
+**Progress:** The editor-authored battle HUD has been redesigned around the accepted Tiny Swords direction. The builder now presents gold and workers, five independent locked/tiered production cards, mirrored stronghold health, a match timer, battle summary, selected-role detail, and result/restart presentation while removing favour, essence, category tabs, speed controls, and the shared queue. Runtime values and actions are not yet bound, and the generated HUD still requires regeneration plus multi-resolution Unity inspection and Play Mode verification. The attempted three-part Tiny Swords stronghold health-bar frame did not produce an acceptable result; its stretched middle segment is temporarily commented out pending a later UI pass.
+
+**Status:** Partially implemented
 
 ---
 
@@ -148,6 +150,7 @@ _No items currently blocked by external state._
 
 ## Discovered follow-up work
 
+- Revisit the editor-generated stronghold health-bar frame in `ClashBattleUIBuilder.CreateHealthBarFrame`. Determine the correct use of the Tiny Swords bar assets or replace the frame treatment; the final frame must fully contain the health fill without distortion or overflow for both teams at QHD 2560×1440 and representative narrower/wider aspect ratios. The current stretched middle segment is intentionally commented out until this is addressed.
 - Tune initial purchase costs, recurring production cadences, role matchups, and stat values through representative playtests.
 - Resolve projectile targeting semantics before changing combat behavior: current projectiles aim at the launch position and may miss moving targets; choose deliberate misses, target leading, or live-target tracking, then document and verify the approved rule.
 - Profile a representative 60-versus-60 battle before changing target-query or unit-count architecture; if measurements confirm pressure, replace allocating physics queries and scene-wide unit scans with proportionate non-allocating queries and lifecycle-owned counts.

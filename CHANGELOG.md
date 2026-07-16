@@ -18,6 +18,7 @@ Git history remains the exact implementation record.
 
 ### Changed
 
+- Redesigned the editor-generated battle HUD around Tiny Swords panels, bars, buttons, icons, workers, strongholds, and human/enemy avatar portraits; replaced conflicting multi-currency and shared-queue mockups with binding-ready gold, worker, five-role independent-production, match-status, and result presentation.
 - Reconciled `GAME_DESIGN.md` with the current Unity repository and the user-approved single-player autobattler direction.
 - Rewrote the Prototype milestone around one economy → production → autonomous combat → result → restart loop against AI.
 - Corrected project tracking to distinguish existing source/asset foundations from unimplemented integration and unverified runtime behavior.
