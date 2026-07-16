@@ -3,53 +3,80 @@
 ## Current milestone
 
 **Milestone:** Prototype  
-**Status:** Started  
-**Primary outcome:** Establish a playable version of the core loop.
+**Status:** In progress — foundations present, player loop not integrated
+
+**Primary outcome:** Deliver one complete economy → production → autonomous combat → result → restart match against AI.
 
 ### Entry conditions
 
-- Project opens successfully.
-- Core project structure exists.
+- [x] Unity 2D project and one battle scene exist.
+- [x] Autonomous lane combat, strongholds, five unit roles, factions, and worker mining have source and asset foundations.
+- [x] Core design and scope are documented in `GAME_DESIGN.md` and `DECISIONS.md`.
+
+Checked entry conditions are based on repository inspection, not a new Unity launch or Play Mode run.
 
 ### Exit criteria
 
-- [ ] The player can complete one full version of the core loop.
-- [ ] The project compiles without known blocking errors.
-- [ ] Critical interactions can be verified in Play Mode.
-- [ ] Major temporary assumptions are documented.
-- [ ] The next milestone has clear entry conditions.
+- [ ] A player can use gold to buy workers, establish independent unit-type production, and buy one-, two-, and three-star upgrades.
+- [ ] An AI opponent makes economy, production, composition, and upgrade decisions under the same match rules.
+- [ ] Units autonomously resolve combat on one shared lane and can destroy either stronghold.
+- [ ] An approximately five-minute timer resolves matches by stronghold health, then lower total value of units lost when health is equal.
+- [ ] The result is clearly presented and a new match can start without Editor intervention.
+- [ ] The functional HUD accurately communicates gold, workers, production, upgrades, time, stronghold health, and result state.
+- [ ] Exact equality after both timeout comparisons produces a draw with no winner or loser.
+- [ ] The project compiles without known blocking errors and the complete critical path is verified in Play Mode.
+- [ ] Critical economy, production, and result rules have proportionate automated coverage or documented manual verification where automation is impractical.
+- [ ] Material assumptions and the next milestone's entry conditions are documented.
 
 ### Current blockers
 
-- None recorded.
+- No project-owned automated tests or test assemblies were found during the 2026-07-16 static review.
 
 ---
 
 ## Milestone 1 — Prototype
 
-**Goal:** Prove the core mechanics and player interaction.
+**Goal:** Prove that short single-player matches create meaningful economy, production, composition, and upgrade decisions without direct unit control.
+
+### Existing foundation
+
+- [x] Autonomous horizontal movement, target acquisition, melee/ranged combat, projectiles, health, and unit death are represented in source.
+- [x] Two strongholds and base-destruction victory handling are represented in source and the battle scene.
+- [x] Melee, archer, cavalry, siege, and mythic role mappings and prototype assets exist.
+- [x] Workers can mine and deposit gold; worker purchase logic exists below the UI layer.
+- [x] Faction data can map roles to faction-specific prefabs.
+- [x] Prototype health, hit, animation, projectile, and victory feedback exists.
+
+These checks confirm repository presence only. Their integrated runtime behavior remains subject to compilation and Play Mode verification.
 
 ### Planned outcomes
 
-- [ ] Basic player movement
-- [ ] Primary interaction or combat
-- [ ] Basic challenge or enemy
-- [ ] Win, completion, or progression condition
-- [ ] Failure and restart flow
-- [ ] Minimal HUD
-- [ ] Basic Play Mode verification
+- [x] Accept `DEC-007`: first purchase unlocks continuous role production; the next two purchases upgrade future spawns to two and three stars.
+- [ ] Connect the player's gold and worker systems to independent production for all five roles.
+- [ ] Implement an AI decision layer that participates in the same economy and production game.
+- [ ] Implement the five-minute timer, stronghold-health comparison, unit-loss-value tiebreaker, result states, and restart flow.
+- [ ] Implement the three star tiers with clear costs, effects, and production/UI feedback.
+- [ ] Move recurring production cadence ownership from the global spawn interval into each role's `UnitData`; retain per-role cost ownership there.
+- [ ] Replace static mock HUD values and shared-queue presentation with functional prototype state.
+- [ ] Validate role readability and at least one meaningful economy-versus-pressure decision through playtesting.
+- [ ] Add focused tests for deterministic economy, production, and result rules, plus a documented Play Mode critical-path check.
 
 ### Dependencies
 
-- Core design direction in `GAME_DESIGN.md`
+- Accepted design constraints in `DEC-002` through `DEC-006`.
+- Accepted production semantics in `DEC-007`.
+- Existing `GameManager`, `WorkerManager`, `WorkerUnit`, `GoldVein`, `FactionData`, `UnitData`, `BaseUnit`, and `Base` foundations.
+- Functional UI bindings and scene wiring after the underlying rules are defined.
 
 ### Deferred from this milestone
 
-- Final art
-- Full progression
-- Broad content
-- Deep optimization
-- Production-ready save system
+- Online multiplayer, ranked matchmaking, and networking architecture.
+- Campaign and persistent progression.
+- Multiple currencies beyond gold.
+- Controller support and broad platform certification.
+- Final art, final audio, and broad faction or map production.
+- Heroes, bosses, neutral objectives, buildings, and powers unless separately approved.
+- Production-ready saving and deep optimization without measured need.
 
 ---
 
@@ -176,7 +203,11 @@
 
 Ideas listed here are not committed scope.
 
-- _TBD_
+- Online multiplayer and ranked matchmaking.
+- Alternative maps, lane structures, or an endless mode after the five-minute match is validated.
+- Campaign and persistent progression.
+- Additional currencies, buildings, powers, heroes, bosses, and neutral objectives.
+- Controller support.
 
 ---
 
@@ -184,7 +215,8 @@ Ideas listed here are not committed scope.
 
 Record intentionally removed work and reference the relevant decision.
 
-- _TBD_
+- Shared FIFO unit production for the prototype — conflicts with `DEC-004`.
+- Direct control of combat units — conflicts with `DEC-002`.
 
 ---
 
@@ -192,4 +224,4 @@ Record intentionally removed work and reference the relevant decision.
 
 Use this section only for major sequencing or scope changes.
 
-- _TBD_
+- 2026-07-16: Reconciled the Prototype milestone with the implemented foundations and accepted design direction. Replaced generic outcomes with the game-specific critical path and deferred non-prototype scope.
