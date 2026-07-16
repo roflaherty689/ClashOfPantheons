@@ -16,6 +16,7 @@ Git history remains the exact implementation record.
 - Per-role production cadence fields on `UnitData`, with initial melee, archer, cavalry, siege, and mythic timing values.
 - A selectable `GameManager` spawn pattern for legacy global spawning or independent per-role timers.
 - Live player-economy HUD bindings for gold, aggregate gold per trip, worker count, worker purchasing, and worker-cap button state.
+- Live player and enemy stronghold-health HUD bindings for current/maximum text and proportional fill.
 
 ### Changed
 
@@ -51,6 +52,7 @@ Git history remains the exact implementation record.
 ### Removed
 
 - Removed the wholly commented, unreferenced `ProductionSlot` script and its metadata.
+- Removed duplicate world-space health bars from bases and their obsolete serialized prefab/scene configuration; unit health bars and their shared assets remain in use.
 
 ### Technical
 
@@ -63,6 +65,7 @@ Git history remains the exact implementation record.
 - User-verified the cleanup pass in Unity and confirmed the current gameplay behavior is working correctly.
 - Resaved the active scene after removing the stray `GoldVein` component from `Tilemap_Water`.
 - User-verified live worker deposits, worker purchasing, gold and worker HUD updates, and five-worker capacity behavior in Play Mode.
+- User-verified live stronghold-health text and proportional HUD fills, fixed UI fill colours, and removal of duplicate world-space base health bars in Play Mode.
 
 ### Known Issues
 

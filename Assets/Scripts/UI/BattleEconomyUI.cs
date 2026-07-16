@@ -5,20 +5,29 @@ using UnityEngine.UI;
 public class BattleEconomyUI : MonoBehaviour
 {
     private const string EconomyPath = "Safe Area/Bottom HUD/Economy/";
+    private const string PlayerHealthPath = "Safe Area/Top HUD/Player Stronghold/Health Bar/";
+    private const string EnemyHealthPath = "Safe Area/Top HUD/Enemy Stronghold/Health Bar/";
 
     [SerializeField] private Team playerTeam = Team.Left;
 
     private WorkerManager workerManager;
+    private Base playerBase;
+    private Base enemyBase;
     private TextMeshProUGUI goldTotalText;
     private TextMeshProUGUI goldPerTripText;
     private TextMeshProUGUI workerTotalText;
     private TextMeshProUGUI battleSummaryText;
     private Button buyWorkerButton;
+    private TextMeshProUGUI playerHealthText;
+    private TextMeshProUGUI enemyHealthText;
+    private Image playerHealthFill;
+    private Image enemyHealthFill;
     private string battleSummarySuffix = string.Empty;
 
     private void Awake()
     {
         ResolveWorkerManager();
+        ResolveBases();
         ResolveUI();
 
         if (buyWorkerButton != null)
@@ -39,6 +48,11 @@ public class BattleEconomyUI : MonoBehaviour
         if (workerManager == null)
         {
             ResolveWorkerManager();
+        }
+
+        if (playerBase == null || enemyBase == null)
+        {
+            ResolveBases();
         }
 
         Refresh();
@@ -65,6 +79,25 @@ public class BattleEconomyUI : MonoBehaviour
         }
     }
 
+    private void ResolveBases()
+    {
+        playerBase = null;
+        enemyBase = null;
+
+        Base[] bases = FindObjectsByType<Base>();
+        foreach (Base battleBase in bases)
+        {
+            if (battleBase.Team == playerTeam)
+            {
+                playerBase = battleBase;
+            }
+            else
+            {
+                enemyBase = battleBase;
+            }
+        }
+    }
+
     private void ResolveUI()
     {
         goldTotalText = FindText(EconomyPath + "Gold Total", EconomyPath + "540 Text");
@@ -73,6 +106,10 @@ public class BattleEconomyUI : MonoBehaviour
         battleSummaryText = FindText(
             "Safe Area/Bottom HUD/Battle Summary/Worker Battle Summary",
             "Safe Area/Bottom HUD/Battle Summary/WORKERS  2 / 5     |     FRIENDLY UNITS  8     |     ENEMY UNITS  8 Text");
+        playerHealthText = FindText(PlayerHealthPath + "Stronghold Health Total", PlayerHealthPath + "50 / 50 Text");
+        enemyHealthText = FindText(EnemyHealthPath + "Stronghold Health Total", EnemyHealthPath + "50 / 50 Text");
+        playerHealthFill = FindImage(PlayerHealthPath + "Health Fill");
+        enemyHealthFill = FindImage(EnemyHealthPath + "Health Fill");
 
         Transform buttonTransform = transform.Find(EconomyPath + "Buy Worker");
         buyWorkerButton = buttonTransform != null ? buttonTransform.GetComponent<Button>() : null;
@@ -84,6 +121,12 @@ public class BattleEconomyUI : MonoBehaviour
                 ? "     " + battleSummaryText.text.Substring(separatorIndex)
                 : string.Empty;
         }
+    }
+
+    private Image FindImage(string path)
+    {
+        Transform target = transform.Find(path);
+        return target != null ? target.GetComponent<Image>() : null;
     }
 
     private TextMeshProUGUI FindText(params string[] paths)
@@ -111,32 +154,51 @@ public class BattleEconomyUI : MonoBehaviour
 
     private void Refresh()
     {
-        if (workerManager == null) return;
-
-        if (goldTotalText != null)
+        if (workerManager != null && goldTotalText != null)
         {
             goldTotalText.text = workerManager.CurrentGold.ToString();
         }
 
-        if (goldPerTripText != null)
+        if (workerManager != null && goldPerTripText != null)
         {
             goldPerTripText.text = $"+{workerManager.TotalGoldPerTrip} PER TRIP";
         }
 
-        string workerTotal = $"{workerManager.WorkerCount} / {workerManager.MaxWorkers}";
-        if (workerTotalText != null)
+        if (workerManager != null)
         {
-            workerTotalText.text = workerTotal;
+            string workerTotal = $"{workerManager.WorkerCount} / {workerManager.MaxWorkers}";
+            if (workerTotalText != null)
+            {
+                workerTotalText.text = workerTotal;
+            }
+
+            if (battleSummaryText != null)
+            {
+                battleSummaryText.text = $"WORKERS  {workerTotal}{battleSummarySuffix}";
+            }
+
+            if (buyWorkerButton != null)
+            {
+                buyWorkerButton.interactable = workerManager.HasWorkerCapacity;
+            }
         }
 
-        if (battleSummaryText != null)
+        RefreshBaseHealth(playerBase, playerHealthText, playerHealthFill);
+        RefreshBaseHealth(enemyBase, enemyHealthText, enemyHealthFill);
+    }
+
+    private static void RefreshBaseHealth(Base battleBase, TextMeshProUGUI healthText, Image healthFill)
+    {
+        if (battleBase == null) return;
+
+        if (healthText != null)
         {
-            battleSummaryText.text = $"WORKERS  {workerTotal}{battleSummarySuffix}";
+            healthText.text = $"{battleBase.CurrentHealth:0.#} / {battleBase.MaxHealth:0.#}";
         }
 
-        if (buyWorkerButton != null)
+        if (healthFill != null)
         {
-            buyWorkerButton.interactable = workerManager.HasWorkerCapacity;
+            healthFill.fillAmount = Mathf.Clamp01(battleBase.CurrentHealth / battleBase.MaxHealth);
         }
     }
 }

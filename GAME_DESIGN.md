@@ -136,9 +136,9 @@ The AI should use the same economy, production, upgrade, and match rules as the 
 
 ## UI and feedback
 
-**Implemented:** Units and bases display damage health bars; base hits shake the base visual; animated attacks and projectile arcs provide combat feedback; victory text identifies the winning team.
+**Implemented:** Units display world-space damage health bars. Stronghold health is shown as live current/maximum text and proportional bars in the battle HUD, without duplicate world-space bars above the bases. Base hits shake the base visual; animated attacks and projectile arcs provide combat feedback; victory text identifies the winning team.
 
-**Partially implemented:** The redesigned scene HUD presents the accepted single-gold economy and independent role cards. Its player gold, aggregate worker income, worker count, and buy-worker button are live; production, stronghold health, timer, result, and restart bindings remain disconnected.
+**Partially implemented:** The redesigned scene HUD presents the accepted single-gold economy and independent role cards. Its player gold, aggregate worker income, worker count, buy-worker button, and both stronghold-health displays are live; production, timer, result, and restart bindings remain disconnected.
 
 The functional prototype HUD must communicate gold, worker purchase state, independent production, star tiers, remaining time, base health, and the final result. A results/restart flow is required. Menus, onboarding, and most feedback remain unimplemented.
 

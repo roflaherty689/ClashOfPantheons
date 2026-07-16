@@ -7,8 +7,6 @@ public class Base : MonoBehaviour, IDamageable
 
     [Header("Health")]
     [SerializeField, Min(0.01f)] private float maxHealth = 50f;
-    [SerializeField] private HealthBar healthBarPrefab;
-    [SerializeField] private Vector3 healthBarOffset = new Vector3(0, 1.2f, 0);
 
     [Header("Visuals")]
     [SerializeField] private Transform visualTransform;
@@ -18,7 +16,6 @@ public class Base : MonoBehaviour, IDamageable
 
     private float currentHealth;
     private GameManager gameManager;
-    private HealthBar healthBar;
     private bool isShaking;
     private float shakeTimer;
     private Vector3 originalVisualPosition;
@@ -45,14 +42,6 @@ public class Base : MonoBehaviour, IDamageable
             spriteRenderer.color = team == Team.Left ? Color.red : Color.blue;
         }
 
-        if (healthBarPrefab == null) return;
-
-        healthBar = Instantiate(
-            healthBarPrefab,
-            transform.position + healthBarOffset,
-            Quaternion.identity,
-            transform);
-        healthBar.SetHealth(currentHealth, MaxHealth);
     }
 
     private void Update()
@@ -93,11 +82,6 @@ public class Base : MonoBehaviour, IDamageable
         currentHealth = Mathf.Max(0f, currentHealth - damage);
 
         PlayDamageAnimation();
-
-        if (healthBar != null)
-        {
-            healthBar.SetHealth(currentHealth, MaxHealth);
-        }
 
         if (currentHealth > 0f) return;
 

@@ -9432,10 +9432,6 @@ PrefabInstance:
       propertyPath: team
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 8315014160421980010, guid: 984db670955470943b97319442394a59, type: 3}
-      propertyPath: healthBarOffset.y
-      value: 0.8
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -18282,7 +18278,7 @@ GameObject:
   - component: {fileID: 1682747565}
   - component: {fileID: 1682747564}
   m_Layer: 0
-  m_Name: 50 / 50 Text
+  m_Name: Stronghold Health Total
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18815,7 +18811,7 @@ GameObject:
   - component: {fileID: 1738851037}
   - component: {fileID: 1738851036}
   m_Layer: 0
-  m_Name: 50 / 50 Text
+  m_Name: Stronghold Health Total
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -23602,10 +23598,6 @@ PrefabInstance:
     - target: {fileID: 8084084781756338509, guid: 984db670955470943b97319442394a59, type: 3}
       propertyPath: m_Name
       value: LeftBase
-      objectReference: {fileID: 0}
-    - target: {fileID: 8315014160421980010, guid: 984db670955470943b97319442394a59, type: 3}
-      propertyPath: healthBarOffset.y
-      value: 0.8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

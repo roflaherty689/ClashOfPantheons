@@ -108,7 +108,7 @@ public static class ClashBattleUIBuilder
         fillImage.fillMethod = Image.FillMethod.Horizontal;
         fillImage.fillOrigin = enemy ? 1 : 0;
         fillImage.fillAmount = 1f;
-        AddText(healthBar, health, 24, TextAlignmentOptions.Center, Vector2.zero, new Vector2(450, 36));
+        AddText(healthBar, health, 24, TextAlignmentOptions.Center, Vector2.zero, new Vector2(450, 36)).gameObject.name = "Stronghold Health Total";
     }
 
     private static void CreateHealthBarFrame(RectTransform parent)
