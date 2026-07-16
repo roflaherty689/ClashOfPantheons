@@ -60,7 +60,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** `DEC-004` and `DEC-007`; initial values require balance tuning during implementation
 
-**Progress:** `UnitData` now owns a serialized spawn interval, and `GameManager` has selectable legacy-global and independent-per-role test patterns. The five initial role cadences are configured and user-verified in Play Mode on 2026-07-16. The player economy HUD is wired to live gold and worker state, buys workers through `WorkerManager`, disables at the five-worker capacity, and starts the active scene with one player worker. Aggregate income uses base gold per trip × upgrade multiplier × worker count. Worker deposits, purchasing, visible state updates, and capacity behavior were user-verified in Play Mode on 2026-07-16 after correcting the generated button's raycast target. Runtime and Editor assemblies compile externally with zero warnings and errors. Production purchase/unlock state, star tiers, broader UI bindings, and tests remain.
+**Progress:** `UnitData` owns each role's cost and cadence. Player production purchasing is now implemented in source: all roles begin locked, a successful purchase atomically spends player gold, the first purchase starts that role's fresh recurring timer, the next two purchases snapshot 1.5×/2× stats onto future units, and a fourth purchase is rejected. The five production cards now show live locked/producing state, tier, unlock/upgrade/max actions, affordability, and greyed locked art; the selected-role panel mirrors the chosen role. The user Play Mode verified clickable production controls, successful melee unlock/upgrade processing through the three-purchase cap, and live 0/3 → 1/3 → 2/3 → 3/3 tier-counter updates on 2026-07-17. Both teams start locked, so the enemy intentionally produces no units until Task 2 supplies AI purchasing. Runtime and Editor assemblies compile externally with zero warnings and errors. Recurring spawn cadence, stat scaling, insufficient-funds behavior, all five roles, and restart reset still require targeted Play Mode verification; focused automated tests remain absent.
 
 **Status:** Partially implemented
 
@@ -80,6 +80,8 @@ Tasks are ordered by dependency and prototype value.
 **Relevant systems:** future AI policy, economy/production interfaces, match state
 
 **Dependencies:** Task 1
+
+**Progress:** Shared team/role production state and purchase rules now exist, but no AI policy or AI economy purchasing has been implemented. Per the user-approved temporary behavior, every enemy role starts locked and remains inactive until this task is completed; there is no automatic enemy-production bootstrap in the active per-role mode.
 
 **Status:** Not started
 
@@ -125,7 +127,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** Tasks 1–3
 
-**Progress:** The editor-authored battle HUD has been redesigned around the accepted Tiny Swords direction. The builder presents gold and workers, five independent locked/tiered production cards, mirrored stronghold health, a match timer, battle summary, selected-role detail, and result/restart presentation while removing favour, essence, category tabs, speed controls, and the shared queue. Player gold and worker values/actions and both stronghold current/maximum health values and proportional bars are live and were user-verified in Play Mode on 2026-07-16. The timer, player-relative result/reason overlay, and restart action are now bound in source; countdown expiry and the lost-gold result were user-verified in a shortened match on 2026-07-17. Production remains disconnected, and the other result/restart paths still need targeted verification. The generated HUD also requires multi-resolution Unity inspection and complete-loop Play Mode verification. The attempted three-part Tiny Swords stronghold health-bar frame did not produce an acceptable result; its stretched middle segment is temporarily commented out pending a later UI pass.
+**Progress:** The editor-authored battle HUD has been redesigned around the accepted Tiny Swords direction. Gold, workers, both strongholds, timer, results, restart, and all five independent production cards are now bound in source. Production cards display live locked/producing state, tier, affordability, greyed locked art, and unlock/upgrade/max actions; the selected-role panel follows the most recently used role. Worker, stronghold, countdown-expiry, and lost-gold paths were previously user-verified. Production purchasing and the remaining result/restart paths still need targeted Play Mode verification. The generated HUD also requires multi-resolution Unity inspection and complete-loop Play Mode verification. The attempted three-part Tiny Swords stronghold health-bar frame did not produce an acceptable result; its stretched middle segment is temporarily commented out pending a later UI pass.
 
 **Status:** Partially implemented
 

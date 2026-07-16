@@ -19,6 +19,8 @@ public enum MatchEndReason
 
 public class GameManager : MonoBehaviour
 {
+    public const int MaximumProductionTier = 3;
+
     private static readonly UnitRole[] SpawnRoles =
     {
         UnitRole.Melee,
@@ -56,6 +58,7 @@ public class GameManager : MonoBehaviour
     private readonly float[] rightUnitSpawnTimers = new float[SpawnRoles.Length];
     private readonly int[,] unitLossCounts = new int[2, SpawnRoles.Length];
     private readonly int[] totalUnitLossValues = new int[2];
+    private readonly int[,] productionTiers = new int[2, SpawnRoles.Length];
 
     private float globalSpawnTimer;
     private int leftReadySpawnIndex;
@@ -144,6 +147,46 @@ public class GameManager : MonoBehaviour
     public int GetTotalUnitLossValue(Team team)
     {
         return totalUnitLossValues[GetTeamIndex(team)];
+    }
+
+    public int GetProductionTier(Team team, UnitRole role)
+    {
+        int roleIndex = GetRoleIndex(role);
+        return roleIndex < 0 ? 0 : productionTiers[GetTeamIndex(team), roleIndex];
+    }
+
+    public bool TryGetProductionData(Team team, UnitRole role, out UnitData data)
+    {
+        FactionData factionData = GetFactionData(team);
+        if (factionData != null && factionData.TryGetUnitData(role, out data))
+        {
+            return true;
+        }
+
+        data = null;
+        return false;
+    }
+
+    public bool TryPurchaseProduction(Team team, UnitRole role, WorkerManager economy)
+    {
+        if (gameOver || economy == null || economy.Team != team) return false;
+
+        int roleIndex = GetRoleIndex(role);
+        if (roleIndex < 0) return false;
+
+        int teamIndex = GetTeamIndex(team);
+        if (productionTiers[teamIndex, roleIndex] >= MaximumProductionTier) return false;
+        if (!TryGetProductionData(team, role, out UnitData data)) return false;
+        if (!economy.TrySpendGold(data.Cost)) return false;
+
+        productionTiers[teamIndex, roleIndex]++;
+
+        if (productionTiers[teamIndex, roleIndex] == 1)
+        {
+            GetSpawnTimers(team)[roleIndex] = 0f;
+        }
+
+        return true;
     }
 
     public void RestartMatch()
@@ -241,6 +284,11 @@ public class GameManager : MonoBehaviour
         return -1;
     }
 
+    private float[] GetSpawnTimers(Team team)
+    {
+        return team == Team.Left ? leftUnitSpawnTimers : rightUnitSpawnTimers;
+    }
+
     private void UpdateGlobalSpawns()
     {
         globalSpawnTimer += Time.deltaTime;
@@ -262,6 +310,12 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < SpawnRoles.Length; i++)
         {
+            if (GetProductionTier(team, SpawnRoles[i]) <= 0)
+            {
+                timers[i] = 0f;
+                continue;
+            }
+
             timers[i] += Time.deltaTime;
         }
 
@@ -272,6 +326,12 @@ public class GameManager : MonoBehaviour
         {
             int roleIndex = (scanStartIndex + offset) % SpawnRoles.Length;
             UnitRole role = SpawnRoles[roleIndex];
+
+            int productionTier = GetProductionTier(team, role);
+            if (productionTier <= 0)
+            {
+                continue;
+            }
 
             if (!factionData.TryGetUnitData(role, out UnitData data))
             {
@@ -286,7 +346,7 @@ public class GameManager : MonoBehaviour
                 continue;
             }
 
-            if (availableSpawnSlots <= 0 || !TrySpawnUnit(team, role))
+            if (availableSpawnSlots <= 0 || !TrySpawnUnit(team, role, productionTier))
             {
                 continue;
             }
@@ -305,7 +365,7 @@ public class GameManager : MonoBehaviour
         {
             if (TrySelectWeightedRole(team, out UnitRole selectedRole))
             {
-                TrySpawnUnit(team, selectedRole);
+                TrySpawnUnit(team, selectedRole, 1);
             }
 
             return;
@@ -315,7 +375,7 @@ public class GameManager : MonoBehaviour
         for (int offset = 0; offset < SpawnRoles.Length; offset++)
         {
             int roleIndex = (scanStartIndex + offset) % SpawnRoles.Length;
-            if (!TrySpawnUnit(team, SpawnRoles[roleIndex]))
+            if (!TrySpawnUnit(team, SpawnRoles[roleIndex], 1))
             {
                 continue;
             }
@@ -394,7 +454,7 @@ public class GameManager : MonoBehaviour
         return Mathf.Max(0, maxUnitsPerTeam - teamUnitCount);
     }
 
-    private bool TrySpawnUnit(Team team, UnitRole role)
+    private bool TrySpawnUnit(Team team, UnitRole role, int productionTier)
     {
         FactionData factionData = GetFactionData(team);
         Transform spawnPoint = team == Team.Left ? leftSpawnPoint : rightSpawnPoint;
@@ -411,7 +471,7 @@ public class GameManager : MonoBehaviour
         }
 
         BaseUnit unitInstance = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
-        unitInstance.Initialize(team, targetPoint, role);
+        unitInstance.Initialize(team, targetPoint, role, productionTier);
         return true;
     }
 

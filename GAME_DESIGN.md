@@ -57,12 +57,12 @@ There is no direct unit control. The prototype is primarily single-player agains
 
 ### Current prototype loop — implemented, not Play Mode verified in this pass
 
-1. Both sides automatically spawn free units using a selectable global fixed-cycle/weighted-random pattern or independent per-role `UnitData` cadences.
+1. Both sides begin with every production role locked. The player can spend gold to unlock independent per-role `UnitData` cadences; the enemy remains inactive until AI purchasing is implemented. A legacy free-spawn pattern remains available only for prototype/debug testing.
 2. Units march, acquire targets, and fight automatically.
 3. Workers independently mine and deposit gold.
 4. Destroying a base or reaching the time limit ends the match and displays the result.
 
-The player HUD now presents live economy and stronghold state, a five-minute countdown, timeout results, and a restart action. Gold is not connected to military spawning, the runtime UI does not select production, and no AI strategy or upgrade flow exists. Countdown expiry and the lost-unit-value timeout resolver were Play Mode verified in a shortened 20-second match on 2026-07-17; the remaining result branches still need targeted verification.
+The player HUD now presents live economy and stronghold state, a five-minute countdown, timeout results, restart, and production purchasing in source. Player roles start locked; purchases spend gold to unlock or upgrade their independent tracks, with locked art greyed out. Both teams start locked, and no AI strategy or enemy purchasing exists yet, so the enemy produces no units in the active per-role mode until that work is completed. Production purchasing remains to be Play Mode verified. Countdown expiry and the lost-unit-value timeout resolver were Play Mode verified in a shortened 20-second match on 2026-07-17; the remaining result branches still need targeted verification.
 
 **Short-loop rhythm:** Worker trips and independent recurring production cadences. Buying a locked role unlocks its continuous production; later purchases advance that role to two and three stars.
 
@@ -117,7 +117,7 @@ The result overlay identifies victory, defeat, or draw and its resolution condit
 
 Each role begins locked. Its first purchase unlocks continuous one-star production; its next two purchases upgrade future spawns to two and three stars. Star tiers multiply all configured unit stats except purchase cost by 1×, 1.5×, and 2×. Existing fielded units do not change when a role is upgraded.
 
-Each role's purchase cost and recurring production cadence are configured in its `UnitData` asset. `GameManager` can run either the legacy global spawn pattern or independent per-role timers for prototype testing. Purchase-slot activation is not yet connected, so the per-role test pattern currently produces all five roles from match start. Initial values remain balance tuning rather than an unresolved ownership decision.
+Each role's purchase cost and recurring production cadence are configured in its `UnitData` asset. `GameManager` can run either the legacy global spawn pattern or independent per-role timers for prototype testing. Purchase-slot activation gates the intended per-role mode, and a newly unlocked track begins a fresh cadence rather than inheriting locked time. Initial values remain balance tuning rather than an unresolved ownership decision.
 
 Campaign and persistent progression are deferred beyond the core prototype. No save system is required for the core loop.
 
@@ -132,13 +132,13 @@ Campaign and persistent progression are deferred beyond the core prototype. No s
 
 ## AI and difficulty
 
-The AI should use the same economy, production, upgrade, and match rules as the player. Its decision model and difficulty controls are unresolved. Possible strategic profiles such as economy-focused or early pressure are ideas, not accepted prototype requirements. Online matchmaking is deferred with multiplayer.
+The AI should use the same economy, production, upgrade, and match rules as the player. Its purchasing policy is not implemented; all enemy roles therefore remain locked and produce nothing in the active per-role mode. Its decision model and difficulty controls are unresolved. Possible strategic profiles such as economy-focused or early pressure are ideas, not accepted prototype requirements. Online matchmaking is deferred with multiplayer.
 
 ## UI and feedback
 
 **Implemented:** Units display world-space damage health bars. Stronghold health is shown as live current/maximum text and proportional bars in the battle HUD, without duplicate world-space bars above the bases. Base hits shake the base visual; animated attacks and projectile arcs provide combat feedback; victory text identifies the winning team.
 
-**Partially implemented:** The redesigned scene HUD presents the accepted single-gold economy and independent role cards. Its player gold, aggregate worker income, worker count, buy-worker button, both stronghold-health displays, match timer, result overlay, resolution reason, and restart button are live in source. Production controls remain disconnected. The shortened countdown and lost-value result were Play Mode verified on 2026-07-17; the other result and restart paths remain targeted verification work.
+**Partially implemented:** The redesigned scene HUD presents the accepted single-gold economy and independent role cards. Its player gold, aggregate worker income, worker count, buy-worker button, five production purchase controls, locked/producing and tier states, affordability, greyed locked art, both stronghold-health displays, match timer, result overlay, resolution reason, and restart button are live in source. Production purchasing requires Play Mode verification. The shortened countdown and lost-value result were Play Mode verified on 2026-07-17; the other result and restart paths remain targeted verification work.
 
 The functional prototype HUD must communicate gold, worker purchase state, independent production, star tiers, remaining time, base health, and the final result. A results/restart flow is required. Menus, onboarding, and most feedback remain unimplemented.
 

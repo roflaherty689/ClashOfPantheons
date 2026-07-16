@@ -20,6 +20,8 @@ Git history remains the exact implementation record.
 - A configurable five-minute match countdown with stronghold-health, lost-unit-value, and exact-draw timeout resolution.
 - Per-team and per-role unit-death counters, with destroyed production-slot costs accumulated for timeout tiebreaks.
 - Live result reasons and active-scene restart through the battle HUD.
+- Team-scoped unit-production purchasing with locked initial states, gold-funded unlocks, independent recurring timers, and three star tiers.
+- Live unlock, upgrade, maximum-tier, affordability, and locked-icon presentation for all five player production cards and the selected-role panel.
 
 ### Changed
 
@@ -39,9 +41,13 @@ Git history remains the exact implementation record.
 - Changed match-result reporting from colour strings to typed left/right team values and moved result presentation into `GameManager`.
 - Moved worker gold-rate ownership to `WorkerManager`, with configurable base income and upgrade multiplier, and changed the active scene to start the player with one worker.
 - Set the current prototype starting gold to 200 to support economy-flow testing.
+- Changed both teams to begin with every unit role locked; enemy production remains inactive until the planned AI purchasing layer is implemented.
+- Applied star upgrades as per-unit stat snapshots so future spawns receive 1×/1.5×/2× stats without changing fielded units or shared `UnitData` assets.
 
 ### Fixed
 
+- Production purchase buttons now repair disabled target-graphic raycasts at runtime, allowing the EventSystem to receive clicks from the existing generated scene.
+- Production tier counters now resolve from their card structure instead of fragile initial text-object names, keeping the displayed star count synchronized with successful upgrades.
 - Generated HUD buttons now accept pointer input by enabling raycasts on their target graphics; the live worker binding also repairs the already-generated Buy Worker button at runtime.
 - Worker purchases no longer spend gold or report success when worker creation fails, and negative purchase costs are rejected.
 - Mining slots now have exclusive reservations; waiting workers retry when a slot becomes available, and disable/game-over cleanup updates reservation and active-miner state exactly once.
@@ -71,12 +77,12 @@ Git history remains the exact implementation record.
 - User-verified live stronghold-health text and proportional HUD fills, fixed UI fill colours, and removal of duplicate world-space base health bars in Play Mode.
 - Compiled runtime and Editor assemblies externally with zero warnings and errors after the match-flow integration.
 - User-verified countdown expiry and correct lost-gold timeout resolution in a shortened 20-second Play Mode match.
+- User-verified clickable production controls, melee unlock/upgrades through the three-purchase cap, and live tier-counter updates in Play Mode.
 
 ### Known Issues
 
-- Independent unit production purchases, upgrades, strategic AI, and remaining live HUD integration are not yet complete.
+- Unit production purchasing and tier presentation are implemented in source but still require Play Mode verification; enemy production remains locked until AI purchasing is implemented.
 - Health-tiebreak, exact-draw, base-destruction result-overlay, and restart-reset paths still require targeted Play Mode verification.
-- Independent cadence spawning currently starts all five role timers immediately; purchase-slot activation remains future work.
 - Exact role values and matchups remain subject to implementation and playtest tuning.
 - Targeted projectile/worker edge cases and stale serialized fields on the non-animated archer prefab remain to be verified or cleaned.
 

@@ -248,10 +248,11 @@ One recurring track per role is easy to read, fits short matches, preserves comp
 - Production tracks must retain independent timers and state.
 - The UI must show locked, one-star, two-star, and three-star states without presenting a shared queue.
 - The AI must purchase and upgrade through the same contract.
+- The locked initial state applies to both teams. Until the separate AI purchasing task is implemented, enemy roles remain locked and produce no units in the active per-role mode; there is no temporary automatic enemy bootstrap.
 - Exact costs, cadences, and matchup values remain tuning inputs rather than production-contract ambiguity.
 - `UnitData` stores both cost and per-role production cadence.
 - `GameManager` may retain the legacy global interval as a selectable prototype/debug pattern, but independent `UnitData` timers remain the intended production behavior.
-- Until purchase-slot activation is implemented, the independent-timer test pattern may produce all five roles from match start.
+- The independent-timer mode gates every role by its purchased tier and does not accumulate production time while locked. The legacy global pattern may continue free spawning only as an explicit prototype/debug mode.
 
 ### Alternatives considered
 

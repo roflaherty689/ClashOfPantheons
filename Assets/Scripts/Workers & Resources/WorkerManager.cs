@@ -74,6 +74,15 @@ public class WorkerManager : MonoBehaviour
         return true;
     }
 
+    public bool TrySpendGold(int amount)
+    {
+        if (gameManager != null && gameManager.IsGameOver) return false;
+        if (amount < 0 || currentGold < amount) return false;
+
+        currentGold -= amount;
+        return true;
+    }
+
     public void AddGold(int amount)
     {
         if (amount <= 0) return;

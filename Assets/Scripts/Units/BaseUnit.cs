@@ -43,6 +43,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     public Team Team => team;
     public Transform Transform => transform;
     public UnitData UnitData => unitData;
+    public int ProductionTier => productionTier;
 
     private Team team;
     private UnitRole role;
@@ -50,6 +51,9 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     private float currentHealth;
     private float attackTimer;
     private bool isDead;
+    private int productionTier = 1;
+    private float statMultiplier = 1f;
+    private float maximumHealth;
 
     private HealthBar healthBar;
     private GameManager gameManager;
@@ -61,13 +65,20 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     private Vector3 originalVisualPosition;
     private Coroutine recoilCoroutine;
 
-    public virtual void Initialize(Team team, Transform targetPoint, UnitRole role)
+    public virtual void Initialize(Team team, Transform targetPoint, UnitRole role, int tier = 1)
     {
         gameManager = FindAnyObjectByType<GameManager>();
 
         this.team = team;
         this.targetPoint = targetPoint;
         this.role = role;
+        productionTier = Mathf.Clamp(tier, 1, GameManager.MaximumProductionTier);
+        statMultiplier = productionTier switch
+        {
+            2 => 1.5f,
+            3 => 2f,
+            _ => 1f
+        };
 
         if (unitData == null)
         {
@@ -76,7 +87,8 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
             return;
         }
 
-        currentHealth = unitData.MaxHealth;
+        maximumHealth = unitData.MaxHealth * statMultiplier;
+        currentHealth = maximumHealth;
 
         if (visualTransform != null)
         {
@@ -137,7 +149,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         float direction = team == Team.Left ? 1f : -1f;
 
         Vector3 nextPosition = transform.position;
-        nextPosition.x += direction * unitData.MoveSpeed * Time.deltaTime;
+        nextPosition.x += direction * unitData.MoveSpeed * statMultiplier * Time.deltaTime;
 
         transform.position = nextPosition;
     }
@@ -193,7 +205,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
-            unitData.AttackRange
+            unitData.AttackRange * statMultiplier
         );
 
         BaseUnit closestEnemyUnit = null;
@@ -240,7 +252,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         attackTimer += Time.deltaTime;
 
-        float attackCooldown = 1f / unitData.AttackSpeed;
+        float attackCooldown = 1f / (unitData.AttackSpeed * statMultiplier);
 
         if (attackTimer < attackCooldown)
         {
@@ -249,7 +261,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         attackTimer -= attackCooldown;
 
-        float finalDamage = unitData.GetDamageAgainst(target.TargetType);
+        float finalDamage = unitData.GetDamageAgainst(target.TargetType) * statMultiplier;
 
         PlayAttackAnimation();
 
@@ -308,7 +320,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         if (healthBar != null)
         {
-            healthBar.SetHealth(currentHealth, unitData.MaxHealth);
+            healthBar.SetHealth(currentHealth, maximumHealth);
         }
 
         if (currentHealth > 0f) return;
@@ -329,7 +341,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
             transform
         );
 
-        healthBar.SetHealth(currentHealth, unitData.MaxHealth);
+        healthBar.SetHealth(currentHealth, maximumHealth);
     }
 
     private void SetFacingDirection()
