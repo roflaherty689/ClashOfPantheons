@@ -1,6 +1,6 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
-using TMPro;
 
 public enum SpawnPattern
 {
@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
         UnitRole.Mythic
     };
 
-    [Header("Team factions")]
+    [Header("Team Factions")]
     [SerializeField] private FactionData leftFactionData;
     [SerializeField] private FactionData rightFactionData;
 
@@ -33,36 +33,35 @@ public class GameManager : MonoBehaviour
 
     [Header("Spawn Settings")]
     [SerializeField] private SpawnPattern spawnPattern = SpawnPattern.GlobalInterval;
-    [Min(0.1f)]
-    [SerializeField] private float spawnInterval = 3f;
+    [SerializeField, Min(0.1f)] private float spawnInterval = 3f;
     [FormerlySerializedAs("maxMeleeUnitsPerTeam")]
-    [Min(1)]
-    [SerializeField] private int maxUnitsPerTeam = 5;
+    [SerializeField, Min(1)] private int maxUnitsPerTeam = 5;
+    [SerializeField] private bool randomiseSpawns;
 
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI victoryText;
 
     [Header("Game Settings")]
-    [SerializeField] private float gameSpeed = 1f;
-    [SerializeField] private bool randomiseSpawns = false;
-    [SerializeField] public bool setTeamColour = true;
-    
-    private float globalSpawnTimer;
+    [SerializeField, Min(0f)] private float gameSpeed = 1f;
+    [SerializeField] private bool setTeamColour = true;
+
     private readonly float[] leftUnitSpawnTimers = new float[SpawnRoles.Length];
     private readonly float[] rightUnitSpawnTimers = new float[SpawnRoles.Length];
+
+    private float globalSpawnTimer;
     private int leftReadySpawnIndex;
     private int rightReadySpawnIndex;
+    private int leftSpawnIndex;
+    private int rightSpawnIndex;
     private bool gameOver;
 
     public bool IsGameOver => gameOver;
-
-    private int _leftSpawnIndex = 0;
-    private int _rightSpawnIndex = 0;
-
+    public bool SetTeamColour => setTeamColour;
 
     private void Start()
     {
-        Time.timeScale = gameSpeed;
+        Time.timeScale = Mathf.Max(0f, gameSpeed);
+        ValidateConfiguration();
     }
 
     private void Update()
@@ -71,25 +70,44 @@ public class GameManager : MonoBehaviour
 
         if (spawnPattern == SpawnPattern.PerUnitInterval)
         {
-            UpdatePerUnitSpawns(Team.Left, leftFactionData, leftUnitSpawnTimers, ref leftReadySpawnIndex);
-            UpdatePerUnitSpawns(Team.Right, rightFactionData, rightUnitSpawnTimers, ref rightReadySpawnIndex);
+            UpdatePerUnitSpawns(
+                Team.Left,
+                leftFactionData,
+                leftUnitSpawnTimers,
+                ref leftReadySpawnIndex);
+            UpdatePerUnitSpawns(
+                Team.Right,
+                rightFactionData,
+                rightUnitSpawnTimers,
+                ref rightReadySpawnIndex);
             return;
         }
 
         UpdateGlobalSpawns();
     }
 
+    public void EndGame(Team winningTeam)
+    {
+        if (gameOver) return;
+
+        gameOver = true;
+
+        if (victoryText != null)
+        {
+            victoryText.gameObject.SetActive(true);
+            victoryText.text = $"{winningTeam} Team Wins!";
+        }
+    }
+
     private void UpdateGlobalSpawns()
     {
         globalSpawnTimer += Time.deltaTime;
 
-        if (globalSpawnTimer >= spawnInterval)
-        {
-            globalSpawnTimer -= spawnInterval;
+        if (globalSpawnTimer < Mathf.Max(0.1f, spawnInterval)) return;
 
-            TrySpawnUnit(Team.Left);
-            TrySpawnUnit(Team.Right);
-        }
+        globalSpawnTimer -= Mathf.Max(0.1f, spawnInterval);
+        TrySpawnGlobalUnit(Team.Left);
+        TrySpawnGlobalUnit(Team.Right);
     }
 
     private void UpdatePerUnitSpawns(
@@ -98,6 +116,8 @@ public class GameManager : MonoBehaviour
         float[] timers,
         ref int readySpawnIndex)
     {
+        if (factionData == null) return;
+
         for (int i = 0; i < SpawnRoles.Length; i++)
         {
             timers[i] += Time.deltaTime;
@@ -110,14 +130,13 @@ public class GameManager : MonoBehaviour
         {
             int roleIndex = (scanStartIndex + offset) % SpawnRoles.Length;
             UnitRole role = SpawnRoles[roleIndex];
-            UnitData data = factionData.GetUnitData(role);
 
-            if (data == null)
+            if (!factionData.TryGetUnitData(role, out UnitData data))
             {
                 continue;
             }
 
-            float roleSpawnInterval = Mathf.Max(data.spawnInterval, 0.1f);
+            float roleSpawnInterval = data.SpawnInterval;
             timers[roleIndex] = Mathf.Min(timers[roleIndex], roleSpawnInterval);
 
             if (timers[roleIndex] < roleSpawnInterval)
@@ -125,7 +144,7 @@ public class GameManager : MonoBehaviour
                 continue;
             }
 
-            if (availableSpawnSlots <= 0 || !SpawnUnit(team, role))
+            if (availableSpawnSlots <= 0 || !TrySpawnUnit(team, role))
             {
                 continue;
             }
@@ -136,35 +155,90 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void EndGame(string winningTeam)
+    private void TrySpawnGlobalUnit(Team team)
     {
-        gameOver = true;
+        if (GetAvailableSpawnSlots(team) <= 0) return;
 
-        if (victoryText != null)
+        if (randomiseSpawns)
         {
-            victoryText.gameObject.SetActive(true);
-            victoryText.text = $"{winningTeam} Team Wins!";
+            if (TrySelectWeightedRole(team, out UnitRole selectedRole))
+            {
+                TrySpawnUnit(team, selectedRole);
+            }
+
+            return;
+        }
+
+        int scanStartIndex = team == Team.Left ? leftSpawnIndex : rightSpawnIndex;
+        for (int offset = 0; offset < SpawnRoles.Length; offset++)
+        {
+            int roleIndex = (scanStartIndex + offset) % SpawnRoles.Length;
+            if (!TrySpawnUnit(team, SpawnRoles[roleIndex]))
+            {
+                continue;
+            }
+
+            int nextSpawnIndex = (roleIndex + 1) % SpawnRoles.Length;
+            if (team == Team.Left)
+            {
+                leftSpawnIndex = nextSpawnIndex;
+            }
+            else
+            {
+                rightSpawnIndex = nextSpawnIndex;
+            }
+
+            return;
         }
     }
 
-    private void TrySpawnUnit(Team team)
+    private bool TrySelectWeightedRole(Team team, out UnitRole selectedRole)
     {
-        if (!TeamHasSpawnCapacity(team)) return;
+        FactionData factionData = GetFactionData(team);
+        float totalWeight = 0f;
 
-        if (randomiseSpawns)
-            GetRandomUnitPrefab(team);
-        else
-            GetNextUnitPrefab(team);
+        foreach (UnitRole role in SpawnRoles)
+        {
+            if (factionData != null && factionData.TryGetUnitData(role, out UnitData data))
+            {
+                totalWeight += GetSpawnWeight(data);
+            }
+        }
+
+        if (totalWeight <= 0f)
+        {
+            selectedRole = default;
+            return false;
+        }
+
+        selectedRole = default;
+        float roll = Random.Range(0f, totalWeight);
+        foreach (UnitRole role in SpawnRoles)
+        {
+            if (factionData == null || !factionData.TryGetUnitData(role, out UnitData data))
+            {
+                continue;
+            }
+
+            selectedRole = role;
+            roll -= GetSpawnWeight(data);
+            if (roll <= 0f)
+            {
+                return true;
+            }
+        }
+
+        return true;
     }
 
-    private bool TeamHasSpawnCapacity(Team team)
+    private static float GetSpawnWeight(UnitData data)
     {
-        return GetAvailableSpawnSlots(team) > 0;
+        return 1f / Mathf.Max(1, data.Cost);
     }
 
     private int GetAvailableSpawnSlots(Team team)
     {
-        BaseUnit[] allUnits = FindObjectsByType<BaseUnit>(FindObjectsSortMode.None);
+        BaseUnit[] allUnits = FindObjectsByType<BaseUnit>();
         int teamUnitCount = 0;
 
         foreach (BaseUnit unit in allUnits)
@@ -178,123 +252,58 @@ public class GameManager : MonoBehaviour
         return Mathf.Max(0, maxUnitsPerTeam - teamUnitCount);
     }
 
-    private void GetRandomUnitPrefab(Team team)
+    private bool TrySpawnUnit(Team team, UnitRole role)
     {
-        float meleeWeight = 1f / 50f;
-        float archerWeight = 1f / 60f;
-        float cavalryWeight = 1f / 100f;
-        float siegeWeight = 1f / 130f;
-        float mythicWeight = 1f / 220f;
-
-        float totalWeight =
-            meleeWeight +
-            archerWeight +
-            cavalryWeight +
-            siegeWeight +
-            mythicWeight;
-
-        float roll = Random.Range(0f, totalWeight);
-
-        UnitRole selectedRole;
-
-        if (roll < meleeWeight)
-        {
-            selectedRole = UnitRole.Melee;
-        }
-        else if ((roll -= meleeWeight) < archerWeight)
-        {
-            selectedRole = UnitRole.Archer;
-        }
-        else if ((roll -= archerWeight) < cavalryWeight)
-        {
-            selectedRole = UnitRole.Cavalry;
-        }
-        else if ((roll -= cavalryWeight) < siegeWeight)
-        {
-            selectedRole = UnitRole.Siege;
-        }
-        else
-        {
-            selectedRole = UnitRole.Mythic;
-        }
-
-        if (team == Team.Left)
-        {
-            SpawnLeftUnit(selectedRole);
-        }
-        else
-        {
-            SpawnRightUnit(selectedRole);
-        }
-    }
-
-    private void GetNextUnitPrefab(Team team)
-    {
-        int index = team == Team.Left ? _leftSpawnIndex : _rightSpawnIndex;
-
-        switch (index)
-        {
-            case 0: 
-                if (team == Team.Left) 
-                    SpawnLeftUnit(UnitRole.Melee);
-                else
-                    SpawnRightUnit(UnitRole.Melee);
-                break;
-            case 1:
-                if (team == Team.Left) 
-                    SpawnLeftUnit(UnitRole.Archer);
-                else
-                    SpawnRightUnit(UnitRole.Archer);
-                break;
-            case 2: 
-                if (team == Team.Left) 
-                    SpawnLeftUnit(UnitRole.Cavalry); 
-                else
-                    SpawnRightUnit(UnitRole.Cavalry);
-                break;
-            case 3: 
-                if (team == Team.Left) 
-                    SpawnLeftUnit(UnitRole.Siege);
-                else
-                    SpawnRightUnit(UnitRole.Siege);
-                break;
-            case 4: 
-                if (team == Team.Left) 
-                    SpawnLeftUnit(UnitRole.Mythic);
-                else
-                    SpawnRightUnit(UnitRole.Mythic);
-                break;
-        };
-
-        if (team == Team.Left)
-            _leftSpawnIndex = (_leftSpawnIndex + 1) % 5;
-        else
-            _rightSpawnIndex = (_rightSpawnIndex + 1) % 5;
-    }
-
-    public void SpawnLeftUnit(UnitRole role)
-    {
-        SpawnUnit(Team.Left, role);
-    }
-
-    public void SpawnRightUnit(UnitRole role)
-    {
-        SpawnUnit(Team.Right, role);
-    }
-
-    private bool SpawnUnit(Team team, UnitRole role)
-    {
-        FactionData factionData = team == Team.Left ? leftFactionData : rightFactionData;
+        FactionData factionData = GetFactionData(team);
         Transform spawnPoint = team == Team.Left ? leftSpawnPoint : rightSpawnPoint;
         Transform targetPoint = team == Team.Left ? leftTargetPoint : rightTargetPoint;
-        BaseUnit prefab = factionData.GetUnitPrefab(role);
 
-        if (prefab == null)
+        if (factionData == null || spawnPoint == null || targetPoint == null)
+        {
             return false;
+        }
+
+        if (!factionData.TryGetUnitPrefab(role, out BaseUnit prefab))
+        {
+            return false;
+        }
 
         BaseUnit unitInstance = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
         unitInstance.Initialize(team, targetPoint);
-
         return true;
+    }
+
+    private FactionData GetFactionData(Team team)
+    {
+        return team == Team.Left ? leftFactionData : rightFactionData;
+    }
+
+    private void ValidateConfiguration()
+    {
+        ValidateTeamConfiguration(Team.Left, leftFactionData, leftSpawnPoint, leftTargetPoint);
+        ValidateTeamConfiguration(Team.Right, rightFactionData, rightSpawnPoint, rightTargetPoint);
+    }
+
+    private void ValidateTeamConfiguration(
+        Team team,
+        FactionData factionData,
+        Transform spawnPoint,
+        Transform targetPoint)
+    {
+        if (factionData == null || spawnPoint == null || targetPoint == null)
+        {
+            Debug.LogError($"{name}: {team} team spawn configuration is incomplete.", this);
+            return;
+        }
+
+        foreach (UnitRole role in SpawnRoles)
+        {
+            if (!factionData.TryGetUnitData(role, out _))
+            {
+                Debug.LogError(
+                    $"{name}: Faction '{factionData.FactionName}' has no valid {role} unit configuration.",
+                    factionData);
+            }
+        }
     }
 }

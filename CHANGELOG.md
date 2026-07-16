@@ -27,27 +27,43 @@ Git history remains the exact implementation record.
 - Clarified that counters modify damage, star tiers scale every configured unit stat except cost, and exact timeout equality produces a draw.
 - Implemented per-role cadence ownership in `UnitData` while retaining the global interval as an explicit prototype/debug option.
 - Renamed the misleading per-team unit-cap field while preserving the scene's configured 60-unit value and serialized compatibility.
+- Refactored global spawn selection to share one role list, derive weighted-random spawning from `UnitData` costs, advance fixed cycles only after successful spawns, and validate faction/team configuration once at startup.
+- Encapsulated serialized faction and unit configuration behind read-only runtime properties while preserving existing Unity field names and asset data.
+- Consolidated ranged recoil feedback in `BaseUnit`, preserving authored visual scale and preventing animation code from stopping unrelated combat coroutines.
+- Changed match-result reporting from colour strings to typed left/right team values and moved result presentation into `GameManager`.
 
 ### Fixed
 
-- _None._
+- Worker purchases no longer spend gold or report success when worker creation fails, and negative purchase costs are rejected.
+- Mining slots now have exclusive reservations; waiting workers retry when a slot becomes available, and disable/game-over cleanup updates reservation and active-miner state exactly once.
+- Workers unregister when destroyed, preventing stale worker counts from blocking later purchases.
+- Destroyed projectile targets are now checked with Unity object semantics before dereferencing or applying damage.
+- Projectile cleanup now respects configured travel times longer than two seconds.
+- Lethal base/unit damage is clamped and idempotent, preventing repeated death or match-result handling.
+- Health bars tolerate missing presentation references and invalid maximum-health input without division errors.
+- The rough battle UI builder now creates the project's configured Input System UI module rather than the legacy standalone module.
 
 ### Removed
 
-- _None._
+- Removed the wholly commented, unreferenced `ProductionSlot` script and its metadata.
 
 ### Technical
 
 - Added persistent Codex project instructions through `AGENTS.md`.
 - Documented that no project-owned automated tests or test assemblies were found during the 2026-07-16 static review.
 - User-verified the selectable global and independent per-role spawn patterns in Play Mode.
+- Completed a coordinated audit of all project-owned runtime and Editor C#; removed the wholly commented, unreferenced `ProductionSlot` script and its metadata.
+- Updated deprecated Unity/TMP API usage found during the pass.
+- Compiled both runtime and Editor assemblies externally with zero warnings and errors after the cleanup.
+- User-verified the cleanup pass in Unity and confirmed the current gameplay behavior is working correctly.
+- Resaved the active scene after removing the stray `GoldVein` component from `Tilemap_Water`.
 
 ### Known Issues
 
 - Player gold, worker purchasing, independent unit production, upgrades, strategic AI, timer/tiebreak results, restart, and live HUD integration are not yet complete.
 - Independent cadence spawning currently starts all five role timers immediately; purchase-slot activation remains future work.
 - Exact role values and matchups remain subject to implementation and playtest tuning.
-- Compilation and Play Mode behavior were not verified during the documentation-only reconciliation pass.
+- Targeted projectile/worker edge cases and stale serialized fields on the non-animated archer prefab remain to be verified or cleaned.
 
 ---
 

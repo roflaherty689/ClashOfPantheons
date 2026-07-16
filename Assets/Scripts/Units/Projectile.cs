@@ -15,14 +15,10 @@ public class Projectile : MonoBehaviour
 
     private float arcHeight;
     private bool initialized;
-
-    [SerializeField] private float hitRadius = 0.2f;
-
+    [SerializeField, Min(0f)] private float hitRadius = 0.2f;
     public void Initialize(IDamageable target, float damage, float travelTime, float arcHeight)
     {
-        Destroy(gameObject, 2f);
-
-        if (target == null || target.Transform == null)
+        if (!DamageableUtility.IsValid(target))
         {
             Destroy(gameObject);
             return;
@@ -33,6 +29,8 @@ public class Projectile : MonoBehaviour
         this.damage = damage;
         this.travelTime = Mathf.Max(0.01f, travelTime);
         this.arcHeight = arcHeight;
+
+        Destroy(gameObject, this.travelTime + 1f);
 
         startPosition = transform.position;
         targetPosition = targetTransform.position;
@@ -48,6 +46,12 @@ public class Projectile : MonoBehaviour
     {
         if (!initialized)
             return;
+
+        if (!DamageableUtility.IsValid(target) || targetTransform == null)
+        {
+            Destroy(gameObject);
+            return;
+        }
 
         timer += Time.deltaTime;
 
@@ -68,12 +72,13 @@ public class Projectile : MonoBehaviour
 
     private void TryApplyDamage()
     {
-        if (targetTransform == null)
+        if (!DamageableUtility.IsValid(target) || targetTransform == null)
+        {
             return;
+        }
 
         float distanceToImpactPoint = Vector3.Distance(targetTransform.position, targetPosition);
-
-        if (distanceToImpactPoint <= hitRadius && target != null)
+        if (distanceToImpactPoint <= Mathf.Max(0f, hitRadius))
         {
             target.TakeDamage(damage);
         }

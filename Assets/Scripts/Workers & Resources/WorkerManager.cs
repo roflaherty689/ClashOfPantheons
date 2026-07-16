@@ -13,8 +13,8 @@ public class WorkerManager : MonoBehaviour
     [SerializeField] private GoldVein goldVein;
 
     [Header("Worker Counts")]
-    [SerializeField] private int startingWorkers = 1;
-    [SerializeField] private int maxWorkers = 5;
+    [SerializeField, Min(0)] private int startingWorkers = 1;
+    [SerializeField, Min(1)] private int maxWorkers = 5;
 
     [Header("Resources")]
     [SerializeField] private int startingGold = 0;
@@ -31,45 +31,57 @@ public class WorkerManager : MonoBehaviour
 
     private void Awake()
     {
-        gameManager = FindFirstObjectByType<GameManager>();
+        gameManager = FindAnyObjectByType<GameManager>();
     }
 
     private void Start()
     {
-        currentGold = startingGold;
+        currentGold = Mathf.Max(0, startingGold);
 
-        for (int i = 0; i < startingWorkers; i++)
+        int workersToSpawn = Mathf.Min(Mathf.Max(0, startingWorkers), Mathf.Max(1, maxWorkers));
+        for (int i = 0; i < workersToSpawn; i++)
         {
-            SpawnWorker();
+            if (!TrySpawnWorker())
+            {
+                break;
+            }
         }
     }
 
     public bool TryBuyWorker(int cost)
     {
         if (gameManager != null && gameManager.IsGameOver) return false;
+        if (cost < 0) return false;
         if (workers.Count >= maxWorkers) return false;
         if (currentGold < cost) return false;
+        if (!TrySpawnWorker()) return false;
 
         currentGold -= cost;
-        SpawnWorker();
 
         return true;
     }
 
     public void AddGold(int amount)
     {
+        if (amount <= 0) return;
+
         currentGold += amount;
     }
 
-    private void SpawnWorker()
+    internal void UnregisterWorker(WorkerUnit worker)
+    {
+        workers.Remove(worker);
+    }
+
+    private bool TrySpawnWorker()
     {
         if (workerPrefab == null || workerSpawnPoint == null || dropOffPoint == null || goldVein == null)
         {
             Debug.LogWarning($"{name}: WorkerManager is missing references.");
-            return;
+            return false;
         }
 
-        if (workers.Count >= maxWorkers) return;
+        if (workers.Count >= maxWorkers) return false;
 
         WorkerUnit worker = Instantiate(
             workerPrefab,
@@ -79,5 +91,7 @@ public class WorkerManager : MonoBehaviour
 
         workers.Add(worker);
         worker.Initialize(this, goldVein, dropOffPoint);
+
+        return true;
     }
 }

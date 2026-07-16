@@ -4,23 +4,40 @@ public class HealthBar : MonoBehaviour
 {
     [SerializeField] private Transform fill;
 
+    private SpriteRenderer fillRenderer;
+
+    private void Awake()
+    {
+        if (fill != null)
+        {
+            fillRenderer = fill.GetComponent<SpriteRenderer>();
+        }
+    }
+
     public void SetHealth(float currentHealth, float maxHealth)
     {
-        float healthPercent = Mathf.Clamp01(currentHealth / maxHealth);
+        if (fill == null)
+        {
+            return;
+        }
+
+        float healthPercent = maxHealth > 0f
+            ? Mathf.Clamp01(currentHealth / maxHealth)
+            : 0f;
 
         gameObject.SetActive(healthPercent < 1f);
 
-        fill.localScale = new Vector3(
-            healthPercent,
-            fill.localScale.y,
-            fill.localScale.z
-        );
+        Vector3 fillScale = fill.localScale;
+        fillScale.x = healthPercent;
+        fill.localScale = fillScale;
 
-        SpriteRenderer fillRenderer = fill.GetComponent<SpriteRenderer>();
-        fillRenderer.color = GetHealthColor(healthPercent);
+        if (fillRenderer != null)
+        {
+            fillRenderer.color = GetHealthColor(healthPercent);
+        }
     }
 
-    private Color GetHealthColor(float healthPercent)
+    private static Color GetHealthColor(float healthPercent)
     {
         if (healthPercent > 0.5f)
         {

@@ -2,8 +2,13 @@ using UnityEngine;
 
 public class WorkerUnit : MonoBehaviour
 {
+    private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
+    private static readonly int IsMiningHash = Animator.StringToHash("IsMining");
+    private static readonly int IsCarryingHash = Animator.StringToHash("IsCarrying");
+
     private enum WorkerState
     {
+        WaitingForMineSlot,
         MovingToMine,
         Mining,
         ReturningToDropOff
@@ -33,6 +38,7 @@ public class WorkerUnit : MonoBehaviour
     private Vector3 targetPosition;
     private int mineSlotIndex = -1;
     private float mineTimer;
+    private bool isMining;
     private bool isCarrying;
 
     public void Initialize(WorkerManager manager, GoldVein goldVein, Transform dropOffPoint)
@@ -41,9 +47,9 @@ public class WorkerUnit : MonoBehaviour
         this.goldVein = goldVein;
         this.dropOffPoint = dropOffPoint;
 
-        gameManager = FindFirstObjectByType<GameManager>();
+        gameManager = FindAnyObjectByType<GameManager>();
 
-        MoveToMine();
+        TryMoveToMine();
     }
 
     private void Update()
@@ -56,6 +62,10 @@ public class WorkerUnit : MonoBehaviour
 
         switch (state)
         {
+            case WorkerState.WaitingForMineSlot:
+                TryMoveToMine();
+                break;
+
             case WorkerState.MovingToMine:
                 MoveTowardsTarget();
 
@@ -82,7 +92,7 @@ public class WorkerUnit : MonoBehaviour
                 if (HasReachedTarget())
                 {
                     DepositGold();
-                    MoveToMine();
+                    TryMoveToMine();
                 }
 
                 break;
@@ -97,50 +107,44 @@ public class WorkerUnit : MonoBehaviour
 
         hasStopped = true;
 
-        // Reset worker state
-        state = WorkerState.ReturningToDropOff;
         isCarrying = false;
-
-        // Release any reserved mining slot
-        if (goldVein != null)
-        {
-            if (mineSlotIndex >= 0)
-            {
-                goldVein.ReleaseSlot(mineSlotIndex);
-                mineSlotIndex = -1;
-            }
-
-            goldVein.SetBeingMined(false);
-        }
+        ReleaseMineAccess();
 
         // Force the animator into Idle
         if (animator != null)
         {
-            animator.SetBool("IsMoving", false);
-            animator.SetBool("IsMining", false);
-            animator.SetBool("IsCarrying", false);
+            animator.SetBool(IsMovingHash, false);
+            animator.SetBool(IsMiningHash, false);
+            animator.SetBool(IsCarryingHash, false);
 
             // Immediately evaluate the new state
             animator.Update(0f);
         }
     }
 
-    private void MoveToMine()
+    private bool TryMoveToMine()
     {
         isCarrying = false;
-        state = WorkerState.MovingToMine;
 
-        mineSlotIndex = goldVein.ReserveSlot();
+        if (!goldVein.TryReserveSlot(out mineSlotIndex))
+        {
+            state = WorkerState.WaitingForMineSlot;
+            return false;
+        }
+
+        state = WorkerState.MovingToMine;
         targetPosition = goldVein.GetSlotPosition(mineSlotIndex);
+        return true;
     }
 
     private void StartMining()
     {
         state = WorkerState.Mining;
         mineTimer = mineDuration;
+        isMining = true;
 
         transform.position = targetPosition;
-        goldVein.SetBeingMined(true);
+        goldVein.EnterMining();
     }
 
     private void FinishMining()
@@ -149,9 +153,7 @@ public class WorkerUnit : MonoBehaviour
         state = WorkerState.ReturningToDropOff;
         targetPosition = dropOffPoint.position;
 
-        goldVein.ReleaseSlot(mineSlotIndex);
-        mineSlotIndex = -1;
-        goldVein.SetBeingMined(false);
+        ReleaseMineAccess();
     }
 
     private void DepositGold()
@@ -194,19 +196,46 @@ public class WorkerUnit : MonoBehaviour
     {
         if (animator == null) return;
 
-        bool isMining = state == WorkerState.Mining;
-        bool isMoving = state != WorkerState.Mining;
+        bool isWaiting = state == WorkerState.WaitingForMineSlot;
+        bool isMoving = !isWaiting && state != WorkerState.Mining;
 
-        animator.SetBool("IsMoving", isMoving);
-        animator.SetBool("IsMining", isMining);
-        animator.SetBool("IsCarrying", isCarrying);
+        animator.SetBool(IsMovingHash, isMoving);
+        animator.SetBool(IsMiningHash, isMining);
+        animator.SetBool(IsCarryingHash, isCarrying);
     }
 
     private void OnDisable()
     {
-        if (goldVein != null && mineSlotIndex >= 0)
+        ReleaseMineAccess();
+
+        if (!hasStopped && manager != null)
+        {
+            state = WorkerState.WaitingForMineSlot;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (manager != null)
+        {
+            manager.UnregisterWorker(this);
+        }
+    }
+
+    private void ReleaseMineAccess()
+    {
+        if (goldVein == null) return;
+
+        if (isMining)
+        {
+            isMining = false;
+            goldVein.ExitMining();
+        }
+
+        if (mineSlotIndex >= 0)
         {
             goldVein.ReleaseSlot(mineSlotIndex);
+            mineSlotIndex = -1;
         }
     }
 }

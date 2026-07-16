@@ -46,9 +46,9 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
     private Team team;
     private Transform targetPoint;
-    private IDamageable currentTarget;
     private float currentHealth;
     private float attackTimer;
+    private bool isDead;
 
     private HealthBar healthBar;
     private GameManager gameManager;
@@ -56,25 +56,37 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     private float attackAnimationTimer;
     private bool isAttackAnimating;
     private Quaternion originalVisualRotation;
+    private Vector3 originalVisualScale;
+    private Vector3 originalVisualPosition;
+    private Coroutine recoilCoroutine;
 
     public virtual void Initialize(Team team, Transform targetPoint)
     {
-        gameManager = FindFirstObjectByType<GameManager>();
+        gameManager = FindAnyObjectByType<GameManager>();
 
         this.team = team;
         this.targetPoint = targetPoint;
 
-        currentHealth = unitData.maxHealth;
+        if (unitData == null)
+        {
+            Debug.LogError($"{name}: UnitData is not assigned.", this);
+            enabled = false;
+            return;
+        }
+
+        currentHealth = unitData.MaxHealth;
 
         if (visualTransform != null)
         {
             originalVisualRotation = visualTransform.rotation;
+            originalVisualScale = visualTransform.localScale;
+            originalVisualPosition = visualTransform.localPosition;
         }
 
         SpawnHealthBar();
         SetFacingDirection();
 
-        if (gameManager != null && gameManager.setTeamColour)
+        if (gameManager != null && gameManager.SetTeamColour)
         {
             SetTeamColour();
         }
@@ -82,15 +94,15 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
     private void Update()
     {
+        UpdateAttackAnimation();
+
         if (gameManager != null && gameManager.IsGameOver)
         {
             SetMovingAnimation(false);
             return;
         }
 
-        UpdateAttackAnimation();
-
-        currentTarget = FindTargetInRange();
+        IDamageable currentTarget = FindTargetInRange();
 
         if (currentTarget != null)
         {
@@ -123,7 +135,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         float direction = team == Team.Left ? 1f : -1f;
 
         Vector3 nextPosition = transform.position;
-        nextPosition.x += direction * unitData.moveSpeed * Time.deltaTime;
+        nextPosition.x += direction * unitData.MoveSpeed * Time.deltaTime;
 
         transform.position = nextPosition;
     }
@@ -179,7 +191,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
-            unitData.attackRange
+            unitData.AttackRange
         );
 
         BaseUnit closestEnemyUnit = null;
@@ -222,16 +234,18 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
     private void AttackTarget(IDamageable target)
     {
+        if (!DamageableUtility.IsValid(target)) return;
+
         attackTimer += Time.deltaTime;
 
-        float attackCooldown = 1f / Mathf.Max(unitData.attackSpeed, 0.01f);
+        float attackCooldown = 1f / unitData.AttackSpeed;
 
         if (attackTimer < attackCooldown)
         {
             return;
         }
 
-        attackTimer = 0f;
+        attackTimer -= attackCooldown;
 
         float finalDamage = unitData.GetDamageAgainst(target.TargetType);
 
@@ -251,7 +265,8 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     {
         yield return new WaitForSeconds(projectileSpawnDelay);
 
-        if (target == null)
+        if (!DamageableUtility.IsValid(target) ||
+            (gameManager != null && gameManager.IsGameOver))
         {
             yield break;
         }
@@ -261,6 +276,8 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
     private void FireProjectileAt(IDamageable target, float damage)
     {
+        if (!DamageableUtility.IsValid(target)) return;
+
         if (projectilePrefab == null || projectileSpawnPoint == null)
         {
             target.TakeDamage(damage);
@@ -283,17 +300,19 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage)
     {
-        currentHealth -= damage;
+        if (isDead || damage <= 0f) return;
+
+        currentHealth = Mathf.Max(0f, currentHealth - damage);
 
         if (healthBar != null)
         {
-            healthBar.SetHealth(currentHealth, unitData.maxHealth);
+            healthBar.SetHealth(currentHealth, unitData.MaxHealth);
         }
 
-        if (currentHealth <= 0)
-        {
-            Destroy(gameObject);
-        }
+        if (currentHealth > 0f) return;
+
+        isDead = true;
+        Destroy(gameObject);
     }
 
     private void SpawnHealthBar()
@@ -307,15 +326,17 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
             transform
         );
 
-        healthBar.SetHealth(currentHealth, unitData.maxHealth);
+        healthBar.SetHealth(currentHealth, unitData.MaxHealth);
     }
 
     private void SetFacingDirection()
     {
         if (visualTransform == null) return;
 
-        float xScale = team == Team.Left ? 1f : -1f;
-        visualTransform.localScale = new Vector3(xScale, 1f, 1f);
+        float xDirection = team == Team.Left ? 1f : -1f;
+        Vector3 facingScale = originalVisualScale;
+        facingScale.x = Mathf.Abs(originalVisualScale.x) * xDirection;
+        visualTransform.localScale = facingScale;
     }
 
     private void SetTeamColour()
@@ -355,6 +376,31 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         visualTransform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
+    protected void PlayRecoilAnimation(float distance = 0.15f, float duration = 0.05f)
+    {
+        if (visualTransform == null) return;
+
+        if (recoilCoroutine != null)
+        {
+            StopCoroutine(recoilCoroutine);
+            visualTransform.localPosition = originalVisualPosition;
+        }
+
+        recoilCoroutine = StartCoroutine(Recoil(distance, duration));
+    }
+
+    private IEnumerator Recoil(float distance, float duration)
+    {
+        float recoilDirection = team == Team.Left ? -1f : 1f;
+        visualTransform.localPosition =
+            originalVisualPosition + new Vector3(distance * recoilDirection, 0f, 0f);
+
+        yield return new WaitForSeconds(duration);
+
+        visualTransform.localPosition = originalVisualPosition;
+        recoilCoroutine = null;
+    }
+
     private void UpdateAttackAnimation()
     {
         if (!isAttackAnimating || visualTransform == null) return;
@@ -364,6 +410,16 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         if (attackAnimationTimer > 0f) return;
 
         isAttackAnimating = false;
+        visualTransform.rotation = originalVisualRotation;
+    }
+
+    protected virtual void OnDisable()
+    {
+        recoilCoroutine = null;
+
+        if (visualTransform == null) return;
+
+        visualTransform.localPosition = originalVisualPosition;
         visualTransform.rotation = originalVisualRotation;
     }
 }

@@ -4,6 +4,9 @@ using UnityEngine;
 [Serializable]
 public class FactionUnitEntry
 {
-    public UnitRole role;
-    public BaseUnit prefab;
+    [SerializeField] private UnitRole role;
+    [SerializeField] private BaseUnit prefab;
+
+    public UnitRole Role => role;
+    public BaseUnit Prefab => prefab;
 }

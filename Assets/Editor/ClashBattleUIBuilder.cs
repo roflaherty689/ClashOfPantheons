@@ -3,6 +3,7 @@ using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 public static class ClashBattleUIBuilder
@@ -237,7 +238,7 @@ public static class ClashBattleUIBuilder
         tmp.fontSize = size;
         tmp.alignment = alignment;
         tmp.color = colour ?? Color.white;
-        tmp.enableWordWrapping = false;
+        tmp.textWrappingMode = TextWrappingModes.NoWrap;
         tmp.raycastTarget = false;
         tmp.fontStyle = FontStyles.Bold;
         return tmp;
@@ -254,9 +255,13 @@ public static class ClashBattleUIBuilder
 
     private static void EnsureEventSystem()
     {
-        if (Object.FindFirstObjectByType<EventSystem>() != null)
+        if (Object.FindAnyObjectByType<EventSystem>() != null)
             return;
-        new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+        GameObject eventSystem = new GameObject(
+            "EventSystem",
+            typeof(EventSystem),
+            typeof(InputSystemUIInputModule));
+        Undo.RegisterCreatedObjectUndo(eventSystem, "Create EventSystem");
     }
 }
 #endif

@@ -4,26 +4,51 @@ using UnityEngine;
 public class FactionData : ScriptableObject
 {
     [Header("Faction Info")]
-    public string factionName;
+    [SerializeField] private string factionName;
 
     [Header("Units")]
-    public FactionUnitEntry[] units;
+    [SerializeField] private FactionUnitEntry[] units;
+
+    public string FactionName => factionName;
 
     public BaseUnit GetUnitPrefab(UnitRole role)
     {
-        foreach (var entry in units)
+        if (TryGetUnitPrefab(role, out BaseUnit prefab))
         {
-            if (entry.role == role)
-                return entry.prefab;
+            return prefab;
         }
 
         Debug.LogError($"No unit prefab found for role {role} in faction {factionName}");
         return null;
     }
 
-    public UnitData GetUnitData(UnitRole role)
+    public bool TryGetUnitPrefab(UnitRole role, out BaseUnit prefab)
     {
-        BaseUnit prefab = GetUnitPrefab(role);
-        return prefab != null ? prefab.UnitData : null;
+        if (units != null)
+        {
+            foreach (FactionUnitEntry entry in units)
+            {
+                if (entry != null && entry.Role == role && entry.Prefab != null)
+                {
+                    prefab = entry.Prefab;
+                    return true;
+                }
+            }
+        }
+
+        prefab = null;
+        return false;
+    }
+
+    public bool TryGetUnitData(UnitRole role, out UnitData unitData)
+    {
+        if (TryGetUnitPrefab(role, out BaseUnit prefab) && prefab.UnitData != null)
+        {
+            unitData = prefab.UnitData;
+            return true;
+        }
+
+        unitData = null;
+        return false;
     }
 }

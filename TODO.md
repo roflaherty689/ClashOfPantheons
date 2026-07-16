@@ -18,6 +18,26 @@ _No confirmed implementation blocker._
 
 Tasks are ordered by dependency and prototype value.
 
+### 0. Validate the project-owned C# correctness and maintainability pass
+
+**Outcome:** The cleaned combat, spawning, worker, resource, health, and Editor-tooling foundations are confirmed safe before further prototype integration builds on them.
+
+**Acceptance criteria:**
+
+- [x] All project-owned C# receives a coordinated architecture, correctness, lifecycle, naming, and maintainability audit.
+- [x] Runtime and Editor assemblies compile externally with zero warnings and errors against the current Unity references; the stale generated entry for the deleted script was excluded only for this check.
+- [x] Dead `ProductionSlot` source and its unreferenced `.meta` file are removed together.
+- [x] Unity imports the changes with no missing-script or serialization errors and refreshes its generated project files.
+- [x] The cleanup pass receives a representative Play Mode smoke check covering the active spawning, combat, base, and worker loop.
+- [ ] Projectile attacks are verified against destroyed targets and with travel times over two seconds.
+- [ ] Worker slot contention, disable-during-mining cleanup, failed purchases, and the worker cap are verified.
+- [ ] The duplicate/stale serialized fields on unit prefabs are cleaned by opening and resaving them in Unity; the non-animated archer retains a valid `visualTransform`.
+- [x] The stray `GoldVein` component on `Tilemap_Water` is removed in Unity and the scene contains only the intended left and right veins.
+
+**Progress:** The code audit, corrections, refactors, dead-source removal, static reference checks, and external runtime/Editor compilation are complete. The user verified the current behavior in Unity on 2026-07-16, and the scene now contains only the two intended gold veins. Targeted projectile/worker edge cases and stale prefab serialization cleanup remain.
+
+**Status:** Partially implemented
+
 ### 1. Integrate player gold, workers, and independent unit production
 
 **Outcome:** The player can make the prototype's core economy-versus-pressure decision with gold.
@@ -129,6 +149,8 @@ _No items currently blocked by external state._
 ## Discovered follow-up work
 
 - Tune initial purchase costs, recurring production cadences, role matchups, and stat values through representative playtests.
+- Resolve projectile targeting semantics before changing combat behavior: current projectiles aim at the launch position and may miss moving targets; choose deliberate misses, target leading, or live-target tracking, then document and verify the approved rule.
+- Profile a representative 60-versus-60 battle before changing target-query or unit-count architecture; if measurements confirm pressure, replace allocating physics queries and scene-wide unit scans with proportionate non-allocating queries and lifecycle-owned counts.
 
 ---
 
