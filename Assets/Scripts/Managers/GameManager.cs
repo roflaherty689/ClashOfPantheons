@@ -9,15 +9,6 @@ public enum SpawnPattern
     PerUnitInterval
 }
 
-public enum MatchEndReason
-{
-    None,
-    StrongholdDestroyed,
-    TimeoutHealth,
-    TimeoutUnitLossValue,
-    TimeoutDraw
-}
-
 public class GameManager : MonoBehaviour
 {
     public const int MaximumProductionTier = 3;
@@ -302,26 +293,19 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        int healthComparison = leftBase.CurrentHealth.CompareTo(rightBase.CurrentHealth);
-        if (healthComparison != 0)
+        MatchResult result = MatchResultResolver.ResolveTimeout(
+            leftBase.CurrentHealth,
+            rightBase.CurrentHealth,
+            GetTotalUnitLossValue(Team.Left),
+            GetTotalUnitLossValue(Team.Right));
+
+        if (result.HasWinner)
         {
-            CompleteMatch(
-                healthComparison > 0 ? Team.Left : Team.Right,
-                MatchEndReason.TimeoutHealth);
+            CompleteMatch(result.Winner, result.Reason);
             return;
         }
 
-        int leftLossValue = GetTotalUnitLossValue(Team.Left);
-        int rightLossValue = GetTotalUnitLossValue(Team.Right);
-        if (leftLossValue != rightLossValue)
-        {
-            CompleteMatch(
-                leftLossValue < rightLossValue ? Team.Left : Team.Right,
-                MatchEndReason.TimeoutUnitLossValue);
-            return;
-        }
-
-        CompleteDraw(MatchEndReason.TimeoutDraw);
+        CompleteDraw(result.Reason);
     }
 
     private void CompleteMatch(Team winner, MatchEndReason reason)

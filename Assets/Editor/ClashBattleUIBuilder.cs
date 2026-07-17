@@ -59,7 +59,7 @@ public static class ClashBattleUIBuilder
 
         Selection.activeGameObject = root;
         EditorUtility.SetDirty(root);
-        Debug.Log("Created the Tiny Swords battle HUD. Values are presentation placeholders until runtime bindings are implemented.");
+        Debug.Log("Created the Tiny Swords battle HUD with runtime binding targets. Verify generated references and layout in Play Mode.");
     }
 
     private static void CreateTopHUD(

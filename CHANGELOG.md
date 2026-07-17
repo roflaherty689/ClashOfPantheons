@@ -115,6 +115,9 @@ Git history remains the exact implementation record.
 
 ### Technical
 
+- Began the maintainability refactor by extracting deterministic timeout comparisons into an engine-independent Core assembly; all five Edit Mode characterization cases for health, lost-unit-value, and exact-draw outcomes passed in Unity.
+- Corrected the battle-HUD builder completion message so it reflects the implemented runtime bindings and required Play Mode layout verification.
+
 - User-verified the three difficulty selections, distinct enemy faction assignment, corrected starting resources, AI purchasing behavior, and rush-resistant Medium/Hard opening priorities in Play Mode.
 
 - Added persistent Codex project instructions through `AGENTS.md`.
