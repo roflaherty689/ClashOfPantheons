@@ -22,6 +22,7 @@ Git history remains the exact implementation record.
 - Live result reasons and active-scene restart through the battle HUD.
 - Team-scoped unit-production purchasing with locked initial states, gold-funded unlocks, independent recurring timers, and three star tiers.
 - Live unlock, upgrade, maximum-tier, affordability, and locked-icon presentation for all five player production cards and the selected-role panel.
+- Black, blue, purple, red, and yellow prototype faction assets with matching animated melee and archer prefabs; cavalry, siege, and mythic remain shared.
 
 ### Changed
 
@@ -31,6 +32,7 @@ Git history remains the exact implementation record.
 - Rewrote the Prototype milestone around one economy → production → autonomous combat → result → restart loop against AI.
 - Corrected project tracking to distinguish existing source/asset foundations from unimplemented integration and unverified runtime behavior.
 - Deferred multiplayer, campaign and persistent progression, multiple currencies, controller support, final art, and broad content beyond the core prototype.
+- Renamed the animated default faction and its black melee/archer prefabs to explicit colour-based names while preserving their Unity GUID references.
 - Accepted the independent production contract: first purchase unlocks continuous one-star production, while later purchases upgrade future spawns to two and three stars.
 - Recorded initial 1.2× counter and 1×/1.5×/2× star-scaling defaults, timeout loss valuation, and future-spawn-only upgrade behavior.
 - Clarified that counters modify damage, star tiers scale every configured unit stat except cost, and exact timeout equality produces a draw.
@@ -47,6 +49,7 @@ Git history remains the exact implementation record.
 
 ### Fixed
 
+- Matched the blue, purple, red, and yellow Warrior/Archer clip behavior to black: Idle and Run loop continuously while attacks remain one-shot.
 - Production purchase buttons now repair disabled target-graphic raycasts at runtime, allowing the EventSystem to receive clicks from the existing generated scene.
 - Production tier counters now resolve from their card structure instead of fragile initial text-object names, keeping the displayed star count synchronized with successful upgrades.
 - Generated HUD buttons now accept pointer input by enabling raycasts on their target graphics; the live worker binding also repairs the already-generated Buy Worker button at runtime.
@@ -80,6 +83,8 @@ Git history remains the exact implementation record.
 - User-verified countdown expiry and correct lost-gold timeout resolution in a shortened 20-second Play Mode match.
 - User-verified clickable production controls, melee unlock/upgrades through the three-purchase cap, and live tier-counter updates in Play Mode.
 - User-verified the selected-role panel's sticky behavior, role artwork, simplified details, and enlarged icon in Play Mode.
+- Configured the previously empty non-black Tiny Swords melee and archer Animator Controllers with the working `isMoving` and `Attack` state-machine behavior and their colour-matched clips.
+- User-verified matching idle, run, and attack behavior for the black, blue, purple, red, and yellow melee/archer variants in Play Mode after their loop and transition settings were aligned.
 
 ### Known Issues
 
@@ -87,6 +92,7 @@ Git history remains the exact implementation record.
 - Health-tiebreak, exact-draw, base-destruction result-overlay, and restart-reset paths still require targeted Play Mode verification.
 - Exact role values and matchups remain subject to implementation and playtest tuning.
 - Targeted projectile/worker edge cases and stale serialized fields on the non-animated archer prefab remain to be verified or cleaned.
+- Shared cavalry, siege, and mythic spawning and both-team faction switching still require Play Mode verification across the five team-colour faction assets.
 
 ---
 

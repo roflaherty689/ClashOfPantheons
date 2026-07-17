@@ -45,6 +45,7 @@ Checked entry conditions are based on repository inspection, not a new Unity lau
 - [x] Melee, archer, cavalry, siege, and mythic role mappings and prototype assets exist.
 - [x] Workers can mine and deposit gold; the player HUD displays live worker economy state and can buy workers up to capacity.
 - [x] Faction data can map roles to faction-specific prefabs.
+- [x] Black, blue, purple, red, and yellow prototype faction assets map colour-specific animated melee/archer prefabs while sharing cavalry, siege, and mythic.
 - [x] Prototype health, hit, animation, projectile, and victory feedback exists.
 
 These checks confirm repository presence only. Their integrated runtime behavior remains subject to compilation and Play Mode verification.
@@ -74,7 +75,7 @@ These checks confirm repository presence only. Their integrated runtime behavior
 - Campaign and persistent progression.
 - Multiple currencies beyond gold.
 - Controller support and broad platform certification.
-- Final art, final audio, and broad faction or map production.
+- Final art, final audio, and broad designed-faction or map production beyond the five mechanically identical prototype team-colour variants.
 - Heroes, bosses, neutral objectives, buildings, and powers unless separately approved.
 - Production-ready saving and deep optimization without measured need.
 

@@ -45,7 +45,7 @@ GameObject:
   - component: {fileID: 4707872448201973211}
   - component: {fileID: 7886269566354373400}
   m_Layer: 7
-  m_Name: MeleeAnimatedUnit
+  m_Name: PurpleMeleeAnimatedUnit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 662fa3a7104587241a55e4a727261425, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::MeleeUnit
   unitData: {fileID: 11400000, guid: 5e56eb212175d1c43a426b24c10465ac, type: 2}
   healthBarPrefab: {fileID: 7140927305658623058, guid: 4197aadd5c42f5841bcb5fcf0eddaa39, type: 3}
@@ -255,7 +255,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7384290322352760091, guid: 728135fe2ac4b434ab56e445d647d2a0, type: 3}
+  m_Sprite: {fileID: 7384290322352760091, guid: 0505cf46dcd784e559fa26016d355ac0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -275,14 +275,14 @@ Animator:
   m_GameObject: {fileID: 8887094048003673539}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: b96f062c1d073496fb335d14ea81c2ec, type: 2}
+  m_Controller: {fileID: 9100000, guid: 12285b2ad229e465ca21363a5ff750b0, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage: 
+  m_WarningMessage:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0

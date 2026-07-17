@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5e9c96c1ab6c22d4bae4aa7f02307064, type: 3}
-  m_Name: DefaultAnimated
+  m_Name: YellowFaction
   m_EditorClassIdentifier: Assembly-CSharp::FactionData
-  factionName: Default
+  factionName: Yellow
   units:
   - role: 0
-    prefab: {fileID: 7886269566354373400, guid: 53f2b4457387d4540bc2552b51586d62, type: 3}
+    prefab: {fileID: 7886269566354373400, guid: a4b5c6d7e8f901ab2c3d4e5f60718293, type: 3}
   - role: 1
-    prefab: {fileID: 643887454051965650, guid: fddd104b752818f49a7ed7ed10d806c9, type: 3}
+    prefab: {fileID: 643887454051965650, guid: b5c6d7e8f901ab2c3d4e5f60718293a4, type: 3}
   - role: 2
     prefab: {fileID: 5211855096962333619, guid: 5ccd9e0bc4262db44b2f19b311425303, type: 3}
   - role: 3

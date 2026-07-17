@@ -137,6 +137,8 @@ Tasks are ordered by dependency and prototype value.
 
 - Define and tune the exact five-role counter model and three-star stat curves after functional production enables representative playtests.
 - Add basic onboarding for workers, production, upgrades, timeout rules, and restart.
+- [x] Black, blue, purple, red, and yellow melee/archer variants show their matching idle, run, and attack animations in Play Mode; the user verified every colour on 2026-07-17 after loop and transition settings were matched to black.
+- [ ] Verify the shared cavalry, siege, and mythic units still spawn correctly with each team-colour faction. Confirm that switching both team factions does not produce missing references, controller warnings, or unintended mechanical differences.
 
 ---
 

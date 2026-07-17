@@ -27,6 +27,7 @@ Do not record trivial implementation details.
 | DEC-006 | Prototype visual direction | Accepted | 2026-07-16 |
 | DEC-007 | Unit purchase and recurring-production contract | Accepted | 2026-07-16 |
 | DEC-008 | Prototype platform priority | Accepted | 2026-07-16 |
+| DEC-009 | Prototype team-colour faction variants | Accepted | 2026-07-17 |
 
 ---
 
@@ -302,13 +303,53 @@ PC-first development matches the current Editor-driven workflow and avoids requi
 
 ---
 
+## DEC-009 — Prototype team-colour faction variants
+
+**Date:** 2026-07-17
+**Status:** Accepted
+
+### Decision
+
+Support all five Tiny Swords unit colours—black, blue, purple, red, and yellow—as mechanically identical prototype faction assets. Melee and archer receive colour-specific animated prefabs and controllers. Cavalry, siege, and mythic remain shared across the five variants for now.
+
+### Context
+
+The original animated prototype faction used black Tiny Swords melee and archer assets. The user requested the other four available colour options and explicitly limited this pass to melee and archer.
+
+### Rationale
+
+Team-colour variants provide readable visual alternatives using already imported art without introducing five mechanically or thematically distinct factions before the core loop is complete.
+
+### Consequences
+
+- Faction assets use the consistent `BlackFaction`, `BlueFaction`, `PurpleFaction`, `RedFaction`, and `YellowFaction` naming convention.
+- Each variant maps its matching animated melee and archer prefabs, with identical `UnitData` and gameplay configuration.
+- Non-black animator controllers must expose the same `isMoving` and `Attack` behavior as the working black controllers while using their own colour clips.
+- These assets are presentation variants, not distinct mythological factions, and do not satisfy or expand the deferred broad faction-production scope.
+- Unity import and Play Mode verification across all colours remains required before the asset task is considered fully validated.
+
+### Alternatives considered
+
+- Four total variants: rejected because the user confirmed all five available colours.
+- Colour-specific versions of all five gameplay roles: deferred because the user limited this pass to melee and archer.
+- Treat each colour as a separate designed faction: rejected because palette alone does not provide the thematic or mechanical identity required by the game-design pillars.
+
+### Related items
+
+- `GAME_DESIGN.md` — Audio and visual direction
+- `ROADMAP.md` — Prototype existing foundation and deferred scope
+- `TODO.md` — Five-colour Unity verification
+- `Assets/ScriptableObjects/Factions`
+
+---
+
 # Decision template
 
 Copy this section for new decisions.
 
 ## DEC-XXX — Decision title
 
-**Date:** YYYY-MM-DD  
+**Date:** YYYY-MM-DD
 **Status:** Proposed
 
 ### Decision
