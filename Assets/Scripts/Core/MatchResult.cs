@@ -60,6 +60,15 @@ public static class MatchResultResolver
 
 public static class MatchResultText
 {
+    public static string GetCountdown(float secondsRemaining)
+    {
+        double clampedSeconds = secondsRemaining < 0f ? 0d : secondsRemaining;
+        int totalSeconds = (int)System.Math.Ceiling(clampedSeconds);
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        return $"{minutes}:{seconds:00}";
+    }
+
     public static string GetTitle(bool hasWinner, Team winningTeam, Team playerTeam)
     {
         if (!hasWinner)

@@ -42,6 +42,17 @@ public class MatchResultResolverTests
 
 public class MatchResultTextTests
 {
+    [TestCase(-1f, "0:00")]
+    [TestCase(0f, "0:00")]
+    [TestCase(0.01f, "0:01")]
+    [TestCase(59f, "0:59")]
+    [TestCase(59.01f, "1:00")]
+    [TestCase(300f, "5:00")]
+    public void GetCountdown_ClampsAndRoundsUpLikeBattleHud(float seconds, string expected)
+    {
+        Assert.That(MatchResultText.GetCountdown(seconds), Is.EqualTo(expected));
+    }
+
     [TestCase(false, Team.Left, Team.Left, "DRAW")]
     [TestCase(true, Team.Left, Team.Left, "VICTORY")]
     [TestCase(true, Team.Right, Team.Left, "DEFEAT")]

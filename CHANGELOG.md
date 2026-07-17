@@ -115,6 +115,7 @@ Git history remains the exact implementation record.
 
 ### Technical
 
+- Moved battle countdown formatting into the tested Core presentation rules; all 38 Core Edit Mode cases passed in Unity, including clamping and minute-boundary behavior.
 - Centralized the accepted 1x/1.25x/1.5x star-tier stat curve in the Core production rules; all 32 Core Edit Mode cases passed in Unity.
 - Extracted production-tier transition rules into the Core assembly; all 26 Core Edit Mode cases passed in Unity, including normal progression, the tier cap, and selection-based mythic unlock behavior.
 - Extracted player-relative match-result title and reason formatting from the battle HUD into the Core assembly; all 15 Core Edit Mode cases passed in Unity.

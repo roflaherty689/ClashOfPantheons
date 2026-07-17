@@ -974,10 +974,7 @@ public class BattleEconomyUI : MonoBehaviour
 
         if (timerText != null)
         {
-            int totalSeconds = Mathf.CeilToInt(gameManager.TimeRemaining);
-            int minutes = totalSeconds / 60;
-            int seconds = totalSeconds % 60;
-            timerText.text = $"{minutes}:{seconds:00}";
+            timerText.text = MatchResultText.GetCountdown(gameManager.TimeRemaining);
         }
 
         if (!gameManager.IsGameOver)
