@@ -30,6 +30,7 @@ Do not record trivial implementation details.
 | DEC-009 | Prototype team-colour faction variants | Accepted | 2026-07-17 |
 | DEC-010 | Faction-owned building presentation with shared gameplay prefabs | Accepted | 2026-07-17 |
 | DEC-011 | Faction-owned animated worker prefabs | Accepted | 2026-07-17 |
+| DEC-012 | Initial title and faction-selection flow | Accepted | 2026-07-17 |
 
 ---
 
@@ -426,6 +427,51 @@ Worker colour is faction presentation, while worker costs, capacity, movement, m
 - `TODO.md` — Faction-driven prototype presentation
 - `Assets/Scripts/Factions/FactionData.cs`
 - `Assets/Scripts/Workers & Resources/WorkerManager.cs`
+
+---
+
+## DEC-012 — Initial title and faction-selection flow
+
+**Date:** 2026-07-17
+**Status:** Accepted
+
+### Decision
+
+The initial front end is delivered in three phases: (1) a dedicated title screen with Play and Exit as its only primary actions; (2) a faction-selection screen whose clickable choices are generated from a build-safe serialized list/catalog of `FactionData` assets and whose selection is applied to the player team before entering battle; and (3) a decorative animated title background using buildings and non-interactive moving units.
+
+### Context
+
+The project currently starts directly in its only Build Settings scene, `SampleScene`, and `GameManager` receives both factions from scene-serialized fields. The user requested a player-facing start flow and specifically required faction choices to be populated from faction ScriptableObjects.
+
+### Rationale
+
+Separating functional navigation and selection from animated presentation keeps each phase independently testable. A serialized catalog is available in player builds, unlike Editor-only `AssetDatabase` discovery, while still allowing button instances to be generated rather than manually duplicated for each faction. Applying the selection before battle initialization preserves `FactionData` as the source of unit, worker, castle, hand-in, and HUD presentation.
+
+### Consequences
+
+- The title scene becomes the first enabled Build Settings scene; the existing battle remains a separate scene.
+- Menu UI generates options from configured `FactionData` references and reports invalid or duplicate configuration clearly.
+- A small scene-boundary selection/session mechanism must make the chosen player `FactionData` available before `GameManager.Awake` applies faction presentation. It must not create duplicate persistent managers or retain stale state unintentionally.
+- The opponent faction remains an explicit battle configuration until a separate opponent-selection rule is approved.
+- Exit must work in a built player and have a safe Editor test path.
+- Phase 3 is decorative only: it stays behind the UI, does not intercept input, and does not instantiate or drive combat, economy, or match systems.
+- Scene wiring, Build Settings order, responsive Canvas layout, and end-to-end transitions require Unity Editor and player-build verification.
+
+### Alternatives considered
+
+- Hand-author one button per faction: rejected because the menu would drift when configured faction content changes.
+- Discover arbitrary assets at runtime with `AssetDatabase`: rejected because Editor APIs are unavailable in player builds.
+- Reuse the battle scene behind the menu: rejected because it would initialize simulation systems before the player starts a match and would couple decorative presentation to gameplay state.
+- Implement the animated background before navigation: rejected as sequencing because it does not validate the required player flow.
+
+### Related items
+
+- `GAME_DESIGN.md` — World and match structure; UI and feedback
+- `ROADMAP.md` — Prototype and Vertical Slice
+- `TODO.md` — Initial title and faction-selection flow
+- `Assets/Scripts/Factions/FactionData.cs`
+- `Assets/Scripts/Managers/GameManager.cs`
+- `ProjectSettings/EditorBuildSettings.asset`
 
 ---
 

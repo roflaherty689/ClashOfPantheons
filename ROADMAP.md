@@ -60,6 +60,7 @@ These checks confirm repository presence only. Their integrated runtime behavior
 - [ ] Implement the three star tiers with clear costs, effects, and production/UI feedback.
 - [x] Move recurring production cadence ownership from the global spawn interval into each role's `UnitData`; retain per-role cost ownership there. Initial values and selectable spawn patterns were user-verified in Play Mode on 2026-07-16.
 - [ ] Replace static mock HUD values and shared-queue presentation with functional prototype state.
+- [ ] Add a player-facing title -> faction selection -> battle flow. Generate faction choices from a build-safe configured `FactionData` catalog and carry the chosen player faction into the battle scene.
 - [ ] Validate role readability and at least one meaningful economy-versus-pressure decision through playtesting.
 - [ ] Add focused tests for deterministic economy, production, and result rules, plus a documented Play Mode critical-path check.
 
@@ -90,6 +91,7 @@ These checks confirm repository presence only. Their integrated runtime behavior
 
 - [ ] Representative gameplay loop
 - [ ] Representative visual direction
+- [ ] Add animated title-screen background presentation using buildings and non-interactive units after the functional menu flow is validated.
 - [ ] Representative audio and feedback
 - [ ] Stable UI flow
 - [ ] Initial accessibility support

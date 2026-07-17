@@ -131,6 +131,34 @@ Tasks are ordered by dependency and prototype value.
 
 **Status:** Partially implemented
 
+### 5. Build the initial title and faction-selection flow
+
+**Outcome:** A player can launch the game into a clear title screen, choose a configured faction, and enter the existing battle with that faction applied.
+
+**Phased acceptance criteria:**
+
+- [x] **Phase 1 — Title:** A dedicated title scene is first in Build Settings and presents exactly two primary clickable actions: Play and Exit.
+- [x] Play opens the faction-selection view or scene without starting battle simulation.
+- [x] Exit calls the platform quit path in a player build and provides a safe, testable Editor behavior.
+- [ ] **Phase 2 — Faction selection:** Clickable faction options are generated from a serialized, build-safe catalog/list of valid `FactionData` assets; adding a configured faction does not require hand-authoring another button.
+- [ ] Each option displays at least `FactionData.FactionName`, rejects or clearly diagnoses null/invalid entries, and has an unambiguous selected/clickable state.
+- [ ] Choosing a faction carries that exact asset into the battle scene and applies it to the player team before faction presentation, workers, or units initialize.
+- [ ] Existing opponent-faction configuration remains explicit and is not accidentally replaced by the player's selection.
+- [ ] Returning to or restarting a battle does not leave stale duplicate menu/session objects.
+- [ ] **Phase 3 — Animated background:** The title screen includes decorative Tiny Swords-style buildings and non-interactive units moving across the background without invoking combat, economy, or match systems.
+- [ ] Background animation is layered behind interactive UI, does not intercept button input, and remains readable and performant at the prototype's representative PC resolutions.
+- [ ] Menu scripts compile, both scenes are present and ordered correctly in Build Settings, and the title -> selection -> battle path is verified in Play Mode and a player build where practical.
+
+**Relevant systems:** new menu scene/UI and controller, `FactionData`, a serialized faction catalog/menu configuration, scene-loading/session-selection boundary, `GameManager`, Build Settings
+
+**Dependencies:** Existing faction assets and faction-driven presentation. Phase 3 depends on Phases 1–2 but the functional menu flow does not depend on the animated background.
+
+**Risks and manual Unity work:** Runtime builds cannot use `AssetDatabase` to discover ScriptableObjects, so available factions must be explicitly serialized or supplied through another build-safe content mechanism. Scene creation, Canvas layout, button references, Build Settings ordering, faction catalog contents, multi-resolution inspection, and Play Mode/player-build verification require Unity Editor validation.
+
+**Progress:** Coordinated and accepted in `DEC-012`. The user verified Phase 1 in Play Mode on 2026-07-17. Phase 2 source now provides a serialized build-safe faction catalog, generated faction buttons with names and castle art, null/duplicate diagnostics, scene-boundary player selection, and early `GameManager` consumption without replacing the opponent faction. An initial Play Mode check found clipped, non-clickable options; the Scroll View was replaced with a direct two-column grid and button raycasts/layout are now enforced. Default and both meme-team assets remain available under `Factions/NonMenu` but are intentionally excluded because catalog generation includes only direct children of the main Factions folder. The updated title scene needs regeneration through `Tools > Clash of Pantheons > Create Title Menu Scene`, followed by Play Mode and player-build verification.
+
+**Status:** Partially implemented
+
 ---
 
 ## P2 — Important after the critical loop

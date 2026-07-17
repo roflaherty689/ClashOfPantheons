@@ -87,6 +87,11 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        if (FactionSelectionSession.PlayerFaction != null)
+        {
+            leftFactionData = FactionSelectionSession.PlayerFaction;
+        }
+
         ResolveBases();
         ApplyFactionPresentation();
     }

@@ -126,7 +126,7 @@ Campaign and persistent progression are deferred beyond the core prototype. No s
 - **Prototype battlefield:** One shared horizontal lane with a stronghold and resource area for each side.
 - **Opponent:** Single-player against AI.
 - **Target length:** Approximately five minutes.
-- **Transitions:** No player-facing menu or transition flow is implemented.
+- **Transitions:** Accepted direction is a title screen with Play and Exit actions, followed by a faction-selection screen populated from the available `FactionData` assets before entering the battle. This flow is not implemented.
 - **Replay:** Restart or rematch after the result; not implemented.
 - **Later possibilities:** Alternative maps, lane structures, or endless mode may be reconsidered after prototype validation.
 
@@ -140,13 +140,15 @@ The AI should use the same economy, production, upgrade, and match rules as the 
 
 **Partially implemented:** The redesigned scene HUD presents the accepted single-gold economy and independent role cards. Its player gold, aggregate worker income, worker count, buy-worker button, five production purchase controls, locked/producing and tier states, affordability, greyed locked art, both stronghold-health displays, match timer, result overlay, resolution reason, and restart button are live in source. Production purchasing requires Play Mode verification. The shortened countdown and lost-value result were Play Mode verified on 2026-07-17; the other result and restart paths remain targeted verification work.
 
-The functional prototype HUD must communicate gold, worker purchase state, independent production, star tiers, remaining time, base health, and the final result. A results/restart flow is required. Menus, onboarding, and most feedback remain unimplemented.
+The functional prototype HUD must communicate gold, worker purchase state, independent production, star tiers, remaining time, base health, and the final result. A results/restart flow is required. The accepted initial front-end flow is a title screen with Play and Exit, then a faction-selection screen whose clickable options are generated from configured `FactionData` assets. The chosen player faction must drive the existing faction-owned battle presentation and unit mappings. Basic onboarding and most feedback remain unimplemented.
 
 ## Audio and visual direction
 
 Use the colourful, humorous Tiny Swords pixel-art style as the prototype direction. Replacement or supplementary art should preserve that tone while using iconic mythological or cultural details where useful; strict historical accuracy is not the goal. Five mechanically identical Tiny Swords team-colour variants (black, blue, purple, red, and yellow) are available for prototype presentation. Each variant owns matching Castle and House3 hand-in sprites, an animated worker prefab, and animated melee/archer prefabs; cavalry, siege, and mythic remain shared. The selected faction drives its world presentation, HUD stronghold icon, and spawned worker colour. These palette variants are not five designed mythological factions. Final art and broad faction production remain deferred.
 
 No project-specific audio system or direction is implemented. Music/SFX controls and audio content are later work.
+
+The title screen should eventually use the same colourful Tiny Swords presentation, with decorative buildings and units moving across its background. This animated background is presentation polish after the functional title and faction-selection flow; it must not own or mutate battle simulation state.
 
 ## Accessibility and input
 

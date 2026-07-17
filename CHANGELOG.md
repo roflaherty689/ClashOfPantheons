@@ -8,6 +8,8 @@ Git history remains the exact implementation record.
 
 ### Added
 
+- Phase 1 title-menu runtime behavior and an Editor builder for a responsive Play/Exit title scene, Phase 2 placeholder, Input System UI, and deterministic Build Settings ordering.
+- A build-safe faction catalog, generated faction-selection buttons, and a scene-transition handoff that applies the chosen player faction before battle presentation initializes.
 - Initial project-memory documents for design, roadmap, tasks, decisions, and changelog maintenance.
 - Accepted decision records for the core player role, prototype match rules, gold economy, independent role production, three-star upgrades, scope boundary, and Tiny Swords visual direction.
 - An accepted purchase-to-recurring-production contract for independent role tracks and three star tiers.
@@ -28,6 +30,8 @@ Git history remains the exact implementation record.
 
 ### Changed
 
+- Restyled the title and faction-selection screens with supplied Tiny Swords wood-table, paper, banner, slot-panel, and blue-button UI sprites.
+- Moved the Default and two meme-team faction assets into `Factions/NonMenu`; title-menu catalog generation now exposes only factions stored directly in the main Factions folder.
 - The selected-role details now follow the last production card hovered over or interacted with, remain pinned after the pointer leaves, show that role's unit artwork at twice the previous icon size instead of a generic sword icon, and omit the redundant production/independent row.
 - Redesigned the editor-generated battle HUD around Tiny Swords panels, bars, buttons, icons, workers, strongholds, and human/enemy avatar portraits; replaced conflicting multi-currency and shared-queue mockups with binding-ready gold, worker, five-role independent-production, match-status, and result presentation.
 - Reconciled `GAME_DESIGN.md` with the current Unity repository and the user-approved single-player autobattler direction.
@@ -53,6 +57,7 @@ Git history remains the exact implementation record.
 
 ### Fixed
 
+- Replaced the faction selector's clipped Scroll View with a directly clickable two-column grid that displays all configured faction options, with each castle-and-label pair centered inside its button.
 - Matched the blue, purple, red, and yellow Warrior/Archer clip behavior to black: Idle and Run loop continuously while attacks remain one-shot.
 - Production purchase buttons now repair disabled target-graphic raycasts at runtime, allowing the EventSystem to receive clicks from the existing generated scene.
 - Production tier counters now resolve from their card structure instead of fragile initial text-object names, keeping the displayed star count synchronized with successful upgrades.
