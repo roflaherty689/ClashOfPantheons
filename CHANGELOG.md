@@ -8,6 +8,8 @@ Git history remains the exact implementation record.
 
 ### Added
 
+- A pre-purchase mythic picker in the right-side role details pane, backed by a build-safe roster containing all five monks, Minotaur, and all 15 qualifying Enemy Pack units.
+- Fifteen animation-complete Enemy Pack mythic prefabs with independent unit data, plus dedicated bone, harpoon, and shaman projectile prefabs for the ranged roster.
 - Phase 1 monk-healer runtime support for lowest-health allied combat targeting, tier-scaled healing on a fixed cadence, clamped health restoration, and recipient-positioned heal effects, plus an Editor builder for all five colour variants.
 - A decorative title-screen background layer with Tiny Swords green terrain, buildings, independently animated five-colour melee/archer units, expanded six-unit patrol groups in each side margin, and a smaller number of untinted minotaurs behind an inset wood panel.
 - Phase 1 title-menu runtime behavior and an Editor builder for a responsive Play/Exit title scene, Phase 2 placeholder, Input System UI, and deterministic Build Settings ordering.
@@ -32,6 +34,13 @@ Git history remains the exact implementation record.
 
 ### Changed
 
+- Completed and accepted the Phase 2 animated Enemy Pack mythic roster and Phase 3 pre-purchase mythic picker after combined Play Mode review.
+- Mythic-picker choices now show their configured avatar beside the unit name and cost, making roster-art review explicit.
+- Standard Tiny Swords archers now fire the pack's matching arrow artwork; mythic slots begin with crossed swords and switch both slot and details imagery to the selected unit's matching Enemy Avatar or colour-specific Human Avatar.
+- Simplified the mythic picker by removing its redundant heading and back button; leaving the picker remains available by selecting another production role.
+- Mythic selection and the initial unlock purchase now occur atomically; later purchases upgrade the locked-in unit, whose own cost, cadence, prefab, and data remain authoritative until the match resets.
+- Normalized the new Enemy Pack mythic Animator Controllers around Idle, Run/Walk, and one-shot Attack states; Troll uses its Attack clip while Boat, guard, windup, recovery, and breaking-club animations remain excluded.
+- Added optional projectile trajectory rotation so animated projectiles such as the shaman orb can retain their authored orientation without changing existing projectile defaults.
 - Restyled the title and faction-selection screens with supplied Tiny Swords wood-table, paper, banner, slot-panel, and blue-button UI sprites.
 - Moved the Default and two meme-team faction assets into `Factions/NonMenu`; title-menu catalog generation now exposes only factions stored directly in the main Factions folder.
 - The selected-role details now follow the last production card hovered over or interacted with, remain pinned after the pointer leaves, show that role's unit artwork at twice the previous icon size instead of a generic sword icon, and omit the redundant production/independent row.
@@ -59,6 +68,9 @@ Git history remains the exact implementation record.
 
 ### Fixed
 
+- Restored parchment behind the locked crossed-swords mythic art, removed the empty-image grey fill, and mirrored that locked presentation in the hovered role-details panel.
+- Corrected the Minotaur, Lizard, Shaman, Thief, Troll, and Turtle portrait mapping, and stopped shared monk `UnitData` from collapsing every colour variant onto one avatar.
+- Corrected mythic portrait and crossed-swords sprite serialization so the HUD no longer retains one authored Enemy Avatar for every selection or while the slot is locked.
 - Replaced the faction selector's clipped Scroll View with a directly clickable two-column grid that displays all configured faction options, with each castle-and-label pair centered inside its button.
 - Matched the blue, purple, red, and yellow Warrior/Archer clip behavior to black: Idle and Run loop continuously while attacks remain one-shot.
 - Production purchase buttons now repair disabled target-graphic raycasts at runtime, allowing the EventSystem to receive clicks from the existing generated scene.

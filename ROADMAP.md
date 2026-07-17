@@ -63,7 +63,7 @@ These checks confirm repository presence only. Their integrated runtime behavior
 - [ ] Add a player-facing title -> faction selection -> battle flow. Generate faction choices from a build-safe configured `FactionData` catalog and carry the chosen player faction into the battle scene.
 - [ ] Validate role readability and at least one meaningful economy-versus-pressure decision through playtesting.
 - [ ] Add focused tests for deterministic economy, production, and result rules, plus a documented Play Mode critical-path check.
-- [ ] Deliver the accepted selectable mythic test roster in sequence: five colour monk healers, reusable animated Enemy Pack melee/ranged prefabs, then a pre-purchase details-pane picker with per-match selection and data-owned balance.
+- [x] Deliver the accepted selectable mythic test roster in sequence: five colour monk healers, reusable animated Enemy Pack melee/ranged prefabs, then a pre-purchase details-pane picker with per-match selection and data-owned balance.
 - [ ] Review the broad initial mythic roster after animation, balance, and counter-selection testing; do not let this expansion displace the AI and complete-match critical path.
 
 ### Dependencies

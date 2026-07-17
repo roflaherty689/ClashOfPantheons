@@ -16,6 +16,7 @@ public class Projectile : MonoBehaviour
     private float arcHeight;
     private bool initialized;
     [SerializeField, Min(0f)] private float hitRadius = 0.2f;
+    [SerializeField] private bool rotateToTrajectory = true;
     public void Initialize(IDamageable target, float damage, float travelTime, float arcHeight)
     {
         if (!DamageableUtility.IsValid(target))
@@ -35,9 +36,12 @@ public class Projectile : MonoBehaviour
         startPosition = transform.position;
         targetPosition = targetTransform.position;
 
-        Vector3 direction = targetPosition - transform.position;
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0, 0, angle);
+        if (rotateToTrajectory)
+        {
+            Vector3 direction = targetPosition - transform.position;
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0, 0, angle);
+        }
 
         initialized = true;
     }

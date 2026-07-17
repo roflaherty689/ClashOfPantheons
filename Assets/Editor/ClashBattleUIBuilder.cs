@@ -216,9 +216,9 @@ public static class ClashBattleUIBuilder
             UiRoot + "/Human Avatars/Avatars_03.png",
             UiRoot + "/Human Avatars/Avatars_02.png",
             "Assets/Tiny Swords - Enemy Pack/Enemy Avatars/Enemy Avatars_16.png",
-            "Assets/Tiny Swords - Enemy Pack/Enemy Avatars/Enemy Avatars_09.png"
+            UiRoot + "/Icons/Icon_05.png"
         };
-        string[] artSprites = { "Avatars_01_0", "Avatars_03_0", "Avatars_02_0", "Enemy Avatars_16_0", "Enemy Avatars_09_0" };
+        string[] artSprites = { "Avatars_01_0", "Avatars_03_0", "Avatars_02_0", "Enemy Avatars_16_0", "Icon_05_0" };
 
         for (int i = 0; i < roles.Length; i++)
         {

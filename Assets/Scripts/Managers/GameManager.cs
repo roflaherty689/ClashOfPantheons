@@ -35,6 +35,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private FactionData leftFactionData;
     [SerializeField] private FactionData rightFactionData;
 
+    [Header("Mythic Selection")]
+    [SerializeField] private MythicUnitRoster mythicUnitRoster;
+
     [Header("Faction Presentation")]
     [SerializeField] private Image leftCastleIcon;
     [SerializeField] private Image rightCastleIcon;
@@ -64,6 +67,7 @@ public class GameManager : MonoBehaviour
     private readonly int[,] unitLossCounts = new int[2, SpawnRoles.Length];
     private readonly int[] totalUnitLossValues = new int[2];
     private readonly int[,] productionTiers = new int[2, SpawnRoles.Length];
+    private readonly BaseUnit[] selectedMythicUnits = new BaseUnit[2];
 
     private float globalSpawnTimer;
     private int leftReadySpawnIndex;
@@ -84,9 +88,15 @@ public class GameManager : MonoBehaviour
     public MatchEndReason EndReason => endReason;
     public float TimeRemaining => Mathf.Max(0f, timeRemaining);
     public bool SetTeamColour => setTeamColour;
+    public MythicUnitRoster MythicUnitRoster => mythicUnitRoster;
 
     private void Awake()
     {
+        if (mythicUnitRoster == null)
+        {
+            mythicUnitRoster = Resources.Load<MythicUnitRoster>("MythicUnitRoster");
+        }
+
         if (FactionSelectionSession.PlayerFaction != null)
         {
             leftFactionData = FactionSelectionSession.PlayerFaction;
@@ -172,6 +182,16 @@ public class GameManager : MonoBehaviour
 
     public bool TryGetProductionData(Team team, UnitRole role, out UnitData data)
     {
+        if (role == UnitRole.Mythic)
+        {
+            BaseUnit selectedMythic = GetSelectedMythicUnit(team);
+            if (selectedMythic != null && selectedMythic.UnitData != null)
+            {
+                data = selectedMythic.UnitData;
+                return true;
+            }
+        }
+
         FactionData factionData = GetFactionData(team);
         if (factionData != null && factionData.TryGetUnitData(role, out data))
         {
@@ -191,6 +211,7 @@ public class GameManager : MonoBehaviour
 
         int teamIndex = GetTeamIndex(team);
         if (productionTiers[teamIndex, roleIndex] >= MaximumProductionTier) return false;
+        if (role == UnitRole.Mythic && productionTiers[teamIndex, roleIndex] == 0) return false;
         if (!TryGetProductionData(team, role, out UnitData data)) return false;
         if (!economy.TrySpendGold(data.Cost)) return false;
 
@@ -201,6 +222,52 @@ public class GameManager : MonoBehaviour
             GetSpawnTimers(team)[roleIndex] = 0f;
         }
 
+        return true;
+    }
+
+    public BaseUnit GetSelectedMythicUnit(Team team)
+    {
+        return selectedMythicUnits[GetTeamIndex(team)];
+    }
+
+    public bool HasMythicChoices(Team team)
+    {
+        if (gameOver || mythicUnitRoster == null ||
+            GetProductionTier(team, UnitRole.Mythic) != 0)
+        {
+            return false;
+        }
+
+        foreach (BaseUnit candidate in mythicUnitRoster.Units)
+        {
+            if (candidate != null && candidate.UnitData != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TrySelectAndPurchaseMythic(Team team, BaseUnit prefab, WorkerManager economy)
+    {
+        if (gameOver || economy == null || economy.Team != team || prefab == null ||
+            mythicUnitRoster == null || !mythicUnitRoster.Contains(prefab))
+        {
+            return false;
+        }
+
+        int roleIndex = GetRoleIndex(UnitRole.Mythic);
+        int teamIndex = GetTeamIndex(team);
+        if (roleIndex < 0 || productionTiers[teamIndex, roleIndex] != 0 ||
+            prefab.UnitData == null || !economy.TrySpendGold(prefab.UnitData.Cost))
+        {
+            return false;
+        }
+
+        selectedMythicUnits[teamIndex] = prefab;
+        productionTiers[teamIndex, roleIndex] = 1;
+        GetSpawnTimers(team)[roleIndex] = 0f;
         return true;
     }
 
@@ -548,7 +615,8 @@ public class GameManager : MonoBehaviour
             return false;
         }
 
-        if (!factionData.TryGetUnitPrefab(role, out BaseUnit prefab))
+        BaseUnit prefab = role == UnitRole.Mythic ? GetSelectedMythicUnit(team) : null;
+        if (prefab == null && !factionData.TryGetUnitPrefab(role, out prefab))
         {
             return false;
         }

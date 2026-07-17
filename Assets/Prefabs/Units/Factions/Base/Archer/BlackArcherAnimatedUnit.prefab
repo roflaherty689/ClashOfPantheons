@@ -128,7 +128,7 @@ MonoBehaviour:
   animator: {fileID: 602104232319759185}
   attackTiltAngle: 15
   attackTiltDuration: 0.2
-  projectilePrefab: {fileID: 2364576383394483315, guid: 8f77a874314decd4dadb197965aef2ef, type: 3}
+  projectilePrefab: {fileID: 2539484330769199787, guid: b841e9f29d2343f5973087cd782aa26a, type: 3}
   projectileSpawnPoint: {fileID: 5373559575329865765}
   projectileTravelTime: 0.4
   projectileArcHeight: 0.5

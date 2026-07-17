@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -38,6 +39,12 @@ public class BattleEconomyUI : MonoBehaviour
         public EventTrigger.Entry PointerDownEntry;
     }
 
+    private sealed class MythicChoiceBinding
+    {
+        public BaseUnit Prefab;
+        public Button Button;
+    }
+
     [SerializeField] private Team playerTeam = Team.Left;
 
     private WorkerManager workerManager;
@@ -67,6 +74,9 @@ public class BattleEconomyUI : MonoBehaviour
     private TextMeshProUGUI selectedRoleTierText;
     private TextMeshProUGUI selectedRoleDescriptionText;
     private TextMeshProUGUI selectedRoleActionText;
+    private RectTransform selectedRolePanel;
+    private GameObject mythicPicker;
+    private readonly List<MythicChoiceBinding> mythicChoiceBindings = new List<MythicChoiceBinding>();
     private string battleSummarySuffix = string.Empty;
 
     private void Awake()
@@ -161,6 +171,8 @@ public class BattleEconomyUI : MonoBehaviour
         {
             selectedRoleButton.onClick.RemoveListener(PurchaseSelectedRole);
         }
+
+        CloseMythicPicker();
     }
 
     private void ResolveGameManager()
@@ -268,6 +280,7 @@ public class BattleEconomyUI : MonoBehaviour
         }
 
         Transform selectedRoleTransform = transform.Find(SelectedRolePath.TrimEnd('/'));
+        selectedRolePanel = selectedRoleTransform as RectTransform;
         selectedRoleIcon = FindImage(SelectedRolePath + "Role Icon", SelectedRolePath + "Melee Icon");
         selectedRoleTitleText = FindText(SelectedRolePath + "MELEE Text");
         selectedRoleStatusText = FindDirectTextContaining(selectedRoleTransform, "LOCKED");
@@ -407,12 +420,25 @@ public class BattleEconomyUI : MonoBehaviour
     private void PurchaseProduction(UnitRole role)
     {
         SelectProductionRole(role);
+
+        if (role == UnitRole.Mythic && gameManager != null &&
+            gameManager.GetProductionTier(playerTeam, UnitRole.Mythic) == 0)
+        {
+            OpenMythicPicker();
+            return;
+        }
+
         gameManager?.TryPurchaseProduction(playerTeam, role, workerManager);
         Refresh();
     }
 
     private void SelectProductionRole(UnitRole role)
     {
+        if (role != UnitRole.Mythic)
+        {
+            CloseMythicPicker();
+        }
+
         selectedRole = role;
 
         if (gameManager != null && workerManager != null)
@@ -482,14 +508,30 @@ public class BattleEconomyUI : MonoBehaviour
             int tier = gameManager.GetProductionTier(playerTeam, binding.Role);
             bool hasData = gameManager.TryGetProductionData(playerTeam, binding.Role, out UnitData data);
             int cost = hasData ? data.Cost : 0;
-            bool canPurchase = hasData && tier < GameManager.MaximumProductionTier &&
-                workerManager.CurrentGold >= cost && !gameManager.IsGameOver;
+            bool needsMythicChoice = binding.Role == UnitRole.Mythic && tier == 0;
+            bool canPurchase = needsMythicChoice
+                ? gameManager.HasMythicChoices(playerTeam)
+                : hasData && tier < GameManager.MaximumProductionTier &&
+                    workerManager.CurrentGold >= cost && !gameManager.IsGameOver;
 
             if (binding.Art != null)
             {
-                binding.Art.color = tier == 0
-                    ? new Color(0.35f, 0.35f, 0.35f, binding.UnlockedColour.a)
-                    : binding.UnlockedColour;
+                if (binding.Role == UnitRole.Mythic && gameManager.MythicUnitRoster != null)
+                {
+                    BaseUnit selectedMythic = gameManager.GetSelectedMythicUnit(playerTeam);
+                    UpdateMythicCardArt(binding.Art, selectedMythic);
+                }
+
+                bool lockedMythic = binding.Role == UnitRole.Mythic && tier == 0;
+                binding.Art.color = lockedMythic
+                    ? Color.clear
+                    : tier == 0
+                        ? new Color(0.35f, 0.35f, 0.35f, binding.UnlockedColour.a)
+                        : binding.UnlockedColour;
+
+                SetCrossedSwordsColour(
+                    binding.Art,
+                    lockedMythic ? new Color(0.35f, 0.35f, 0.35f, 1f) : binding.Art.color);
             }
 
             if (binding.StatusText != null)
@@ -510,6 +552,7 @@ public class BattleEconomyUI : MonoBehaviour
                 binding.ActionText.alignment = TextAlignmentOptions.Center;
                 binding.ActionText.text = tier >= GameManager.MaximumProductionTier
                     ? "MAX"
+                    : needsMythicChoice ? "CHOOSE"
                     : tier == 0 ? $"UNLOCK {cost}" : $"UPGRADE {cost}";
             }
 
@@ -520,6 +563,7 @@ public class BattleEconomyUI : MonoBehaviour
         }
 
         RefreshSelectedRole();
+        RefreshMythicPicker();
     }
 
     private void RefreshSelectedRole()
@@ -527,16 +571,33 @@ public class BattleEconomyUI : MonoBehaviour
         int tier = gameManager.GetProductionTier(playerTeam, selectedRole);
         bool hasData = gameManager.TryGetProductionData(playerTeam, selectedRole, out UnitData data);
         int cost = hasData ? data.Cost : 0;
-        string roleName = selectedRole.ToString().ToUpperInvariant();
+        BaseUnit selectedMythic = selectedRole == UnitRole.Mythic
+            ? gameManager.GetSelectedMythicUnit(playerTeam)
+            : null;
+        string roleName = selectedMythic != null
+            ? GetDisplayName(selectedMythic).ToUpperInvariant()
+            : selectedRole.ToString().ToUpperInvariant();
 
         if (selectedRoleIcon != null)
         {
-            ProductionUIBinding selectedBinding = GetProductionBinding(selectedRole);
-            if (selectedBinding?.Art != null)
+            if (selectedRole == UnitRole.Mythic)
             {
-                selectedRoleIcon.sprite = selectedBinding.Art.sprite;
-                selectedRoleIcon.color = selectedBinding.Art.color;
-                selectedRoleIcon.preserveAspect = true;
+                UpdateMythicCardArt(selectedRoleIcon, selectedMythic);
+                selectedRoleIcon.color = selectedMythic == null ? Color.clear : Color.white;
+                SetCrossedSwordsColour(
+                    selectedRoleIcon,
+                    selectedMythic == null ? new Color(0.35f, 0.35f, 0.35f, 1f) : Color.white);
+            }
+            else
+            {
+                HideCrossedSwords(selectedRoleIcon);
+                ProductionUIBinding selectedBinding = GetProductionBinding(selectedRole);
+                if (selectedBinding?.Art != null)
+                {
+                    selectedRoleIcon.sprite = selectedBinding.Art.sprite;
+                    selectedRoleIcon.color = selectedBinding.Art.color;
+                    selectedRoleIcon.preserveAspect = true;
+                }
             }
         }
 
@@ -557,7 +618,9 @@ public class BattleEconomyUI : MonoBehaviour
 
         if (selectedRoleDescriptionText != null)
         {
-            selectedRoleDescriptionText.text = tier == 0
+            selectedRoleDescriptionText.text = selectedRole == UnitRole.Mythic && tier == 0
+                ? "Choose a mythic unit before spending gold. Its own cost and production cadence will apply for this match."
+                : tier == 0
                 ? $"Unlock to begin recurring {roleName.ToLowerInvariant()} production. Upgrades affect future spawns only."
                 : tier < GameManager.MaximumProductionTier
                     ? $"Producing {tier}-star {roleName.ToLowerInvariant()} units. Upgrade affects future spawns only."
@@ -568,16 +631,313 @@ public class BattleEconomyUI : MonoBehaviour
         {
             selectedRoleActionText.text = tier >= GameManager.MaximumProductionTier
                 ? "MAXIMUM TIER"
+                : selectedRole == UnitRole.Mythic && tier == 0 ? "SELECT UNIT"
                 : tier == 0 ? $"UNLOCK   {cost} GOLD" : $"UPGRADE   {cost} GOLD";
         }
 
         if (selectedRoleButton != null)
         {
-            selectedRoleButton.interactable = hasData &&
-                tier < GameManager.MaximumProductionTier &&
-                workerManager.CurrentGold >= cost &&
-                !gameManager.IsGameOver;
+            selectedRoleButton.interactable = selectedRole == UnitRole.Mythic && tier == 0
+                ? gameManager.HasMythicChoices(playerTeam)
+                : hasData && tier < GameManager.MaximumProductionTier &&
+                    workerManager.CurrentGold >= cost && !gameManager.IsGameOver;
         }
+    }
+
+    private void OpenMythicPicker()
+    {
+        if (selectedRolePanel == null || gameManager?.MythicUnitRoster == null || mythicPicker != null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < selectedRolePanel.childCount; i++)
+        {
+            selectedRolePanel.GetChild(i).gameObject.SetActive(false);
+        }
+
+        mythicPicker = CreateUIObject("Mythic Picker", selectedRolePanel).gameObject;
+        RectTransform pickerRect = mythicPicker.GetComponent<RectTransform>();
+        pickerRect.anchorMin = Vector2.zero;
+        pickerRect.anchorMax = Vector2.one;
+        pickerRect.offsetMin = new Vector2(10f, 10f);
+        pickerRect.offsetMax = new Vector2(-10f, -10f);
+        Image background = mythicPicker.AddComponent<Image>();
+        background.color = new Color32(31, 36, 37, 252);
+
+        RectTransform viewport = CreateUIObject("Viewport", pickerRect);
+        viewport.anchorMin = new Vector2(0f, 0f);
+        viewport.anchorMax = new Vector2(1f, 1f);
+        viewport.offsetMin = new Vector2(8f, 8f);
+        viewport.offsetMax = new Vector2(-8f, -8f);
+        Image viewportImage = viewport.gameObject.AddComponent<Image>();
+        viewportImage.color = new Color(0f, 0f, 0f, 0.12f);
+        viewport.gameObject.AddComponent<RectMask2D>();
+
+        RectTransform content = CreateUIObject("Choices", viewport);
+        content.anchorMin = new Vector2(0f, 1f);
+        content.anchorMax = new Vector2(1f, 1f);
+        content.pivot = new Vector2(0.5f, 1f);
+        content.anchoredPosition = Vector2.zero;
+        content.sizeDelta = Vector2.zero;
+        GridLayoutGroup grid = content.gameObject.AddComponent<GridLayoutGroup>();
+        grid.cellSize = new Vector2(190f, 58f);
+        grid.spacing = new Vector2(8f, 7f);
+        grid.padding = new RectOffset(3, 3, 3, 3);
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = 2;
+        ContentSizeFitter fitter = content.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        ScrollRect scroll = mythicPicker.AddComponent<ScrollRect>();
+        scroll.viewport = viewport;
+        scroll.content = content;
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.scrollSensitivity = 28f;
+
+        foreach (BaseUnit prefab in gameManager.MythicUnitRoster.Units)
+        {
+            if (prefab == null || prefab.UnitData == null) continue;
+
+            Button choice = CreatePickerButton(content, GetDisplayName(prefab), Vector2.zero, grid.cellSize);
+            TextMeshProUGUI label = choice.GetComponentInChildren<TextMeshProUGUI>();
+            label.text = $"{GetDisplayName(prefab)}\n{prefab.UnitData.Cost} GOLD";
+            label.fontSize = 14f;
+            label.alignment = TextAlignmentOptions.MidlineLeft;
+            RectTransform labelRect = (RectTransform)label.transform;
+            labelRect.anchoredPosition = new Vector2(25f, 0f);
+            labelRect.sizeDelta = new Vector2(128f, 52f);
+
+            Sprite avatar = gameManager.MythicUnitRoster.GetAvatar(prefab) ?? GetUnitSprite(prefab);
+            CreatePickerAvatar(choice.transform, avatar);
+            BaseUnit selectedPrefab = prefab;
+            choice.onClick.AddListener(() => PurchaseMythicChoice(selectedPrefab));
+            mythicChoiceBindings.Add(new MythicChoiceBinding
+            {
+                Prefab = prefab,
+                Button = choice
+            });
+        }
+
+        RefreshMythicPicker();
+    }
+
+    private void PurchaseMythicChoice(BaseUnit prefab)
+    {
+        if (gameManager != null && gameManager.TrySelectAndPurchaseMythic(playerTeam, prefab, workerManager))
+        {
+            CloseMythicPicker();
+            Refresh();
+        }
+    }
+
+    private void RefreshMythicPicker()
+    {
+        if (mythicPicker == null || workerManager == null || gameManager == null) return;
+
+        foreach (MythicChoiceBinding binding in mythicChoiceBindings)
+        {
+            bool valid = binding.Prefab != null && binding.Prefab.UnitData != null;
+            binding.Button.interactable = valid && !gameManager.IsGameOver &&
+                workerManager.CurrentGold >= binding.Prefab.UnitData.Cost;
+        }
+    }
+
+    private void CloseMythicPicker()
+    {
+        GameObject pickerToDestroy = mythicPicker;
+        mythicPicker = null;
+        if (pickerToDestroy != null)
+        {
+            pickerToDestroy.SetActive(false);
+            Destroy(pickerToDestroy);
+        }
+
+        mythicChoiceBindings.Clear();
+        if (selectedRolePanel == null) return;
+
+        for (int i = 0; i < selectedRolePanel.childCount; i++)
+        {
+            GameObject child = selectedRolePanel.GetChild(i).gameObject;
+            if (child != pickerToDestroy)
+            {
+                child.SetActive(true);
+            }
+        }
+    }
+
+    private Button CreatePickerButton(Transform parent, string objectName, Vector2 position, Vector2 size)
+    {
+        RectTransform rect = CreateUIObject(objectName, parent);
+        rect.sizeDelta = size;
+        rect.anchoredPosition = position;
+        Image image = rect.gameObject.AddComponent<Image>();
+        image.color = new Color32(43, 102, 127, 255);
+        Button button = rect.gameObject.AddComponent<Button>();
+        button.targetGraphic = image;
+        CreatePickerText(rect, objectName, 16f, Vector2.zero, size - new Vector2(8f, 4f));
+        return button;
+    }
+
+    private TextMeshProUGUI CreatePickerText(
+        Transform parent,
+        string value,
+        float fontSize,
+        Vector2 position,
+        Vector2 size)
+    {
+        RectTransform rect = CreateUIObject(value + " Text", parent);
+        rect.sizeDelta = size;
+        rect.anchoredPosition = position;
+        TextMeshProUGUI text = rect.gameObject.AddComponent<TextMeshProUGUI>();
+        text.text = value;
+        text.font = selectedRoleTitleText != null ? selectedRoleTitleText.font : null;
+        text.fontSize = fontSize;
+        text.color = Color.white;
+        text.alignment = TextAlignmentOptions.Center;
+        text.raycastTarget = false;
+        return text;
+    }
+
+    private static void CreatePickerAvatar(Transform parent, Sprite avatar)
+    {
+        RectTransform avatarRect = CreateUIObject("Avatar", parent);
+        avatarRect.anchorMin = new Vector2(0.5f, 0.5f);
+        avatarRect.anchorMax = new Vector2(0.5f, 0.5f);
+        avatarRect.sizeDelta = new Vector2(48f, 48f);
+        avatarRect.anchoredPosition = new Vector2(-66f, 0f);
+        Image avatarImage = avatarRect.gameObject.AddComponent<Image>();
+        avatarImage.sprite = avatar;
+        avatarImage.color = Color.white;
+        avatarImage.preserveAspect = true;
+        avatarImage.raycastTarget = false;
+    }
+
+    private static RectTransform CreateUIObject(string objectName, Transform parent)
+    {
+        GameObject instance = new GameObject(objectName, typeof(RectTransform));
+        RectTransform rect = instance.GetComponent<RectTransform>();
+        rect.SetParent(parent, false);
+        return rect;
+    }
+
+    private static Sprite GetUnitSprite(BaseUnit prefab)
+    {
+        SpriteRenderer renderer = prefab != null ? prefab.GetComponentInChildren<SpriteRenderer>(true) : null;
+        return renderer != null ? renderer.sprite : null;
+    }
+
+    private void UpdateMythicCardArt(Image art, BaseUnit selectedMythic)
+    {
+        if (art == null || gameManager?.MythicUnitRoster == null) return;
+
+        Transform crossedSwords = art.transform.Find("Crossed Swords");
+        if (selectedMythic != null)
+        {
+            if (crossedSwords != null)
+            {
+                crossedSwords.gameObject.SetActive(false);
+            }
+
+            art.sprite = gameManager.MythicUnitRoster.GetAvatar(selectedMythic) ??
+                GetUnitSprite(selectedMythic);
+            art.preserveAspect = true;
+            return;
+        }
+
+        art.sprite = null;
+        if (crossedSwords == null)
+        {
+            crossedSwords = CreateUIObject("Crossed Swords", art.transform);
+            RectTransform crossedRect = (RectTransform)crossedSwords;
+            crossedRect.anchorMin = Vector2.zero;
+            crossedRect.anchorMax = Vector2.one;
+            crossedRect.offsetMin = Vector2.zero;
+            crossedRect.offsetMax = Vector2.zero;
+
+            CreateParchmentImage(crossedSwords);
+            CreateSwordImage(crossedSwords, "Sword A", 0f);
+            CreateSwordImage(crossedSwords, "Sword B", 90f);
+        }
+
+        crossedSwords.gameObject.SetActive(true);
+    }
+
+    private void CreateParchmentImage(Transform parent)
+    {
+        RectTransform parchmentRect = CreateUIObject("Parchment", parent);
+        parchmentRect.anchorMin = Vector2.zero;
+        parchmentRect.anchorMax = Vector2.one;
+        parchmentRect.offsetMin = Vector2.zero;
+        parchmentRect.offsetMax = Vector2.zero;
+        Image parchment = parchmentRect.gameObject.AddComponent<Image>();
+        parchment.sprite = GetMythicParchmentSprite();
+        parchment.color = Color.white;
+        parchment.preserveAspect = true;
+        parchment.raycastTarget = false;
+    }
+
+    private Sprite GetMythicParchmentSprite()
+    {
+        ProductionUIBinding mythicBinding = GetProductionBinding(UnitRole.Mythic);
+        Transform parchment = mythicBinding?.Card != null
+            ? mythicBinding.Card.Find("Portrait Paper")
+            : null;
+        return parchment != null && parchment.TryGetComponent(out Image image)
+            ? image.sprite
+            : null;
+    }
+
+    private void CreateSwordImage(Transform parent, string objectName, float rotation)
+    {
+        RectTransform swordRect = CreateUIObject(objectName, parent);
+        swordRect.anchorMin = new Vector2(0.5f, 0.5f);
+        swordRect.anchorMax = new Vector2(0.5f, 0.5f);
+        swordRect.sizeDelta = new Vector2(78f, 78f);
+        swordRect.anchoredPosition = Vector2.zero;
+        swordRect.localRotation = Quaternion.Euler(0f, 0f, rotation);
+        Image sword = swordRect.gameObject.AddComponent<Image>();
+        sword.sprite = gameManager.MythicUnitRoster.DefaultIcon;
+        sword.preserveAspect = true;
+        sword.raycastTarget = false;
+    }
+
+    private static void SetCrossedSwordsColour(Image art, Color colour)
+    {
+        Transform crossedSwords = art.transform.Find("Crossed Swords");
+        if (crossedSwords == null) return;
+
+        for (int i = 0; i < crossedSwords.childCount; i++)
+        {
+            Transform child = crossedSwords.GetChild(i);
+            if (child.name.StartsWith("Sword") && child.TryGetComponent(out Image sword))
+            {
+                sword.color = colour;
+            }
+        }
+    }
+
+    private static void HideCrossedSwords(Image art)
+    {
+        Transform crossedSwords = art.transform.Find("Crossed Swords");
+        if (crossedSwords != null)
+        {
+            crossedSwords.gameObject.SetActive(false);
+        }
+    }
+
+    private static string GetDisplayName(BaseUnit prefab)
+    {
+        if (prefab == null) return "Unknown";
+
+        return prefab.name
+            .Replace("MythicUnit", string.Empty)
+            .Replace("MeleeMythicAnimatedUnit", "Minotaur")
+            .Replace("MonkUnit", " Monk")
+            .Replace("Fish", " Fish")
+            .Trim();
     }
 
     private ProductionUIBinding GetProductionBinding(UnitRole role)
