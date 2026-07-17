@@ -3,7 +3,7 @@
 ## Current milestone
 
 **Milestone:** Prototype  
-**Status:** In progress — foundations present, player loop not integrated
+**Status:** In progress — critical loop integrated in source; complete validation, tuning, and regression coverage remain
 
 **Primary outcome:** Deliver one complete economy → production → autonomous combat → result → restart match against AI.
 
@@ -30,7 +30,12 @@ Checked entry conditions are based on repository inspection, not a new Unity lau
 
 ### Current blockers
 
+_No confirmed implementation blocker._
+
+### Current risks and coverage gaps
+
 - No project-owned automated tests or test assemblies were found during the 2026-07-16 static review.
+- The complete economy → production → combat → result → restart path has not been verified end to end.
 
 ---
 
@@ -54,12 +59,12 @@ These checks confirm repository presence only. Their integrated runtime behavior
 ### Planned outcomes
 
 - [x] Accept `DEC-007`: first purchase unlocks continuous role production; the next two purchases upgrade future spawns to two and three stars.
-- [ ] Connect the player's gold and worker systems to independent production for all five roles.
+- [ ] Complete Play Mode verification of the source-integrated player gold, worker, and independent production paths across all five roles.
 - [x] Implement an AI decision layer that participates in the same economy and production game, with three Play Mode-verified difficulties, same-rule purchasing, and random mythic/opponent selection.
-- [ ] Implement the five-minute timer, stronghold-health comparison, unit-loss-value tiebreaker, result states, and restart flow.
-- [ ] Implement the three star tiers with clear costs, effects, and production/UI feedback.
+- [ ] Complete targeted verification of the implemented five-minute timer, stronghold-health comparison, unit-loss-value tiebreaker, result states, and restart/reset flow.
+- [ ] Complete all-role verification of the implemented three star tiers, costs, effects, and production/UI feedback.
 - [x] Move recurring production cadence ownership from the global spawn interval into each role's `UnitData`; retain per-role cost ownership there. Initial values and selectable spawn patterns were user-verified in Play Mode on 2026-07-16.
-- [ ] Replace static mock HUD values and shared-queue presentation with functional prototype state.
+- [ ] Validate the source-integrated functional HUD at representative resolutions and across the complete critical path.
 - [x] Add a player-facing title -> faction selection -> difficulty selection -> battle flow, verified in Play Mode; player-build coverage remains tracked separately.
 - [ ] Validate role readability and at least one meaningful economy-versus-pressure decision through playtesting.
 - [ ] Playtest the implemented first-pass role counters, differentiated mythic roster, reduced 1x/1.25x/1.5x star curve, and roster/base values across equal-gold, mixed-composition, and tiered matchups; tune from observed five-minute match pacing.
@@ -94,7 +99,7 @@ These checks confirm repository presence only. Their integrated runtime behavior
 
 - [ ] Representative gameplay loop
 - [ ] Representative visual direction
-- [ ] Add animated title-screen background presentation using buildings and non-interactive units after the functional menu flow is validated.
+- [x] Add animated title-screen background presentation using buildings and non-interactive units; this was pulled forward and completed during the Prototype milestone.
 - [ ] Representative audio and feedback
 - [ ] Stable UI flow
 - [ ] Initial accessibility support

@@ -16,7 +16,7 @@ This file defines the intended player experience, rules, systems, and scope. **I
 
 **Target audience:** Broad-age strategy players interested in mythology or ancient warfare; exact age rating and audience positioning remain unconfirmed.
 
-**Current stage:** Prototype — mechanics exist but the player-facing loop is not integrated.
+**Current stage:** Prototype — the player-facing loop is integrated in source and partially Play Mode verified; complete critical-path, restart, build, and balance validation remain.
 
 **Pitch:** Build a mythological war economy, shape an autonomous army, and push along a contested lane to destroy the rival stronghold before time runs out.
 
@@ -95,7 +95,7 @@ The five accepted roles are melee, archer, cavalry, siege, and mythic. All five 
 | Archer | Ranged support; intended strong versus melee and weak versus cavalry | Projectile role exists |
 | Cavalry | Fast pressure; intended strong versus archers and weak versus melee | Prototype role exists |
 | Siege | Structure specialist, vulnerable without support | Projectile role and building modifier exist |
-| Mythic | Expensive selectable power unit; initial roster supports testing and counter-selection | Shared Minotaur prototype exists; monk healing and the broader selectable roster are accepted but not implemented |
+| Mythic | Expensive selectable power or support unit; the initial roster supports testing and counter-selection | A 21-option pre-purchase roster is implemented: 16 Enemy Pack creatures including Minotaur and five mechanically identical colour monks. Creature profiles, ranged projectiles, monk healing, atomic selection/purchase, and picker presentation are implemented and have received representative Play Mode review; broader balance and matchup testing remain. |
 
 Heroes and bosses are not prototype scope.
 
@@ -113,7 +113,7 @@ The result overlay identifies victory, defeat, or draw and its resolution condit
 
 **Implemented:** Workers repeatedly travel to a gold vein, mine, return, and deposit gold. Starting and maximum worker counts, worker cost, base gold per trip, and a future-facing income-upgrade multiplier are configurable on `WorkerManager`. The player starts with one worker in the active scene, and the live HUD can buy workers up to the five-worker capacity while displaying current gold, worker count, and aggregate income per trip.
 
-**Accepted but not implemented:** Gold is the only prototype currency. It funds workers, five independent unit-production types, and three star tiers of in-match upgrades. Favour and essence shown in the rough HUD are not prototype systems.
+**Implemented in source, partially Play Mode verified:** Gold is the only prototype currency. It funds workers, five independent unit-production types, and three star tiers of in-match upgrades for both the player and AI. Favour, essence, and shared-queue presentation are excluded from the functional battle HUD. All-role cadence, insufficient-funds, edge-case, and restart-reset coverage remain incomplete.
 
 ### Progression and persistence
 
@@ -129,7 +129,7 @@ Campaign and persistent progression are deferred beyond the core prototype. No s
 - **Opponent:** Single-player against AI.
 - **Target length:** Approximately five minutes.
 - **Transitions:** Implemented in source: title, player-faction selection, difficulty selection, then battle. Difficulty defaults to Easy; the opponent randomly receives a different configured faction.
-- **Replay:** Restart or rematch after the result; not implemented.
+- **Replay:** Active-scene restart is implemented in source and exposed by the result HUD; complete reset behavior still requires targeted Play Mode verification. A distinct rematch flow is not implemented.
 - **Later possibilities:** Alternative maps, lane structures, or endless mode may be reconsidered after prototype validation.
 
 ## AI and difficulty

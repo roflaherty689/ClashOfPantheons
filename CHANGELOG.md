@@ -40,6 +40,9 @@ Git history remains the exact implementation record.
 
 ### Changed
 
+- Reconciled project tracking with the source-integrated critical loop, AI, selectable mythic roster, HUD, timer/results, and restart implementation while preserving outstanding verification work.
+- Audited scene and prefab structure and recorded focused follow-up work for the duplicate Canvas hierarchy, reusable production-card/panel prefabs, mirrored gold-vein presentation, and third-party asset boundaries.
+
 - Expanded the animated title background to include every selectable mythic at least once: all 16 qualifying Enemy Pack creatures and all five colour monks, independently of the melee/archer decoration mix.
 
 - Mythic choices in the production picker are now ordered by ascending gold cost, with alphabetical ordering for equal-cost options.
@@ -138,7 +141,7 @@ Git history remains the exact implementation record.
 
 ### Known Issues
 
-- Unit production purchasing, AI decision behavior, all three difficulty bonuses, and tier presentation require broader Play Mode verification.
+- Recurring production cadence across all five roles, insufficient-funds behavior, revised tier scaling/counters, and restart reset require broader Play Mode verification. Representative AI purchasing, all three difficulty selections and bonuses, and opening behavior were already user-verified.
 - Health-tiebreak, exact-draw, base-destruction result-overlay, and restart-reset paths still require targeted Play Mode verification.
 - Exact role values and matchups remain subject to implementation and playtest tuning.
 - Targeted projectile/worker edge cases and stale serialized fields on the non-animated archer prefab remain to be verified or cleaned.

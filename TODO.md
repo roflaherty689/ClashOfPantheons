@@ -44,10 +44,10 @@ Tasks are ordered by dependency and prototype value.
 
 **Acceptance criteria:**
 
-- [ ] Player gold is the authoritative currency for worker purchases, all five production types, and upgrades.
+- [x] Player gold is the authoritative currency for worker purchases, all five production types, and upgrades.
 - [x] Buying a worker uses the existing worker limit and updates visible gold/worker state.
-- [ ] Every unit type follows the approved independent recurring-production contract without a shared FIFO queue.
-- [ ] A role begins locked; its first purchase unlocks continuous one-star production and its next two purchases upgrade only future spawns to two and three stars.
+- [x] Every unit type follows the approved independent recurring-production contract without a shared FIFO queue in source; all-role Play Mode verification remains tracked below.
+- [x] A role begins locked; its first purchase unlocks continuous one-star production and its next two purchases upgrade only future spawns to two and three stars in source.
 - [x] Favourable matchups apply a 1.2× damage multiplier.
 - [x] Star tiers multiply every configured unit stat except purchase cost by 1×/1.25×/1.5× and affect future spawns only.
 - [x] Each `UnitData` asset owns that role's purchase cost and recurring production cadence; the global spawn interval no longer defines all roles.
@@ -60,7 +60,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** `DEC-004` and `DEC-007`; initial values require balance tuning during implementation
 
-**Progress:** `UnitData` owns each role's cost and cadence. Player production purchasing is now implemented in source: all roles begin locked, a successful purchase atomically spends player gold, the first purchase starts that role's fresh recurring timer, the next two purchases snapshot 1.25×/1.5× stats onto future units, and a fourth purchase is rejected. The implemented counter triangle applies 1.2× favourable damage for melee against cavalry, archers against melee, and cavalry against archers. The five production cards show live locked/producing state, tier, unlock/upgrade/max actions, affordability, and greyed locked art; the selected-role panel mirrors the chosen role. The user Play Mode verified clickable production controls, successful melee unlock/upgrade processing through the three-purchase cap, and live 0/3 → 1/3 → 2/3 → 3/3 tier-counter updates on 2026-07-17, and accepted the revised curve and counter implementation on 2026-07-17. Both teams start locked, so the enemy intentionally produces no units until Task 2 supplies AI purchasing. Runtime and Editor assemblies compile externally with zero warnings and errors. Recurring spawn cadence, revised stat scaling, matchup behavior, insufficient-funds behavior, all five roles, and restart reset still require targeted Play Mode verification; focused automated tests remain absent.
+**Progress:** `UnitData` owns each role's cost and cadence. Player production purchasing is now implemented in source: all roles begin locked, a successful purchase atomically spends player gold, the first purchase starts that role's fresh recurring timer, the next two purchases snapshot 1.25×/1.5× stats onto future units, and a fourth purchase is rejected. The implemented counter triangle applies 1.2× favourable damage for melee against cavalry, archers against melee, and cavalry against archers. The five production cards show live locked/producing state, tier, unlock/upgrade/max actions, affordability, and greyed locked art; the selected-role panel mirrors the chosen role. The user Play Mode verified clickable production controls, successful melee unlock/upgrade processing through the three-purchase cap, and live 0/3 → 1/3 → 2/3 → 3/3 tier-counter updates on 2026-07-17, and accepted the revised curve and counter implementation on 2026-07-17. The completed AI task now purchases and runs enemy production through the same APIs. Runtime and Editor assemblies compile externally with zero warnings and errors. Recurring spawn cadence, revised stat scaling, matchup behavior, insufficient-funds behavior, all five roles, and restart reset still require targeted Play Mode verification; focused automated tests remain absent.
 
 **Status:** Partially implemented
 
@@ -116,8 +116,8 @@ Tasks are ordered by dependency and prototype value.
 
 **Acceptance criteria:**
 
-- [ ] HUD shows live gold, workers, five independent production states, star tiers, timer, both stronghold health values, and results.
-- [ ] Favour, essence, and shared FIFO queue presentation are removed or clearly excluded from the functional prototype UI.
+- [x] HUD shows live gold, workers, five independent production states, star tiers, timer, both stronghold health values, and results in source; complete-loop and multi-resolution verification remain below.
+- [x] Favour, essence, and shared FIFO queue presentation are removed or clearly excluded from the functional prototype UI.
 - [ ] Player purchase and upgrade controls provide success, failure, affordability, and cooldown/cadence feedback.
 - [ ] Critical state does not rely on red/blue colour alone and text is readable at the chosen prototype resolution.
 - [ ] At least one complete economy → production → combat → result → restart match is verified in Play Mode.
@@ -232,6 +232,10 @@ _No items currently blocked by external state._
 
 ## Discovered follow-up work
 
+- After critical-loop verification, normalize the battle-scene UI hierarchy in Unity: remove or rename the duplicate `Canvas` wrapper, correct the actual Canvas RectTransform's serialized zero scale, and confirm whether the legacy victory Canvas can be consolidated with the battle HUD without changing sorting or input. Verify scene reopen, pointer input, result overlay, and representative aspect ratios.
+- Reduce scene/UI duplication after the critical path is stable: create a reusable production-card prefab and shared bordered-panel treatment, and prefab the mirrored gold-vein presentation while preserving side-specific mine points and worker references. Keep the builder deterministic and verify all five cards plus both worker loops after migration.
+- Add behavior-preserving tests before splitting the oversized `BattleEconomyUI` and `GameManager` responsibilities. Prefer seams for production presentation/mythic picker/results and production control/match resolution; preserve serialized names, initialization order, atomic mythic purchase, and exact loss accounting.
+- Inventory project-owned modifications inside third-party Tiny Swords folders. Treat vendor content as read-mostly and migrate future project-owned Animator Controllers or overrides into a project-owned animation folder when safe; do not move `Resources/MythicUnitRoster.asset` while `GameManager` relies on its fallback `Resources.Load` contract.
 - Revisit the editor-generated stronghold health-bar frame in `ClashBattleUIBuilder.CreateHealthBarFrame`. Determine the correct use of the Tiny Swords bar assets or replace the frame treatment; the final frame must fully contain the health fill without distortion or overflow for both teams at QHD 2560×1440 and representative narrower/wider aspect ratios. The current stretched middle segment is intentionally commented out until this is addressed.
 - Tune initial purchase costs, recurring production cadences, role matchups, and stat values through representative playtests.
 - Resolve projectile targeting semantics before changing combat behavior: current projectiles aim at the launch position and may miss moving targets; choose deliberate misses, target leading, or live-target tracking, then document and verify the approved rule.
@@ -247,7 +251,7 @@ _No items currently blocked by external state._
 
 **Evidence:** User-approved answers are recorded in accepted `DEC-007`: first purchase unlocks one continuously producing role track; later purchases advance future spawns to two and three stars; fielded units are unchanged. `DEC-003`, `DEC-004`, and `DEC-008` also record the resolved timeout valuation, initial multipliers, and PC-first priority.
 
-This completes the design dependency only; production and upgrades are not implemented.
+This completed the design dependency only. Production and upgrades were not implemented when this decision task closed; their current implementation and remaining verification are tracked in P1 Task 1.
 
 ### Define and reconcile the current game direction
 
