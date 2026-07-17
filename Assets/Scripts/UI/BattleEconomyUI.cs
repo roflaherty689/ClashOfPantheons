@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
@@ -24,6 +25,7 @@ public class BattleEconomyUI : MonoBehaviour
     private sealed class ProductionUIBinding
     {
         public UnitRole Role;
+        public Transform Card;
         public Button Button;
         public Image Art;
         public TextMeshProUGUI StatusText;
@@ -31,6 +33,9 @@ public class BattleEconomyUI : MonoBehaviour
         public TextMeshProUGUI ActionText;
         public Color UnlockedColour;
         public UnityAction PurchaseAction;
+        public EventTrigger InteractionTrigger;
+        public EventTrigger.Entry HoverEntry;
+        public EventTrigger.Entry PointerDownEntry;
     }
 
     [SerializeField] private Team playerTeam = Team.Left;
@@ -56,6 +61,7 @@ public class BattleEconomyUI : MonoBehaviour
     private readonly ProductionUIBinding[] productionBindings = new ProductionUIBinding[ProductionRoles.Length];
     private UnitRole selectedRole = UnitRole.Melee;
     private Button selectedRoleButton;
+    private Image selectedRoleIcon;
     private TextMeshProUGUI selectedRoleTitleText;
     private TextMeshProUGUI selectedRoleStatusText;
     private TextMeshProUGUI selectedRoleTierText;
@@ -135,6 +141,19 @@ public class BattleEconomyUI : MonoBehaviour
             if (binding?.Button != null && binding.PurchaseAction != null)
             {
                 binding.Button.onClick.RemoveListener(binding.PurchaseAction);
+            }
+
+            if (binding?.InteractionTrigger != null)
+            {
+                if (binding.HoverEntry != null)
+                {
+                    binding.InteractionTrigger.triggers.Remove(binding.HoverEntry);
+                }
+
+                if (binding.PointerDownEntry != null)
+                {
+                    binding.InteractionTrigger.triggers.Remove(binding.PointerDownEntry);
+                }
             }
         }
 
@@ -236,6 +255,7 @@ public class BattleEconomyUI : MonoBehaviour
             productionBindings[i] = new ProductionUIBinding
             {
                 Role = role,
+                Card = cardTransform,
                 Button = buttonTransform != null ? buttonTransform.GetComponent<Button>() : null,
                 Art = art,
                 StatusText = FindDirectTextContaining(cardTransform, "LOCKED"),
@@ -248,6 +268,7 @@ public class BattleEconomyUI : MonoBehaviour
         }
 
         Transform selectedRoleTransform = transform.Find(SelectedRolePath.TrimEnd('/'));
+        selectedRoleIcon = FindImage(SelectedRolePath + "Role Icon", SelectedRolePath + "Melee Icon");
         selectedRoleTitleText = FindText(SelectedRolePath + "MELEE Text");
         selectedRoleStatusText = FindDirectTextContaining(selectedRoleTransform, "LOCKED");
         selectedRoleTierText = FindDirectTextContaining(selectedRoleTransform, "STARS");
@@ -265,7 +286,11 @@ public class BattleEconomyUI : MonoBehaviour
     {
         foreach (ProductionUIBinding binding in productionBindings)
         {
-            if (binding?.Button == null) continue;
+            if (binding == null) continue;
+
+            BindProductionCardInteraction(binding);
+
+            if (binding.Button == null) continue;
 
             if (binding.Button.targetGraphic != null)
             {
@@ -288,10 +313,56 @@ public class BattleEconomyUI : MonoBehaviour
         }
     }
 
-    private Image FindImage(string path)
+    private void BindProductionCardInteraction(ProductionUIBinding binding)
     {
-        Transform target = transform.Find(path);
-        return target != null ? target.GetComponent<Image>() : null;
+        if (binding.Card == null) return;
+
+        if (binding.Card.TryGetComponent(out Graphic cardGraphic))
+        {
+            cardGraphic.raycastTarget = true;
+        }
+
+        binding.InteractionTrigger = binding.Card.GetComponent<EventTrigger>();
+        if (binding.InteractionTrigger == null)
+        {
+            binding.InteractionTrigger = binding.Card.gameObject.AddComponent<EventTrigger>();
+        }
+
+        UnitRole role = binding.Role;
+        binding.HoverEntry = CreateInteractionEntry(
+            EventTriggerType.PointerEnter,
+            _ => SelectProductionRole(role));
+        binding.PointerDownEntry = CreateInteractionEntry(
+            EventTriggerType.PointerDown,
+            _ => SelectProductionRole(role));
+        binding.InteractionTrigger.triggers.Add(binding.HoverEntry);
+        binding.InteractionTrigger.triggers.Add(binding.PointerDownEntry);
+    }
+
+    private static EventTrigger.Entry CreateInteractionEntry(
+        EventTriggerType eventType,
+        UnityAction<BaseEventData> action)
+    {
+        EventTrigger.Entry entry = new EventTrigger.Entry
+        {
+            eventID = eventType
+        };
+        entry.callback.AddListener(action);
+        return entry;
+    }
+
+    private Image FindImage(params string[] paths)
+    {
+        foreach (string path in paths)
+        {
+            Transform target = transform.Find(path);
+            if (target != null && target.TryGetComponent(out Image image))
+            {
+                return image;
+            }
+        }
+
+        return null;
     }
 
     private static TextMeshProUGUI FindDirectTextContaining(Transform parent, string content)
@@ -335,9 +406,19 @@ public class BattleEconomyUI : MonoBehaviour
 
     private void PurchaseProduction(UnitRole role)
     {
-        selectedRole = role;
+        SelectProductionRole(role);
         gameManager?.TryPurchaseProduction(playerTeam, role, workerManager);
         Refresh();
+    }
+
+    private void SelectProductionRole(UnitRole role)
+    {
+        selectedRole = role;
+
+        if (gameManager != null && workerManager != null)
+        {
+            RefreshSelectedRole();
+        }
     }
 
     private void PurchaseSelectedRole()
@@ -448,6 +529,17 @@ public class BattleEconomyUI : MonoBehaviour
         int cost = hasData ? data.Cost : 0;
         string roleName = selectedRole.ToString().ToUpperInvariant();
 
+        if (selectedRoleIcon != null)
+        {
+            ProductionUIBinding selectedBinding = GetProductionBinding(selectedRole);
+            if (selectedBinding?.Art != null)
+            {
+                selectedRoleIcon.sprite = selectedBinding.Art.sprite;
+                selectedRoleIcon.color = selectedBinding.Art.color;
+                selectedRoleIcon.preserveAspect = true;
+            }
+        }
+
         if (selectedRoleTitleText != null)
         {
             selectedRoleTitleText.text = roleName;
@@ -486,6 +578,19 @@ public class BattleEconomyUI : MonoBehaviour
                 workerManager.CurrentGold >= cost &&
                 !gameManager.IsGameOver;
         }
+    }
+
+    private ProductionUIBinding GetProductionBinding(UnitRole role)
+    {
+        foreach (ProductionUIBinding binding in productionBindings)
+        {
+            if (binding != null && binding.Role == role)
+            {
+                return binding;
+            }
+        }
+
+        return null;
     }
 
     private void RefreshMatchState()

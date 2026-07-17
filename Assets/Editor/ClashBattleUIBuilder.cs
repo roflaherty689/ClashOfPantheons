@@ -239,16 +239,13 @@ public static class ClashBattleUIBuilder
         AddText(detail, "SELECTED ROLE", 19, TextAlignmentOptions.Left, new Vector2(-92, 132), new Vector2(210, 28), Gold);
         AddText(detail, "MELEE", 30, TextAlignmentOptions.Left, new Vector2(-93, 99), new Vector2(210, 40));
 
-        RectTransform icon = CreateRect("Melee Icon", detail, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(152, 104), new Vector2(54, 54));
-        AddSpriteOrPanel(icon.gameObject, UiRoot + "/Icons/Icon_05.png", "Icon_05_0", Color.white, true);
+        RectTransform icon = CreateRect("Role Icon", detail, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(150, 112), new Vector2(108, 108));
+        AddSpriteOrPanel(icon.gameObject, UiRoot + "/Human Avatars/Avatars_01.png", "Avatars_01_0", Color.white, true);
 
         AddText(detail, "STATUS", 17, TextAlignmentOptions.Left, new Vector2(-150, 48), new Vector2(110, 26), Muted);
         AddText(detail, "LOCKED", 20, TextAlignmentOptions.Right, new Vector2(99, 48), new Vector2(220, 30), Gold);
         AddText(detail, "TIER", 17, TextAlignmentOptions.Left, new Vector2(-150, 15), new Vector2(110, 26), Muted);
         AddText(detail, "0 / 3 STARS", 20, TextAlignmentOptions.Right, new Vector2(99, 15), new Vector2(220, 30));
-        AddText(detail, "PRODUCTION", 17, TextAlignmentOptions.Left, new Vector2(-125, -18), new Vector2(160, 26), Muted);
-        AddText(detail, "INDEPENDENT", 20, TextAlignmentOptions.Right, new Vector2(99, -18), new Vector2(220, 30));
-
         AddText(detail, "Unlock to begin recurring melee production. Upgrades affect future spawns only.", 18,
             TextAlignmentOptions.TopLeft, new Vector2(0, -74), new Vector2(380, 64), new Color32(225, 224, 216, 255), null, true);
         CreateButton(detail, "Role Action", "UNLOCK   50 GOLD", new Vector2(0, -126), new Vector2(380, 54), false, false);

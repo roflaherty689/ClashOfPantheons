@@ -25,6 +25,7 @@ Git history remains the exact implementation record.
 
 ### Changed
 
+- The selected-role details now follow the last production card hovered over or interacted with, remain pinned after the pointer leaves, show that role's unit artwork at twice the previous icon size instead of a generic sword icon, and omit the redundant production/independent row.
 - Redesigned the editor-generated battle HUD around Tiny Swords panels, bars, buttons, icons, workers, strongholds, and human/enemy avatar portraits; replaced conflicting multi-currency and shared-queue mockups with binding-ready gold, worker, five-role independent-production, match-status, and result presentation.
 - Reconciled `GAME_DESIGN.md` with the current Unity repository and the user-approved single-player autobattler direction.
 - Rewrote the Prototype milestone around one economy → production → autonomous combat → result → restart loop against AI.
@@ -78,10 +79,11 @@ Git history remains the exact implementation record.
 - Compiled runtime and Editor assemblies externally with zero warnings and errors after the match-flow integration.
 - User-verified countdown expiry and correct lost-gold timeout resolution in a shortened 20-second Play Mode match.
 - User-verified clickable production controls, melee unlock/upgrades through the three-purchase cap, and live tier-counter updates in Play Mode.
+- User-verified the selected-role panel's sticky behavior, role artwork, simplified details, and enlarged icon in Play Mode.
 
 ### Known Issues
 
-- Unit production purchasing and tier presentation are implemented in source but still require Play Mode verification; enemy production remains locked until AI purchasing is implemented.
+- Unit production purchasing and tier presentation still require broader Play Mode verification; enemy production remains locked until AI purchasing is implemented.
 - Health-tiebreak, exact-draw, base-destruction result-overlay, and restart-reset paths still require targeted Play Mode verification.
 - Exact role values and matchups remain subject to implementation and playtest tuning.
 - Targeted projectile/worker edge cases and stale serialized fields on the non-animated archer prefab remain to be verified or cleaned.
