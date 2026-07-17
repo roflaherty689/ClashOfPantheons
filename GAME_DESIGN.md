@@ -95,7 +95,7 @@ The five accepted roles are melee, archer, cavalry, siege, and mythic. All five 
 | Archer | Ranged support; intended strong versus melee and weak versus cavalry | Projectile role exists |
 | Cavalry | Fast pressure; intended strong versus archers and weak versus melee | Prototype role exists |
 | Siege | Structure specialist, vulnerable without support | Projectile role and building modifier exist |
-| Mythic | Expensive faction-defining power unit | High-stat prototype role exists; final counterplay unresolved |
+| Mythic | Expensive selectable power unit; initial roster supports testing and counter-selection | Shared Minotaur prototype exists; monk healing and the broader selectable roster are accepted but not implemented |
 
 Heroes and bosses are not prototype scope.
 
@@ -182,13 +182,19 @@ The title screen should eventually use the same colourful Tiny Swords presentati
 - Battle-speed controls for solo play or testing.
 - Additional unit options if the five-role model proves insufficient.
 
+### Accepted mythic-roster test expansion
+
+Unlocking mythic production opens a choice menu before gold is spent. Selecting an option atomically purchases the unlock; later purchases upgrade that chosen option for the rest of the match. Each option's `UnitData` owns its cost and production cadence. The initial menu includes every combat-capable Tiny Swords Enemy Pack unit with usable idle, movement, and attack-equivalent animation, plus the five colour monks, so the roster can be reduced after review and used to test counter-selection when the opponent reveals a mythic choice first.
+
+Most first-pass enemy-pack options share the Minotaur's melee behavior and balance baseline, while retaining independent data assets for later tuning. Gnoll, Harpoon Fish, and Shaman are ranged mythics and use the bone, harpoon, and shaman projectile art supplied beside their source animations rather than the standard archer arrow. Troll uses its Windup clip as its attack; Troll Recovery and club-breaking clips, Skull and Turtle guard clips, and Boat are excluded. Monks are the support exception: they stop to heal the most-injured valid allied combat unit within range 2, excluding themselves, bases, dead units, and full-health units. They heal 5 health every 3 seconds at one star; heal amount follows the 1x/1.5x/2x tier curve while cadence stays fixed. Multiple monks may heal the same target, without overhealing, and resume movement when no valid ally in combat is in range.
+
 ### Deferred beyond the core prototype
 
 - Online multiplayer and ranked matchmaking.
 - Campaign and persistent progression.
 - Multiple currencies.
 - Controller support.
-- Final art, broad designed-faction production beyond the five prototype team-colour variants, production-ready saves, and deep optimization.
+- Final art, broad designed-faction production beyond the accepted test-oriented mythic roster and five prototype team-colour variants, production-ready saves, and deep optimization.
 - Heroes, bosses, neutral objectives, buildings, and powers unless separately approved.
 
 ## Prototype success criteria

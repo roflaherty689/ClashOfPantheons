@@ -168,6 +168,30 @@ Tasks are ordered by dependency and prototype value.
 - [x] Black, blue, purple, red, and yellow melee/archer variants show their matching idle, run, and attack animations in Play Mode; the user verified every colour on 2026-07-17 after loop and transition settings were matched to black.
 - [ ] Verify the shared cavalry, siege, and mythic units still spawn correctly with each team-colour faction. Confirm that switching both team factions does not produce missing references, controller warnings, or unintended mechanical differences.
 
+### Selectable mythic roster
+
+**Outcome:** Mythic production supports an animation-complete test roster and a pre-purchase choice that remains selected for the match.
+
+**Phased acceptance criteria:**
+
+- [ ] **Phase 1 - Monk healer:** Create Black, Blue, Purple, Red, and Yellow monk prefabs using their Idle, Run, and Heal clips; loop Idle/Run but not Heal.
+- [ ] Target the most-injured allied combat unit within range 2, excluding self, bases, dead units, and full-health units; stop to heal and resume moving when none is valid and in combat.
+- [ ] Heal 5 every 3 seconds; amount scales 1x/1.5x/2x by tier, cadence stays fixed, multiple monks may share a target, and healing cannot exceed maximum health.
+- [ ] Present the monk's heal animation and its effect around the recipient; safely cancel on target death or match end.
+- [ ] **Phase 2 - Enemy Pack prefabs:** Create Minotaur-structured mythic prefabs for Bear, Gnoll, Gnome, Harpoon Fish, Lancer, Lizard, Paddle Fish, Panda, Shaman, Skull, Snake, Spider, Thief, Troll, and Turtle; retain Minotaur.
+- [ ] Use Idle, Run/Walk, and Attack clips, treating Gnoll/Harpoon Fish `Throw` as attack equivalents. Loop only Idle and Run/Walk.
+- [ ] Treat Gnoll, Harpoon Fish, and Shaman as ranged mythics. Use their nearby bone, harpoon, and shaman projectile assets instead of the standard archer arrow, with independently configurable `UnitData` for range, cost, cadence, and balance.
+- [ ] Treat the remaining Enemy Pack options as Minotaur-style melee mythics initially, with independently configurable `UnitData`.
+- [ ] Use Troll Windup as its attack. Ignore Troll Recovery and breaking-club animations, Skull/Turtle guard animations, and Boat.
+- [ ] **Phase 3 - Mythic picker:** Open the right-side details picker before spending. Selection atomically purchases the configured unlock and remains locked for the match; cancellation spends nothing.
+- [ ] Later purchases upgrade the selection without reopening the picker. Its `UnitData` controls cost and cadence, and all future mythic spawns use it.
+- [ ] Initially populate all Phase 1-2 qualifying units. Preserve explicit opponent configuration until AI selection is implemented, while supporting later enemy-first reveal and counter-selection.
+- [ ] Validate compilation/import, serialized-data migration, both teams/facings, animator references, restart reset, transaction behavior, representative resolutions, and Play Mode.
+
+**Dependencies/risks:** Existing faction and production data assume one prefab/data pair per role. Healing requires friendly targeting and current/max-health access without costly broad scans. This test expansion must not displace the incomplete AI/core-loop work.
+
+**Status:** Accepted, not started (`DEC-013`).
+
 ### Faction-driven prototype presentation
 
 **Outcome:** The faction selected for either team is the single source of truth for its world Castle, House3 worker hand-in, HUD stronghold icon, and animated worker prefab without duplicating economy or building gameplay configuration.

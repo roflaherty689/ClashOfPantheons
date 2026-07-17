@@ -475,6 +475,50 @@ Separating functional navigation and selection from animated presentation keeps 
 
 ---
 
+## DEC-013 - Selectable test roster for mythic production
+
+**Date:** 2026-07-17
+**Status:** Accepted
+
+### Decision
+
+Mythic production becomes a per-match choice rather than one fixed faction prefab. The locked mythic card opens a picker before payment; selecting an option atomically purchases its configured unlock, and later purchases upgrade that choice without reopening the picker. Each option's `UnitData` owns cost and cadence. The initial test picker contains all qualifying Enemy Pack combatants plus five colour monks. Most first-pass enemy units share Minotaur melee behavior; Gnoll, Harpoon Fish, and Shaman are ranged mythics using their packaged bone, harpoon, and shaman projectile art rather than the standard archer arrow.
+
+Monks heal the most-injured allied combat unit within range 2, excluding themselves, bases, dead units, and full-health units. They stop while healing and otherwise move normally. Healing starts at 5 every 3 seconds; amount uses existing tier multipliers, cadence does not, multiple monks may share a target, and healing cannot exceed maximum health.
+
+### Context
+
+The current model maps one prefab to each faction role. This broad roster is intentionally for animation/gameplay testing and possible counter-selection after an opponent reveals its mythic choice. It may be reduced after review.
+
+### Rationale
+
+A data-driven picker permits rapid comparison without prematurely designing distinct mechanics for every imported character. Monk healing proves support behavior separately from the reusable animated melee-prefab pipeline.
+
+### Consequences
+
+- `FactionData`, `GameManager`, and the HUD need a build-safe option model and per-team match selection while preserving serialized assets.
+- Troll uses Windup as its attack. Troll Recovery and club-breaking animations, Skull and Turtle guard animations, and Boat are excluded.
+- Opponent choice remains explicit until AI selection is implemented; the model must allow later enemy-first reveal and player counter-selection.
+- This expansion remains subordinate to the prototype's incomplete AI and full-match critical path.
+
+### Alternatives considered
+
+- Keep one faction-owned mythic: rejected for this testing phase because it blocks roster and counter-selection experiments.
+- Give every unit distinct mechanics immediately: deferred due to combat, balance, VFX, and validation scope.
+- Spend before opening the picker: rejected because cancellation would create an unclear transaction.
+
+### Related items
+
+- `GAME_DESIGN.md` - Accepted mythic-roster test expansion
+- `ROADMAP.md` - Prototype planned outcomes
+- `TODO.md` - Selectable mythic roster
+- `Assets/Scripts/Factions/FactionData.cs`
+- `Assets/Scripts/Managers/GameManager.cs`
+- `Assets/Scripts/UI/BattleEconomyUI.cs`
+- `Assets/Scripts/Units/BaseUnit.cs`
+
+---
+
 # Decision template
 
 Copy this section for new decisions.
