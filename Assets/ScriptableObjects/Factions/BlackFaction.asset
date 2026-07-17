@@ -15,6 +15,7 @@ MonoBehaviour:
   factionName: Black
   castleSprite: {fileID: 21300000, guid: d0349d8d3a04044f7a4810157b116b14, type: 3}
   handInSprite: {fileID: 21300000, guid: c94d66993de80409fb65b3577475c483, type: 3}
+  workerPrefab: {fileID: 8120276743538827778, guid: 76e22820f8d16bc47861a806bb1ae4c6, type: 3}
   units:
   - role: 0
     prefab: {fileID: 7886269566354373400, guid: 53f2b4457387d4540bc2552b51586d62, type: 3}

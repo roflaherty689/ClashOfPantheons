@@ -9,11 +9,15 @@ public class FactionData : ScriptableObject
     [Header("Units")]
     [SerializeField] private FactionUnitEntry[] units;
 
+    [Header("Worker")]
+    [SerializeField] private WorkerUnit workerPrefab;
+
     [Header("Building Presentation")]
     [SerializeField] private Sprite castleSprite;
     [SerializeField] private Sprite handInSprite;
 
     public string FactionName => factionName;
+    public WorkerUnit WorkerPrefab => workerPrefab;
     public Sprite CastleSprite => castleSprite;
     public Sprite HandInSprite => handInSprite;
     public bool HasBuildingPresentation => castleSprite != null && handInSprite != null;

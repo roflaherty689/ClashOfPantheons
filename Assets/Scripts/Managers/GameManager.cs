@@ -85,12 +85,16 @@ public class GameManager : MonoBehaviour
     public float TimeRemaining => Mathf.Max(0f, timeRemaining);
     public bool SetTeamColour => setTeamColour;
 
+    private void Awake()
+    {
+        ResolveBases();
+        ApplyFactionPresentation();
+    }
+
     private void Start()
     {
         Time.timeScale = Mathf.Max(0f, gameSpeed);
         timeRemaining = Mathf.Max(1f, matchDurationSeconds);
-        ResolveBases();
-        ApplyFactionPresentation();
         ValidateConfiguration();
     }
 
@@ -302,6 +306,23 @@ public class GameManager : MonoBehaviour
 
         presentation.ValidateReferences();
         presentation.Apply(factionData, team);
+
+        WorkerManager workerManager = battleBase.GetComponent<WorkerManager>();
+        if (workerManager == null)
+        {
+            Debug.LogError($"{battleBase.name}: Missing WorkerManager.", battleBase);
+        }
+        else if (factionData != null && factionData.WorkerPrefab != null)
+        {
+            workerManager.ApplyWorkerPrefab(factionData.WorkerPrefab);
+        }
+        else
+        {
+            string factionName = factionData == null ? "<missing>" : factionData.FactionName;
+            Debug.LogWarning(
+                $"{team} faction '{factionName}' has no worker prefab; the existing WorkerManager fallback will be retained.",
+                factionData);
+        }
 
         if (castleIcon != null)
         {

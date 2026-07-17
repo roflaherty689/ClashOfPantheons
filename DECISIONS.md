@@ -28,6 +28,8 @@ Do not record trivial implementation details.
 | DEC-007 | Unit purchase and recurring-production contract | Accepted | 2026-07-16 |
 | DEC-008 | Prototype platform priority | Accepted | 2026-07-16 |
 | DEC-009 | Prototype team-colour faction variants | Accepted | 2026-07-17 |
+| DEC-010 | Faction-owned building presentation with shared gameplay prefabs | Accepted | 2026-07-17 |
+| DEC-011 | Faction-owned animated worker prefabs | Accepted | 2026-07-17 |
 
 ---
 
@@ -382,6 +384,48 @@ Presentation sprites are authored faction configuration, while base health, coll
 - `TODO.md` — Faction-driven prototype building presentation
 - `Assets/Scripts/Factions/FactionData.cs`
 - `Assets/Prefabs/Buildings/Base.prefab`
+
+---
+
+## DEC-011 — Faction-owned animated worker prefabs
+
+**Date:** 2026-07-17
+**Status:** Accepted
+
+### Decision
+
+Each prototype colour faction owns a matching animated `WorkerUnit` prefab in addition to its military and building presentation references. At match initialization, `GameManager` applies the selected faction's worker prefab to that team's shared `WorkerManager` before initial workers spawn.
+
+### Context
+
+The five colour factions already selected their melee, archer, Castle, and House3 presentation, but both teams still spawned the same black worker through scene-owned `WorkerManager` overrides. The user requested colour-matched workers with the same animation-controller behavior and looping as black.
+
+### Rationale
+
+Worker colour is faction presentation, while worker costs, capacity, movement, mining, deposits, and lifecycle remain shared economy behavior. Storing only the prefab reference in `FactionData` keeps visual selection faction-owned without duplicating `WorkerManager` configuration.
+
+### Consequences
+
+- `FactionData` exposes a colour-specific worker prefab alongside its role mappings and building sprites.
+- Black, blue, purple, red, and yellow each have an animated worker prefab; the existing black prefab retains its GUID under an explicit name.
+- Non-black pawn controllers mirror black's three parameters, 20 states, eight transitions, transition settings, and state settings while referencing their own colour clips.
+- All 20 pawn clips per colour inherit black's enabled loop behavior.
+- `GameManager` applies faction presentation during `Awake` so `WorkerManager.Start` cannot spawn the serialized fallback before faction selection is applied.
+- Legacy factions without a worker prefab retain the serialized `WorkerManager` fallback and emit an actionable warning.
+
+### Alternatives considered
+
+- Tint one shared worker sprite: rejected because it would not use the authored colour-specific animation frames.
+- Store colour selection directly in `WorkerManager`: rejected because it would duplicate faction presentation ownership.
+- Create five economy-manager or Base prefabs: rejected because identical gameplay configuration would drift between colours.
+
+### Related items
+
+- `DEC-009` — Prototype team-colour faction variants
+- `DEC-010` — Faction-owned building presentation with shared gameplay prefabs
+- `TODO.md` — Faction-driven prototype presentation
+- `Assets/Scripts/Factions/FactionData.cs`
+- `Assets/Scripts/Workers & Resources/WorkerManager.cs`
 
 ---
 

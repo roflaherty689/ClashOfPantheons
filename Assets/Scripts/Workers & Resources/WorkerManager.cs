@@ -37,6 +37,17 @@ public class WorkerManager : MonoBehaviour
     public int TotalGoldPerTrip => Mathf.RoundToInt(baseGoldPerTrip * goldUpgradeMultiplier * WorkerCount);
     public bool HasWorkerCapacity => WorkerCount < maxWorkers;
 
+    public void ApplyWorkerPrefab(WorkerUnit factionWorkerPrefab)
+    {
+        if (factionWorkerPrefab == null)
+        {
+            Debug.LogWarning($"{name}: Cannot apply a missing faction worker prefab.", this);
+            return;
+        }
+
+        workerPrefab = factionWorkerPrefab;
+    }
+
     private void Awake()
     {
         gameManager = FindAnyObjectByType<GameManager>();

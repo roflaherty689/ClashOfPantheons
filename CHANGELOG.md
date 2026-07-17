@@ -24,6 +24,7 @@ Git history remains the exact implementation record.
 - Live unlock, upgrade, maximum-tier, affordability, and locked-icon presentation for all five player production cards and the selected-role panel.
 - Black, blue, purple, red, and yellow prototype faction assets with matching animated melee and archer prefabs; cavalry, siege, and mythic remain shared.
 - Matching Castle and House3 presentation references for all five prototype colour factions, applied to world buildings and stronghold HUD icons from the selected faction.
+- Black, blue, purple, red, and yellow animated worker prefabs owned by their matching faction assets.
 
 ### Changed
 
@@ -48,6 +49,7 @@ Git history remains the exact implementation record.
 - Changed both teams to begin with every unit role locked; enemy production remains inactive until the planned AI purchasing layer is implemented.
 - Applied star upgrades as per-unit stat snapshots so future spawns receive 1×/1.5×/2× stats without changing fielded units or shared `UnitData` assets.
 - Consolidated each team's worker hand-in visual into the shared Base prefab and made the active scene default to Black versus Red.
+- Made the selected faction's worker prefab authoritative before initial workers spawn while retaining scene-authored fallbacks for legacy factions.
 
 ### Fixed
 
@@ -86,9 +88,12 @@ Git history remains the exact implementation record.
 - User-verified clickable production controls, melee unlock/upgrades through the three-purchase cap, and live tier-counter updates in Play Mode.
 - User-verified the selected-role panel's sticky behavior, role artwork, simplified details, and enlarged icon in Play Mode.
 - Configured the previously empty non-black Tiny Swords melee and archer Animator Controllers with the working `isMoving` and `Attack` state-machine behavior and their colour-matched clips.
+- Configured all non-black pawn Animator Controllers to mirror black's worker state machine and enabled black-matching loops across all pawn clips.
 - User-verified matching idle, run, and attack behavior for the black, blue, purple, red, and yellow melee/archer variants in Play Mode after their loop and transition settings were aligned.
 - Updated the battle-HUD builder to create faction-neutral left/right castle-icon bindings and reconnect regenerated icons to `GameManager`.
 - Compiled the faction-building runtime and Editor changes externally with zero warnings and errors.
+- Compiled the faction-owned worker runtime and Editor changes externally with zero warnings and errors.
+- User-verified that the faction-owned worker variants import and work correctly in Play Mode.
 
 ### Known Issues
 
@@ -97,7 +102,7 @@ Git history remains the exact implementation record.
 - Exact role values and matchups remain subject to implementation and playtest tuning.
 - Targeted projectile/worker edge cases and stale serialized fields on the non-animated archer prefab remain to be verified or cleaned.
 - Shared cavalry, siege, and mythic spawning and both-team faction switching still require Play Mode verification across the five team-colour faction assets.
-- Faction-driven Castle, House3 hand-in, HUD icon, worker-deposit, base-damage, and restart behavior still require Unity import and Play Mode verification across both team sides.
+- Faction-driven Castle, House3 hand-in, HUD icon, worker-deposit, base-damage, and restart behavior still require complete Play Mode verification across both team sides.
 
 ---
 

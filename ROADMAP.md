@@ -45,7 +45,7 @@ Checked entry conditions are based on repository inspection, not a new Unity lau
 - [x] Melee, archer, cavalry, siege, and mythic role mappings and prototype assets exist.
 - [x] Workers can mine and deposit gold; the player HUD displays live worker economy state and can buy workers up to capacity.
 - [x] Faction data can map roles to faction-specific prefabs.
-- [x] Black, blue, purple, red, and yellow prototype faction assets map colour-specific animated melee/archer prefabs while sharing cavalry, siege, and mythic.
+- [x] Black, blue, purple, red, and yellow prototype faction assets map colour-specific animated worker, melee, and archer prefabs while sharing cavalry, siege, and mythic.
 - [x] The five prototype colour factions own matching Castle and House3 presentation references consumed by one shared Base prefab and the stronghold HUD; integrated Play Mode verification remains pending.
 - [x] Prototype health, hit, animation, projectile, and victory feedback exists.
 
