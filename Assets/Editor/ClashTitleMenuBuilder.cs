@@ -144,8 +144,6 @@ public static class ClashTitleMenuBuilder
         CreateDecoration(parent, "Black Tower", "Assets/Tiny Swords/Buildings/Black Buildings/Tower.png", "Tower_0", new Vector2(0, 470), new Vector2(145, 145), false);
 
         string[] colours = { "Black", "Blue", "Purple", "Red", "Yellow" };
-        string minotaurPath = "Assets/Tiny Swords - Enemy Pack/Enemies/Minotaur/Minotaur_Walk.png";
-
         for (int i = 0; i < colours.Length; i++)
         {
             bool moveRight = i % 2 == 0;
@@ -158,13 +156,42 @@ public static class ClashTitleMenuBuilder
             CreateRunner(parent, $"{colours[i]} Archer Runner", unitRoot + "/Archer/Archer_Run.png", new Vector2(-startX, upperLane), 72f + i * 6f, !moveRight, new Vector2(100, 100));
         }
 
-        CreateRunner(parent, "Lower Left Minotaur", minotaurPath, new Vector2(-560, -500), 55f, true, new Vector2(135, 135));
-        CreateRunner(parent, "Lower Right Minotaur", minotaurPath, new Vector2(560, -450), 62f, false, new Vector2(135, 135));
-        CreateRunner(parent, "Upper Left Minotaur", minotaurPath, new Vector2(-420, 455), 58f, false, new Vector2(135, 135));
-        CreateRunner(parent, "Upper Right Minotaur", minotaurPath, new Vector2(420, 505), 66f, true, new Vector2(135, 135));
+        CreateMythicRunners(parent);
 
         CreateSidePatrols(parent, "Left Side Patrols", -850f, true);
         CreateSidePatrols(parent, "Right Side Patrols", 850f, false);
+    }
+
+    private static void CreateMythicRunners(RectTransform parent)
+    {
+        const string enemyRoot = "Assets/Tiny Swords - Enemy Pack/Enemies";
+        (string Name, string Sheet, Vector2 Position, float Speed, bool MoveRight, Vector2 Size)[] runners =
+        {
+            ("Bear Mythic", $"{enemyRoot}/Bear/Bear_Run.png", new Vector2(-720, -485), 58f, true, new Vector2(130, 130)),
+            ("Gnoll Mythic", $"{enemyRoot}/Gnoll/Gnoll_Run.png", new Vector2(-560, -525), 68f, false, new Vector2(105, 105)),
+            ("Gnome Mythic", $"{enemyRoot}/Gnome/Gnome_Run.png", new Vector2(-400, -465), 88f, true, new Vector2(82, 82)),
+            ("Harpoon Fish Mythic", $"{enemyRoot}/Harpoon Fish/HarpoonFish_Run.png", new Vector2(-240, -515), 68f, false, new Vector2(100, 100)),
+            ("Lancer Mythic", $"{enemyRoot}/Lancer/Lancer_Run.png", new Vector2(-80, -470), 72f, true, new Vector2(105, 105)),
+            ("Lizard Mythic", $"{enemyRoot}/Lizard/Lizard_Run.png", new Vector2(80, -520), 76f, false, new Vector2(100, 100)),
+            ("Minotaur Mythic", $"{enemyRoot}/Minotaur/Minotaur_Walk.png", new Vector2(250, -475), 55f, true, new Vector2(125, 125)),
+            ("Paddle Fish Mythic", $"{enemyRoot}/Paddle Fish/PaddleFish_Run.png", new Vector2(420, -520), 70f, false, new Vector2(100, 100)),
+            ("Panda Mythic", $"{enemyRoot}/Panda/Panda_Run.png", new Vector2(580, -470), 62f, true, new Vector2(115, 115)),
+            ("Shaman Mythic", $"{enemyRoot}/Shaman/Shaman_Run.png", new Vector2(735, -515), 60f, false, new Vector2(105, 105)),
+            ("Skull Mythic", $"{enemyRoot}/Skull/Skull_Run.png", new Vector2(-720, 490), 66f, false, new Vector2(105, 105)),
+            ("Snake Mythic", $"{enemyRoot}/Snake/Snake_Run.png", new Vector2(-540, 525), 80f, true, new Vector2(90, 90)),
+            ("Spider Mythic", $"{enemyRoot}/Spider/Spider_Run.png", new Vector2(-360, 475), 82f, false, new Vector2(95, 95)),
+            ("Thief Mythic", $"{enemyRoot}/Thief/Thief_Run.png", new Vector2(-180, 520), 86f, true, new Vector2(95, 95)),
+            ("Troll Mythic", $"{enemyRoot}/Troll/Troll_Walk.png", new Vector2(0, 480), 48f, false, new Vector2(140, 140)),
+            ("Turtle Mythic", $"{enemyRoot}/Turtle/Turtle_Walk.png", new Vector2(180, 525), 42f, true, new Vector2(110, 110)),
+            ("Black Monk Mythic", "Assets/Tiny Swords/Units/Black Units/Monk/Run.png", new Vector2(340, 475), 58f, false, new Vector2(95, 95)),
+            ("Blue Monk Mythic", "Assets/Tiny Swords/Units/Blue Units/Monk/Run.png", new Vector2(440, 525), 60f, true, new Vector2(95, 95)),
+            ("Purple Monk Mythic", "Assets/Tiny Swords/Units/Purple Units/Monk/Run.png", new Vector2(540, 475), 62f, false, new Vector2(95, 95)),
+            ("Red Monk Mythic", "Assets/Tiny Swords/Units/Red Units/Monk/Run.png", new Vector2(640, 525), 64f, true, new Vector2(95, 95)),
+            ("Yellow Monk Mythic", "Assets/Tiny Swords/Units/Yellow Units/Monk/Run.png", new Vector2(740, 475), 66f, false, new Vector2(95, 95))
+        };
+
+        foreach (var runner in runners)
+            CreateRunner(parent, runner.Name, runner.Sheet, runner.Position, runner.Speed, runner.MoveRight, runner.Size);
     }
 
     private static void CreateSidePatrols(RectTransform parent, string name, float xPosition, bool startsRight)

@@ -40,6 +40,8 @@ Git history remains the exact implementation record.
 
 ### Changed
 
+- Expanded the animated title background to include every selectable mythic at least once: all 16 qualifying Enemy Pack creatures and all five colour monks, independently of the melee/archer decoration mix.
+
 - Mythic choices in the production picker are now ordered by ascending gold cost, with alphabetical ordering for equal-cost options.
 
 - Differentiated the mythic test roster by creature identity, cost, production cadence, health, damage, and movement. Light creatures now arrive faster at lower power and cost, while Minotaur and Bear are premium bruisers and Troll is the strongest, slowest-producing, uniquely highest-cost option; all monk colours remain mechanically identical.

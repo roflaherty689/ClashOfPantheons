@@ -155,7 +155,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Risks and manual Unity work:** Runtime builds cannot use `AssetDatabase` to discover ScriptableObjects, so available factions must be explicitly serialized or supplied through another build-safe content mechanism. Scene creation, Canvas layout, button references, Build Settings ordering, faction catalog contents, multi-resolution inspection, and Play Mode/player-build verification require Unity Editor validation.
 
-**Progress:** Coordinated and accepted in `DEC-012` and extended by `DEC-014`. The user verified the title, faction selection, Tiny Swords animated presentation, difficulty selection, distinct opponent faction, and transition into battle in Play Mode on 2026-07-17. Difficulty choices launch battle directly from a parchment-contained Tiny Swords menu. Player-build verification remains pending, so the parent task remains partially implemented.
+**Progress:** Coordinated and accepted in `DEC-012` and extended by `DEC-014`. The user verified the title, faction selection, Tiny Swords animated presentation, difficulty selection, distinct opponent faction, and transition into battle in Play Mode on 2026-07-17. Difficulty choices launch battle directly from a parchment-contained Tiny Swords menu. The title-background builder now includes at least one runner for every selectable mythic: all 16 qualifying Enemy Pack creatures and all five colour monks. Their count and placement are independent of the standard melee/archer mix; regenerating and visually reviewing the scene remains required. Player-build verification remains pending, so the parent task remains partially implemented.
 
 **Status:** Partially implemented
 
