@@ -92,3 +92,41 @@ public static class MatchResultText
         };
     }
 }
+
+public static class ProductionTierRules
+{
+    public const int MaximumTier = 3;
+
+    public static bool TryAdvance(
+        int currentTier,
+        bool requiresInitialSelection,
+        out int nextTier)
+    {
+        nextTier = currentTier;
+
+        if (currentTier < 0 || currentTier >= MaximumTier)
+        {
+            return false;
+        }
+
+        if (requiresInitialSelection && currentTier == 0)
+        {
+            return false;
+        }
+
+        nextTier = currentTier + 1;
+        return true;
+    }
+
+    public static bool TryUnlockSelectedOption(int currentTier, out int nextTier)
+    {
+        nextTier = currentTier;
+        if (currentTier != 0)
+        {
+            return false;
+        }
+
+        nextTier = 1;
+        return true;
+    }
+}

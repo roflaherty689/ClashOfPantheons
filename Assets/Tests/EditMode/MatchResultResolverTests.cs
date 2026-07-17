@@ -90,3 +90,65 @@ public class MatchResultTextTests
             Is.EqualTo("MATCH COMPLETE"));
     }
 }
+
+public class ProductionTierRulesTests
+{
+    [TestCase(0, 1)]
+    [TestCase(1, 2)]
+    [TestCase(2, 3)]
+    public void TryAdvance_NormalProductionAdvancesOneTier(int currentTier, int expectedTier)
+    {
+        bool succeeded = ProductionTierRules.TryAdvance(currentTier, false, out int nextTier);
+
+        Assert.That(succeeded, Is.True);
+        Assert.That(nextTier, Is.EqualTo(expectedTier));
+    }
+
+    [Test]
+    public void TryAdvance_MaximumTierIsRejectedWithoutChangingTier()
+    {
+        bool succeeded = ProductionTierRules.TryAdvance(3, false, out int nextTier);
+
+        Assert.That(succeeded, Is.False);
+        Assert.That(nextTier, Is.EqualTo(3));
+    }
+
+    [Test]
+    public void TryAdvance_SelectionRoleCannotUseNormalInitialUnlock()
+    {
+        bool succeeded = ProductionTierRules.TryAdvance(0, true, out int nextTier);
+
+        Assert.That(succeeded, Is.False);
+        Assert.That(nextTier, Is.Zero);
+    }
+
+    [TestCase(1, 2)]
+    [TestCase(2, 3)]
+    public void TryAdvance_SelectedRoleCanUpgradeNormally(int currentTier, int expectedTier)
+    {
+        bool succeeded = ProductionTierRules.TryAdvance(currentTier, true, out int nextTier);
+
+        Assert.That(succeeded, Is.True);
+        Assert.That(nextTier, Is.EqualTo(expectedTier));
+    }
+
+    [Test]
+    public void TryUnlockSelectedOption_LockedRoleBecomesTierOne()
+    {
+        bool succeeded = ProductionTierRules.TryUnlockSelectedOption(0, out int nextTier);
+
+        Assert.That(succeeded, Is.True);
+        Assert.That(nextTier, Is.EqualTo(1));
+    }
+
+    [TestCase(1)]
+    [TestCase(2)]
+    [TestCase(3)]
+    public void TryUnlockSelectedOption_AlreadyUnlockedRoleIsRejected(int currentTier)
+    {
+        bool succeeded = ProductionTierRules.TryUnlockSelectedOption(currentTier, out int nextTier);
+
+        Assert.That(succeeded, Is.False);
+        Assert.That(nextTier, Is.EqualTo(currentTier));
+    }
+}

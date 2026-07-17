@@ -11,7 +11,7 @@ public enum SpawnPattern
 
 public class GameManager : MonoBehaviour
 {
-    public const int MaximumProductionTier = 3;
+    public const int MaximumProductionTier = ProductionTierRules.MaximumTier;
 
     private static readonly UnitRole[] SpawnRoles =
     {
@@ -211,14 +211,20 @@ public class GameManager : MonoBehaviour
         if (roleIndex < 0) return false;
 
         int teamIndex = GetTeamIndex(team);
-        if (productionTiers[teamIndex, roleIndex] >= MaximumProductionTier) return false;
-        if (role == UnitRole.Mythic && productionTiers[teamIndex, roleIndex] == 0) return false;
+        if (!ProductionTierRules.TryAdvance(
+                productionTiers[teamIndex, roleIndex],
+                role == UnitRole.Mythic,
+                out int nextTier))
+        {
+            return false;
+        }
+
         if (!TryGetProductionData(team, role, out UnitData data)) return false;
         if (!economy.TrySpendGold(data.Cost)) return false;
 
-        productionTiers[teamIndex, roleIndex]++;
+        productionTiers[teamIndex, roleIndex] = nextTier;
 
-        if (productionTiers[teamIndex, roleIndex] == 1)
+        if (nextTier == 1)
         {
             GetSpawnTimers(team)[roleIndex] = 0f;
         }
@@ -260,14 +266,18 @@ public class GameManager : MonoBehaviour
 
         int roleIndex = GetRoleIndex(UnitRole.Mythic);
         int teamIndex = GetTeamIndex(team);
-        if (roleIndex < 0 || productionTiers[teamIndex, roleIndex] != 0 ||
-            prefab.UnitData == null || !economy.TrySpendGold(prefab.UnitData.Cost))
+        if (roleIndex < 0 ||
+            !ProductionTierRules.TryUnlockSelectedOption(
+                productionTiers[teamIndex, roleIndex],
+                out int nextTier) ||
+            prefab.UnitData == null ||
+            !economy.TrySpendGold(prefab.UnitData.Cost))
         {
             return false;
         }
 
         selectedMythicUnits[teamIndex] = prefab;
-        productionTiers[teamIndex, roleIndex] = 1;
+        productionTiers[teamIndex, roleIndex] = nextTier;
         GetSpawnTimers(team)[roleIndex] = 0f;
         return true;
     }
