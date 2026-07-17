@@ -47,7 +47,11 @@ public static class ClashTitleMenuBuilder
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
 
+        RectTransform decorativeBackground = CreateRect("Decorative Background", canvasObject.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        CreateDecorativeBackground(decorativeBackground);
+
         RectTransform backdrop = CreateRect("Backdrop", canvasObject.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        backdrop.sizeDelta = new Vector2(-260, -160);
         Image backdropImage = AddTinySwordsSprite(backdrop.gameObject, TinySwordsUi + "/Wood Table/WoodTable.png", "WoodTable_4", Background, false);
         backdropImage.color = new Color32(72, 58, 48, 255);
 
@@ -62,13 +66,13 @@ public static class ClashTitleMenuBuilder
         Button exit = CreateButton(card, "Exit Button", "EXIT", new Vector2(0, -160));
 
         RectTransform selectionView = CreateRect("Faction Selection View", canvasObject.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-        RectTransform selectionCard = CreateRect("Selection Card", selectionView, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1120, 760));
+        RectTransform selectionCard = CreateRect("Selection Card", selectionView, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1120, 800));
         AddTinySwordsSprite(selectionCard.gameObject, TinySwordsUi + "/Papers/RegularPaper.png", "RegularPaper_4", Panel, false);
-        RectTransform selectionBanner = CreateRect("Selection Banner", selectionCard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 290), new Vector2(910, 120));
+        RectTransform selectionBanner = CreateRect("Selection Banner", selectionCard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 310), new Vector2(910, 120));
         AddTinySwordsSprite(selectionBanner.gameObject, TinySwordsUi + "/Banners/Banner.png", "Banner_4", Trim, false);
-        AddText(selectionCard, "CHOOSE YOUR FACTION", 52, new Vector2(0, 290), new Vector2(900, 90));
+        AddText(selectionCard, "CHOOSE YOUR FACTION", 52, new Vector2(0, 310), new Vector2(900, 90));
 
-        RectTransform content = CreateRect("Faction Options", selectionCard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 10), new Vector2(960, 440));
+        RectTransform content = CreateRect("Faction Options", selectionCard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 5), new Vector2(960, 500));
         Image factionPanel = AddTinySwordsSprite(content.gameObject, TinySwordsUi + "/Wood Table/WoodTable_Slots.png", "WoodTable_Slots_0", new Color32(31, 35, 40, 220), false);
         factionPanel.color = new Color32(108, 82, 61, 255);
         GridLayoutGroup layout = content.gameObject.AddComponent<GridLayoutGroup>();
@@ -81,7 +85,7 @@ public static class ClashTitleMenuBuilder
         layout.constraintCount = 2;
 
         Button factionTemplate = CreateFactionButtonTemplate(content);
-        Button back = CreateButton(selectionCard, "Back Button", "BACK", new Vector2(0, -305));
+        Button back = CreateButton(selectionCard, "Back Button", "BACK", new Vector2(0, -330));
 
         TitleMenuController controller = canvasObject.GetComponent<TitleMenuController>();
         SerializedObject serializedController = new SerializedObject(controller);
@@ -102,6 +106,90 @@ public static class ClashTitleMenuBuilder
         ConfigureBuildSettings();
         AssetDatabase.SaveAssets();
         Debug.Log($"Created title menu scene at {ScenePath} and placed it first in Build Settings.");
+    }
+
+    private static void CreateDecorativeBackground(RectTransform parent)
+    {
+        RectTransform terrain = CreateRect("Green Terrain", parent, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        Image terrainImage = AddTinySwordsSprite(
+            terrain.gameObject,
+            "Assets/Tiny Swords/Terrain/Tileset/Tilemap_color1.png",
+            "Tilemap_color1_9",
+            new Color32(103, 142, 76, 255),
+            false);
+        terrainImage.type = Image.Type.Tiled;
+        terrainImage.color = new Color32(205, 222, 154, 255);
+
+        CreateDecoration(parent, "Blue Castle", "Assets/Tiny Swords/Buildings/Blue Buildings/Castle.png", "Castle_0", new Vector2(-820, -330), new Vector2(210, 210), false);
+        CreateDecoration(parent, "Red Castle", "Assets/Tiny Swords/Buildings/Red Buildings/Castle.png", "Castle_0", new Vector2(820, -330), new Vector2(210, 210), false);
+        CreateDecoration(parent, "Purple House", "Assets/Tiny Swords/Buildings/Purple Buildings/House3.png", "House3_0", new Vector2(-825, 350), new Vector2(150, 150), false);
+        CreateDecoration(parent, "Yellow House", "Assets/Tiny Swords/Buildings/Yellow Buildings/House3.png", "House3_0", new Vector2(825, 350), new Vector2(150, 150), false);
+        CreateDecoration(parent, "Black Tower", "Assets/Tiny Swords/Buildings/Black Buildings/Tower.png", "Tower_0", new Vector2(0, 470), new Vector2(145, 145), false);
+
+        string[] colours = { "Black", "Blue", "Purple", "Red", "Yellow" };
+        string minotaurPath = "Assets/Tiny Swords - Enemy Pack/Enemies/Minotaur/Minotaur_Walk.png";
+
+        for (int i = 0; i < colours.Length; i++)
+        {
+            bool moveRight = i % 2 == 0;
+            float startX = -720f + i * 360f;
+            string unitRoot = $"Assets/Tiny Swords/Units/{colours[i]} Units";
+            float lowerLane = -510f + (i % 3) * 40f;
+            float upperLane = 510f - (i % 3) * 40f;
+
+            CreateRunner(parent, $"{colours[i]} Melee Runner", unitRoot + "/Warrior/Warrior_Run.png", new Vector2(startX, lowerLane), 78f + i * 7f, moveRight, new Vector2(100, 100));
+            CreateRunner(parent, $"{colours[i]} Archer Runner", unitRoot + "/Archer/Archer_Run.png", new Vector2(-startX, upperLane), 72f + i * 6f, !moveRight, new Vector2(100, 100));
+        }
+
+        CreateRunner(parent, "Lower Left Minotaur", minotaurPath, new Vector2(-560, -500), 55f, true, new Vector2(135, 135));
+        CreateRunner(parent, "Lower Right Minotaur", minotaurPath, new Vector2(560, -450), 62f, false, new Vector2(135, 135));
+        CreateRunner(parent, "Upper Left Minotaur", minotaurPath, new Vector2(-420, 455), 58f, false, new Vector2(135, 135));
+        CreateRunner(parent, "Upper Right Minotaur", minotaurPath, new Vector2(420, 505), 66f, true, new Vector2(135, 135));
+
+        CreateSidePatrols(parent, "Left Side Patrols", -850f, true);
+        CreateSidePatrols(parent, "Right Side Patrols", 850f, false);
+    }
+
+    private static void CreateSidePatrols(RectTransform parent, string name, float xPosition, bool startsRight)
+    {
+        RectTransform lane = CreateRect(name, parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(xPosition, 0), new Vector2(220, 650));
+        string[] colours = startsRight
+            ? new[] { "Black", "Blue", "Purple", "Red", "Yellow", "Black" }
+            : new[] { "Yellow", "Red", "Purple", "Blue", "Black", "Yellow" };
+        float[] laneHeights = { -285f, -170f, -55f, 55f, 170f, 285f };
+
+        for (int i = 0; i < colours.Length; i++)
+        {
+            bool moveRight = (i % 2 == 0) == startsRight;
+            bool archer = i % 2 == 1;
+            string role = archer ? "Archer" : "Warrior";
+            string sheet = archer ? "Archer_Run.png" : "Warrior_Run.png";
+            string path = $"Assets/Tiny Swords/Units/{colours[i]} Units/{role}/{sheet}";
+            CreateRunner(lane, $"{colours[i]} Side Runner {i + 1}", path, new Vector2(moveRight ? -75 : 75, laneHeights[i]), 42f + i * 6f, moveRight, new Vector2(88, 88));
+        }
+    }
+
+    private static void CreateDecoration(RectTransform parent, string name, string path, string spriteName, Vector2 position, Vector2 size, bool flipX)
+    {
+        RectTransform rect = CreateRect(name, parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), position, size);
+        Image image = AddTinySwordsSprite(rect.gameObject, path, spriteName, Color.clear, true);
+        rect.localScale = new Vector3(flipX ? -1f : 1f, 1f, 1f);
+        image.raycastTarget = false;
+    }
+
+    private static void CreateRunner(RectTransform parent, string name, string path, Vector2 position, float speed, bool moveRight, Vector2 size)
+    {
+        Sprite[] frames = LoadSprites(path);
+        RectTransform rect = CreateRect(name, parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), position, size);
+        Image image = rect.gameObject.AddComponent<Image>();
+        image.sprite = frames.Length > 0 ? frames[0] : null;
+        image.color = Color.white;
+        image.preserveAspect = true;
+        image.raycastTarget = false;
+        rect.localScale = new Vector3(moveRight ? 1f : -1f, 1f, 1f);
+
+        TitleMenuBackgroundActor actor = rect.gameObject.AddComponent<TitleMenuBackgroundActor>();
+        actor.Configure(frames, speed, 10f, moveRight, 90f);
     }
 
     private static FactionCatalog CreateOrUpdateFactionCatalog()
@@ -210,6 +298,14 @@ public static class ClashTitleMenuBuilder
             if (asset is Sprite sprite && sprite.name == spriteName)
                 return sprite;
         return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+    }
+
+    private static Sprite[] LoadSprites(string path)
+    {
+        return AssetDatabase.LoadAllAssetsAtPath(path)
+            .OfType<Sprite>()
+            .OrderBy(sprite => sprite.name, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
     }
 
     private static void AddOutline(GameObject target)

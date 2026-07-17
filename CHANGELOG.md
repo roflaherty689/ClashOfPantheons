@@ -8,6 +8,7 @@ Git history remains the exact implementation record.
 
 ### Added
 
+- A decorative title-screen background layer with Tiny Swords green terrain, buildings, independently animated five-colour melee/archer units, expanded six-unit patrol groups in each side margin, and a smaller number of untinted minotaurs behind an inset wood panel.
 - Phase 1 title-menu runtime behavior and an Editor builder for a responsive Play/Exit title scene, Phase 2 placeholder, Input System UI, and deterministic Build Settings ordering.
 - A build-safe faction catalog, generated faction-selection buttons, and a scene-transition handoff that applies the chosen player faction before battle presentation initializes.
 - Initial project-memory documents for design, roadmap, tasks, decisions, and changelog maintenance.
