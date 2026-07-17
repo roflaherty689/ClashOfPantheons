@@ -12,12 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7df4611281b2d084387fd40880d4e52b, type: 3}
   m_Name: ArcherUnitData
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
-  maxHealth: 60
-  damage: 8
+  maxHealth: 65
+  damage: 9
   attackRange: 4
-  attackSpeed: 1.25
+  attackSpeed: 1.1
   moveSpeed: 1.8
-  cost: 60
+  cost: 65
   spawnInterval: 4
   unitDamageMultiplier: 1
-  buildingDamageMultiplier: 0.5
+  buildingDamageMultiplier: 0.4
+  hasFavouredUnitMatchup: 1
+  favouredUnitRole: 0
+  favouredUnitDamageMultiplier: 1.2

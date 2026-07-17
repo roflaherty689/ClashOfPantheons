@@ -233,7 +233,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Base
   faction: {fileID: 0}
   team: 0
-  maxHealth: 100
+  maxHealth: 1000
   visualTransform: {fileID: 316434180751877948}
   spriteRenderer: {fileID: 4809939592946214654}
   shakeDuration: 0.1

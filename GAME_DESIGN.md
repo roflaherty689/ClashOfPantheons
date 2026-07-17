@@ -87,7 +87,7 @@ The first purchase unlocks one continuously producing track for that role. The s
 
 ### Unit roles and counterplay
 
-The five accepted roles are melee, archer, cavalry, siege, and mythic. All five role mappings and prototype prefabs exist. A favourable role matchup applies a 1.2× damage multiplier. Exact matchups beyond those listed below remain balance work.
+The five accepted roles are melee, archer, cavalry, siege, and mythic. All five role mappings and prototype prefabs exist. The implemented first-pass counter triangle applies 1.2× damage for melee against cavalry, archers against melee, and cavalry against archers. Siege remains a structure specialist; mythics use melee, ranged, and support baselines without a role-wide counter bonus. Exact values remain subject to representative Play Mode tuning.
 
 | Role | Intended identity | Implementation status |
 |---|---|---|
@@ -103,6 +103,8 @@ Heroes and bosses are not prototype scope.
 
 **Implemented:** Units die at zero health. Destroying a stronghold immediately ends the match and stops autonomous units and workers.
 
+The first-pass combat scale uses 100 health for one-star melee units and 1,000 health for strongholds. One-star role baselines are tuned together with production cost and cadence. Star tiers scale health, damage, attack rate, range, and movement by 1×/1.25×/1.5×. Because damage and attack rate both scale, effective damage per second becomes 1×/1.5625×/2.25× rather than the previous 1×/2.25×/4×; high-tier pacing still requires targeted playtesting.
+
 **Implemented in source, partially Play Mode verified:** A match also ends when the configurable timer expires. The healthier stronghold wins. If health is equal, the side with the lower total value of units lost wins. Lost-unit value is accumulated from the purchase cost of each destroyed unit's production slot, with per-role death counts retained for inspection. If both comparisons are equal, the match is a draw with no winner or loser. Countdown expiry and the lost-value resolver were user-verified in a shortened match on 2026-07-17.
 
 The result overlay identifies victory, defeat, or draw and its resolution condition. Its restart action reloads the active battle scene to reset current runtime state; this path still requires Play Mode verification.
@@ -115,7 +117,7 @@ The result overlay identifies victory, defeat, or draw and its resolution condit
 
 ### Progression and persistence
 
-Each role begins locked. Its first purchase unlocks continuous one-star production; its next two purchases upgrade future spawns to two and three stars. Star tiers multiply all configured unit stats except purchase cost by 1×, 1.5×, and 2×. Existing fielded units do not change when a role is upgraded.
+Each role begins locked. Its first purchase unlocks continuous one-star production; its next two purchases upgrade future spawns to two and three stars. Star tiers multiply all configured unit stats except purchase cost by 1×, 1.25×, and 1.5×. Existing fielded units do not change when a role is upgraded.
 
 Each role's purchase cost and recurring production cadence are configured in its `UnitData` asset. `GameManager` can run either the legacy global spawn pattern or independent per-role timers for prototype testing. Purchase-slot activation gates the intended per-role mode, and a newly unlocked track begins a fresh cadence rather than inheriting locked time. Initial values remain balance tuning rather than an unresolved ownership decision.
 
@@ -186,7 +188,9 @@ The title screen should eventually use the same colourful Tiny Swords presentati
 
 Unlocking mythic production opens a choice menu before gold is spent. Selecting an option atomically purchases the unlock; later purchases upgrade that chosen option for the rest of the match. Each option's `UnitData` owns its cost and production cadence. The initial menu includes every combat-capable Tiny Swords Enemy Pack unit with usable idle, movement, and attack-equivalent animation, plus the five colour monks, so the roster can be reduced after review and used to test counter-selection when the opponent reveals a mythic choice first.
 
-Most first-pass enemy-pack options share the Minotaur's melee behavior and balance baseline, while retaining independent data assets for later tuning. Gnoll, Harpoon Fish, and Shaman are ranged mythics and use the bone, harpoon, and shaman projectile art supplied beside their source animations rather than the standard archer arrow. Troll uses its Windup clip as its attack; Troll Recovery and club-breaking clips, Skull and Turtle guard clips, and Boat are excluded. Monks are the support exception: they stop to heal the most-injured valid allied combat unit within range 2, excluding themselves, bases, dead units, and full-health units. They heal 5 health every 3 seconds at one star; heal amount follows the 1x/1.5x/2x tier curve while cadence stays fixed. Multiple monks may heal the same target, without overhealing, and resume movement when no valid ally in combat is in range.
+The combat mythics use differentiated first-pass profiles rather than one shared Minotaur baseline. Small, agile creatures such as Gnome, Thief, Spider, and Snake are cheaper, weaker, and produced more frequently; the middle roster trades cadence for increasing durability and damage; Bear and Minotaur are premium bruisers; and Troll is the strongest, slowest-producing, uniquely highest-cost option. Turtle emphasizes durability over damage and speed. Gnoll, Harpoon Fish, and Shaman are ranged mythics with increasing cost and power, reduced building damage, and their supplied bone, harpoon, and shaman projectile art. Troll uses its Windup clip as its attack; Troll Recovery and club-breaking clips, Skull and Turtle guard clips, and Boat are excluded.
+
+All five monk colours reference the same `MonkUnitData` and are mechanically identical. Monks stop to heal the most-injured valid allied combat unit within range 2, excluding themselves, bases, dead units, and full-health units. They heal 5 health every 3 seconds at one star; heal amount follows the 1x/1.25x/1.5x tier curve while cadence stays fixed. Multiple monks may heal the same target, without overhealing, and resume movement when no valid ally in combat is in range.
 
 ### Deferred beyond the core prototype
 

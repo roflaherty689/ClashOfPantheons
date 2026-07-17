@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7df4611281b2d084387fd40880d4e52b, type: 3}
   m_Name: GnollUnitData
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
-  maxHealth: 300
-  damage: 25
+  maxHealth: 150
+  damage: 15
   attackRange: 4
   attackSpeed: 1
-  moveSpeed: 1.8
-  cost: 220
-  spawnInterval: 12
+  moveSpeed: 2.1
+  cost: 165
+  spawnInterval: 9
   unitDamageMultiplier: 1
-  buildingDamageMultiplier: 1.5
+  buildingDamageMultiplier: 0.75

@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7df4611281b2d084387fd40880d4e52b, type: 3}
   m_Name: CatapultUnitData
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
-  maxHealth: 180
-  damage: 45
+  maxHealth: 150
+  damage: 40
   attackRange: 5.5
   attackSpeed: 0.4
   moveSpeed: 1
-  cost: 130
+  cost: 135
   spawnInterval: 8
-  unitDamageMultiplier: 1
+  unitDamageMultiplier: 0.6
   buildingDamageMultiplier: 1.5

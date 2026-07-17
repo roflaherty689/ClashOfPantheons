@@ -697,10 +697,25 @@ public class BattleEconomyUI : MonoBehaviour
         scroll.movementType = ScrollRect.MovementType.Clamped;
         scroll.scrollSensitivity = 28f;
 
+        List<BaseUnit> orderedMythics = new List<BaseUnit>();
         foreach (BaseUnit prefab in gameManager.MythicUnitRoster.Units)
         {
-            if (prefab == null || prefab.UnitData == null) continue;
+            if (prefab != null && prefab.UnitData != null)
+            {
+                orderedMythics.Add(prefab);
+            }
+        }
 
+        orderedMythics.Sort((left, right) =>
+        {
+            int costComparison = left.UnitData.Cost.CompareTo(right.UnitData.Cost);
+            return costComparison != 0
+                ? costComparison
+                : string.Compare(GetDisplayName(left), GetDisplayName(right), System.StringComparison.Ordinal);
+        });
+
+        foreach (BaseUnit prefab in orderedMythics)
+        {
             Button choice = CreatePickerButton(content, GetDisplayName(prefab), Vector2.zero, grid.cellSize);
             TextMeshProUGUI label = choice.GetComponentInChildren<TextMeshProUGUI>();
             label.text = $"{GetDisplayName(prefab)}\n{prefab.UnitData.Cost} GOLD";

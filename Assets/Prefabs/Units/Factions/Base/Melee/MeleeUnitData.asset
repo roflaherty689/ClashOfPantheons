@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MeleeUnitData
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
   maxHealth: 100
-  damage: 10
+  damage: 12
   attackRange: 0.75
   attackSpeed: 1
   moveSpeed: 2
@@ -21,3 +21,6 @@ MonoBehaviour:
   spawnInterval: 3
   unitDamageMultiplier: 1
   buildingDamageMultiplier: 0.75
+  hasFavouredUnitMatchup: 1
+  favouredUnitRole: 2
+  favouredUnitDamageMultiplier: 1.2

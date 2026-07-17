@@ -62,6 +62,7 @@ These checks confirm repository presence only. Their integrated runtime behavior
 - [ ] Replace static mock HUD values and shared-queue presentation with functional prototype state.
 - [x] Add a player-facing title -> faction selection -> difficulty selection -> battle flow, verified in Play Mode; player-build coverage remains tracked separately.
 - [ ] Validate role readability and at least one meaningful economy-versus-pressure decision through playtesting.
+- [ ] Playtest the implemented first-pass role counters, differentiated mythic roster, reduced 1x/1.25x/1.5x star curve, and roster/base values across equal-gold, mixed-composition, and tiered matchups; tune from observed five-minute match pacing.
 - [ ] Add focused tests for deterministic economy, production, and result rules, plus a documented Play Mode critical-path check.
 - [x] Deliver the accepted selectable mythic test roster in sequence: five colour monk healers, reusable animated Enemy Pack melee/ranged prefabs, then a pre-purchase details-pane picker with per-match selection and data-owned balance.
 - [ ] Review the broad initial mythic roster after animation, balance, and counter-selection testing; do not let this expansion displace the AI and complete-match critical path.

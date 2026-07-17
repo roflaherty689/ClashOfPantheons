@@ -560,6 +560,50 @@ Calling the shared purchase APIs preserves costs, caps, tiers, and production be
 
 ---
 
+## DEC-015 â€” First-pass combat scale and role counters
+
+**Date:** 2026-07-17
+**Status:** Accepted
+
+### Decision
+
+Use 100 one-star melee health and 1,000 stronghold health as the initial combat scale. Apply a data-configured 1.2x favourable matchup for melee against cavalry, archers against melee, and cavalry against archers. Keep siege's building specialization in its target-type modifiers. Differentiate combat mythics by creature identity, cost, production cadence, health, damage, and movement: lighter creatures are generally cheaper, weaker, and faster-producing; Minotaur remains a premium bruiser; Troll is the strongest, slowest-producing, and uniquely highest-cost option. Keep the three ranged mythics less durable and at 0.75x building damage. All five monk colours share one support profile and remain mechanically identical. Scale configured unit stats across the three star tiers by 1x/1.25x/1.5x.
+
+### Context
+
+The user requested a coordinated first implementation and tuning pass across unit damage, health, speed, cost, production cadence, and bases, suggested roughly 100 melee health and 800+ base health, and delegated the initial values. The repository documented counters but could only distinguish unit targets from buildings, while nearly all combat mythics shared identical durability, damage, cost, and cadence despite large differences in creature identity. After reviewing the first pass, the user identified the existing fourfold tier-three DPS as excessive and requested a scaling adjustment, then explicitly approved differentiating mythics, keeping monks equal, and making Troll the highest-cost creature.
+
+### Rationale
+
+The 1.2x triangle creates readable counterplay without making an unfavourable purchase useless. A 1,000-health stronghold better absorbs escalating tier damage than the previous 100-health prefab. Lower anti-unit siege efficiency preserves escort needs, while lower ranged-mythic and monk durability prices their range or support utility. Costs and cadences remain close to their existing economy scale to isolate combat effects during the first playtest. The reduced star curve keeps each purchase meaningful while limiting the compounded effect of scaling both damage and attack rate: effective DPS is now 1x/1.5625x/2.25x instead of 1x/2.25x/4x.
+
+### Consequences
+
+- Unit matchup damage composes with existing unit/building and tier multipliers.
+- Values remain provisional pending equal-gold, mixed-composition, base time-to-kill, and full-match tests.
+- Health, movement speed, range, raw damage, attack rate, and monk healing amount use the 1x/1.25x/1.5x curve; purchase cost and monk healing cadence remain unchanged.
+- Damage and attack-rate compounding produces 1x/1.5625x/2.25x effective DPS.
+- Siege retains the largest structure advantage; mythics no longer share its 1.5x building modifier.
+- Mythic choices now range from 140 gold/8-second production for Gnome to 300 gold/16-second production for Troll, with independently tuned combat profiles.
+- The five monk colour prefabs continue to share one 200-gold, 12-second support profile.
+
+### Alternatives considered
+
+- 800-health stronghold: viable, but 1,000 gives more room for tier escalation.
+- Universal mythic counter: rejected because the test roster spans melee, ranged, and support utility.
+- Stronger counters: deferred to avoid hard counters before playtesting.
+- 1x/1.5x/2x stat scaling: replaced because simultaneous damage and attack-rate scaling produced excessive 2.25x/4x effective DPS.
+- Scale only selected stats: deferred to keep one predictable upgrade rule while the first balance pass is tested.
+
+### Related items
+
+- `GAME_DESIGN.md` â€” Unit roles and counterplay
+- `TODO.md` â€” first roster-wide combat balance pass
+- `Assets/Scripts/Units/UnitData.cs`
+- `Assets/Scripts/Units/BaseUnit.cs`
+
+---
+
 # Decision template
 
 Copy this section for new decisions.

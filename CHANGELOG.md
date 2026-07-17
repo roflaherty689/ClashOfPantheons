@@ -8,6 +8,8 @@ Git history remains the exact implementation record.
 
 ### Added
 
+- Role-aware unit damage matchups, with a 1.2x first-pass counter triangle: melee beats cavalry, archers beat melee, and cavalry beats archers.
+
 - A three-difficulty enemy AI that buys workers, production, upgrades, and a random mythic through the same economy and production rules as the player.
 - A post-faction difficulty screen defaulting to Easy, with enemy starting-gold bonuses of +0/+50/+150 for Easy/Medium/Hard.
 - Random opponent-faction selection that excludes the player's chosen faction to prevent colour conflicts.
@@ -37,6 +39,14 @@ Git history remains the exact implementation record.
 - Black, blue, purple, red, and yellow animated worker prefabs owned by their matching faction assets.
 
 ### Changed
+
+- Mythic choices in the production picker are now ordered by ascending gold cost, with alphabetical ordering for equal-cost options.
+
+- Differentiated the mythic test roster by creature identity, cost, production cadence, health, damage, and movement. Light creatures now arrive faster at lower power and cost, while Minotaur and Bear are premium bruisers and Troll is the strongest, slowest-producing, uniquely highest-cost option; all monk colours remain mechanically identical.
+
+- Reduced star-tier stat scaling from 1x/1.5x/2x to 1x/1.25x/1.5x, lowering compounded effective DPS from 1x/2.25x/4x to 1x/1.5625x/2.25x while preserving future-spawn-only upgrades.
+
+- Rebalanced the full prototype roster around a 100-health melee baseline, differentiated siege and mythic roles, and a 1,000-health stronghold; values remain subject to Play Mode tuning.
 
 - Medium and Hard AI now gate early worker purchases behind military production, with Hard requiring a broader opening composition to resist rushes.
 

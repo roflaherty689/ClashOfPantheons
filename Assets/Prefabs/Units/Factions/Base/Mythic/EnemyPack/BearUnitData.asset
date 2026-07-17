@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7df4611281b2d084387fd40880d4e52b, type: 3}
   m_Name: BearUnitData
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
-  maxHealth: 300
-  damage: 25
+  maxHealth: 320
+  damage: 28
   attackRange: 1
   attackSpeed: 1
-  moveSpeed: 1.8
-  cost: 220
-  spawnInterval: 12
+  moveSpeed: 1.7
+  cost: 235
+  spawnInterval: 13
   unitDamageMultiplier: 1
-  buildingDamageMultiplier: 1.5
+  buildingDamageMultiplier: 1

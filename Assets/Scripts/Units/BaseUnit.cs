@@ -43,6 +43,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     public Team Team => team;
     public Transform Transform => transform;
     public UnitData UnitData => unitData;
+    public UnitRole Role => role;
     public int ProductionTier => productionTier;
     public float CurrentHealth => currentHealth;
     public float MaximumHealth => maximumHealth;
@@ -84,8 +85,8 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         productionTier = Mathf.Clamp(tier, 1, GameManager.MaximumProductionTier);
         statMultiplier = productionTier switch
         {
-            2 => 1.5f,
-            3 => 2f,
+            2 => 1.25f,
+            3 => 1.5f,
             _ => 1f
         };
 
@@ -303,7 +304,8 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         attackTimer -= attackCooldown;
 
-        float finalDamage = unitData.GetDamageAgainst(target.TargetType) * statMultiplier;
+        UnitRole targetRole = target is BaseUnit targetUnit ? targetUnit.Role : default;
+        float finalDamage = unitData.GetDamageAgainst(target.TargetType, targetRole) * statMultiplier;
 
         PlayAttackAnimation();
 

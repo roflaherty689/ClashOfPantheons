@@ -17,6 +17,9 @@ public class UnitData : ScriptableObject
     [Header("Damage Modifiers")]
     [SerializeField, Min(0f)] private float unitDamageMultiplier = 1f;
     [SerializeField, Min(0f)] private float buildingDamageMultiplier = 1f;
+    [SerializeField] private bool hasFavouredUnitMatchup;
+    [SerializeField] private UnitRole favouredUnitRole;
+    [SerializeField, Min(1f)] private float favouredUnitDamageMultiplier = 1.2f;
 
     public float MaxHealth => Mathf.Max(0.01f, maxHealth);
     public float AttackRange => Mathf.Max(0f, attackRange);
@@ -25,13 +28,20 @@ public class UnitData : ScriptableObject
     public int Cost => Mathf.Max(0, cost);
     public float SpawnInterval => Mathf.Max(0.1f, spawnInterval);
 
-    public float GetDamageAgainst(TargetType targetType)
+    public float GetDamageAgainst(TargetType targetType, UnitRole targetRole = default)
     {
-        return targetType switch
+        float targetDamage = targetType switch
         {
             TargetType.Unit => damage * Mathf.Max(0f, unitDamageMultiplier),
             TargetType.Building => damage * Mathf.Max(0f, buildingDamageMultiplier),
             _ => damage
         };
+
+        if (targetType == TargetType.Unit && hasFavouredUnitMatchup && targetRole == favouredUnitRole)
+        {
+            targetDamage *= Mathf.Max(1f, favouredUnitDamageMultiplier);
+        }
+
+        return targetDamage;
     }
 }

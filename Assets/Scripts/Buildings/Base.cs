@@ -6,7 +6,7 @@ public class Base : MonoBehaviour, IDamageable
     [SerializeField] private Team team;
 
     [Header("Health")]
-    [SerializeField, Min(0.01f)] private float maxHealth = 50f;
+    [SerializeField, Min(0.01f)] private float maxHealth = 1000f;
 
     [Header("Visuals")]
     [SerializeField] private Transform visualTransform;

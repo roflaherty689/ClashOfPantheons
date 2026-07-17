@@ -12,12 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7df4611281b2d084387fd40880d4e52b, type: 3}
   m_Name: CavalryUnitData
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
-  maxHealth: 140
-  damage: 15
+  maxHealth: 150
+  damage: 18
   attackRange: 0.9
-  attackSpeed: 1
+  attackSpeed: 0.9
   moveSpeed: 3.2
-  cost: 100
+  cost: 105
   spawnInterval: 6
   unitDamageMultiplier: 1
   buildingDamageMultiplier: 0.6
+  hasFavouredUnitMatchup: 1
+  favouredUnitRole: 1
+  favouredUnitDamageMultiplier: 1.2
