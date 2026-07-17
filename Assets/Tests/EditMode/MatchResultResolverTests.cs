@@ -39,3 +39,54 @@ public class MatchResultResolverTests
         Assert.That(result.Reason, Is.EqualTo(MatchEndReason.TimeoutDraw));
     }
 }
+
+public class MatchResultTextTests
+{
+    [TestCase(false, Team.Left, Team.Left, "DRAW")]
+    [TestCase(true, Team.Left, Team.Left, "VICTORY")]
+    [TestCase(true, Team.Right, Team.Left, "DEFEAT")]
+    public void GetTitle_UsesPlayerRelativeResult(
+        bool hasWinner,
+        Team winner,
+        Team playerTeam,
+        string expected)
+    {
+        Assert.That(MatchResultText.GetTitle(hasWinner, winner, playerTeam), Is.EqualTo(expected));
+    }
+
+    [TestCase(MatchEndReason.StrongholdDestroyed, true, "ENEMY STRONGHOLD DESTROYED")]
+    [TestCase(MatchEndReason.StrongholdDestroyed, false, "YOUR STRONGHOLD WAS DESTROYED")]
+    [TestCase(MatchEndReason.TimeoutHealth, true, "TIME EXPIRED · YOUR STRONGHOLD HAD MORE HEALTH")]
+    [TestCase(MatchEndReason.TimeoutHealth, false, "TIME EXPIRED · ENEMY STRONGHOLD HAD MORE HEALTH")]
+    public void GetReason_UsesPlayerRelativeWording(
+        MatchEndReason reason,
+        bool playerWon,
+        string expected)
+    {
+        Assert.That(MatchResultText.GetReason(reason, playerWon, 10, 20), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void GetReason_LostValueIncludesBothTeamsValues()
+    {
+        Assert.That(
+            MatchResultText.GetReason(MatchEndReason.TimeoutUnitLossValue, true, 10, 20),
+            Is.EqualTo("TIME EXPIRED · LOSSES 10 vs 20 GOLD"));
+    }
+
+    [Test]
+    public void GetReason_DrawIncludesTiedValue()
+    {
+        Assert.That(
+            MatchResultText.GetReason(MatchEndReason.TimeoutDraw, false, 20, 20),
+            Is.EqualTo("TIME EXPIRED · HEALTH AND LOSSES TIED AT 20 GOLD"));
+    }
+
+    [Test]
+    public void GetReason_UnknownReasonUsesFallback()
+    {
+        Assert.That(
+            MatchResultText.GetReason(MatchEndReason.None, false, 0, 0),
+            Is.EqualTo("MATCH COMPLETE"));
+    }
+}

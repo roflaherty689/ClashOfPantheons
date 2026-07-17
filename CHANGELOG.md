@@ -115,6 +115,7 @@ Git history remains the exact implementation record.
 
 ### Technical
 
+- Extracted player-relative match-result title and reason formatting from the battle HUD into the Core assembly; all 15 Core Edit Mode cases passed in Unity.
 - Began the maintainability refactor by extracting deterministic timeout comparisons into an engine-independent Core assembly; all five Edit Mode characterization cases for health, lost-unit-value, and exact-draw outcomes passed in Unity.
 - Corrected the battle-HUD builder completion message so it reflects the implemented runtime bindings and required Play Mode layout verification.
 

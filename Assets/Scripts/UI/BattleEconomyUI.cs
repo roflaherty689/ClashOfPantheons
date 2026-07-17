@@ -991,37 +991,21 @@ public class BattleEconomyUI : MonoBehaviour
         bool playerWon = gameManager.HasWinner && gameManager.WinningTeam == playerTeam;
         if (resultTitleText != null)
         {
-            resultTitleText.text = !gameManager.HasWinner
-                ? "DRAW"
-                : playerWon ? "VICTORY" : "DEFEAT";
+            resultTitleText.text = MatchResultText.GetTitle(
+                gameManager.HasWinner,
+                gameManager.WinningTeam,
+                playerTeam);
         }
 
         if (resultReasonText != null)
         {
-            resultReasonText.text = GetResultReason(playerWon);
+            Team enemyTeam = playerTeam == Team.Left ? Team.Right : Team.Left;
+            resultReasonText.text = MatchResultText.GetReason(
+                gameManager.EndReason,
+                playerWon,
+                gameManager.GetTotalUnitLossValue(playerTeam),
+                gameManager.GetTotalUnitLossValue(enemyTeam));
         }
-    }
-
-    private string GetResultReason(bool playerWon)
-    {
-        Team enemyTeam = playerTeam == Team.Left ? Team.Right : Team.Left;
-
-        return gameManager.EndReason switch
-        {
-            MatchEndReason.StrongholdDestroyed => playerWon
-                ? "ENEMY STRONGHOLD DESTROYED"
-                : "YOUR STRONGHOLD WAS DESTROYED",
-            MatchEndReason.TimeoutHealth => playerWon
-                ? "TIME EXPIRED · YOUR STRONGHOLD HAD MORE HEALTH"
-                : "TIME EXPIRED · ENEMY STRONGHOLD HAD MORE HEALTH",
-            MatchEndReason.TimeoutUnitLossValue =>
-                $"TIME EXPIRED · LOSSES {gameManager.GetTotalUnitLossValue(playerTeam)} vs " +
-                $"{gameManager.GetTotalUnitLossValue(enemyTeam)} GOLD",
-            MatchEndReason.TimeoutDraw =>
-                $"TIME EXPIRED · HEALTH AND LOSSES TIED AT " +
-                $"{gameManager.GetTotalUnitLossValue(playerTeam)} GOLD",
-            _ => "MATCH COMPLETE"
-        };
     }
 
     private void SetResultOverlayVisible(bool visible)
