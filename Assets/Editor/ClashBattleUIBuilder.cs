@@ -52,21 +52,25 @@ public static class ClashBattleUIBuilder
         RectTransform safe = CreateRect("Safe Area", root.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
         safe.gameObject.AddComponent<BattleSafeArea>();
 
-        CreateTopHUD(safe);
+        CreateTopHUD(safe, out Image leftCastleIcon, out Image rightCastleIcon);
         CreateBottomHUD(safe);
         CreateOverlay(safe);
+        AssignFactionCastleIcons(leftCastleIcon, rightCastleIcon);
 
         Selection.activeGameObject = root;
         EditorUtility.SetDirty(root);
         Debug.Log("Created the Tiny Swords battle HUD. Values are presentation placeholders until runtime bindings are implemented.");
     }
 
-    private static void CreateTopHUD(RectTransform parent)
+    private static void CreateTopHUD(
+        RectTransform parent,
+        out Image leftCastleIcon,
+        out Image rightCastleIcon)
     {
         RectTransform top = CreateRect("Top HUD", parent, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -63), new Vector2(-32, 110));
 
-        CreateTeamHeader(top, "Player Stronghold", false, "PLAYER", "50 / 50");
-        CreateTeamHeader(top, "Enemy Stronghold", true, "ENEMY", "50 / 50");
+        leftCastleIcon = CreateTeamHeader(top, "Player Stronghold", false, "PLAYER", "50 / 50");
+        rightCastleIcon = CreateTeamHeader(top, "Enemy Stronghold", true, "ENEMY", "50 / 50");
 
         RectTransform timer = CreateRect("Match Timer", top, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(330, 104));
         AddSpriteOrPanel(timer.gameObject, UiRoot + "/Banners/Banner.png", "Banner_4", new Color32(225, 207, 159, 255), false);
@@ -74,7 +78,7 @@ public static class ClashBattleUIBuilder
         AddText(timer, "MATCH TIME", 17, TextAlignmentOptions.Center, new Vector2(0, -30), new Vector2(180, 24), new Color32(78, 58, 40, 255));
     }
 
-    private static void CreateTeamHeader(RectTransform parent, string name, bool enemy, string label, string health)
+    private static Image CreateTeamHeader(RectTransform parent, string name, bool enemy, string label, string health)
     {
         Vector2 edgeAnchor = new Vector2(enemy ? 0.95f : 0.05f, 0.5f);
         RectTransform header = CreateRect(
@@ -87,10 +91,10 @@ public static class ClashBattleUIBuilder
         AddPanel(header.gameObject, Ink);
         AddBorder(header, Trim, 3);
 
-        string colour = enemy ? "Red" : "Blue";
+        string colour = enemy ? "Red" : "Black";
         string castlePath = TinySwords + "/Buildings/" + colour + " Buildings/Castle.png";
-        RectTransform castle = CreateRect(colour + " Castle Icon", header, new Vector2(enemy ? 1 : 0, 0.5f), new Vector2(enemy ? 1 : 0, 0.5f), new Vector2(enemy ? -35 : 35, -1), new Vector2(70, 70));
-        AddSpriteOrPanel(castle.gameObject, castlePath, "Castle_0", Color.white, true);
+        RectTransform castle = CreateRect((enemy ? "Right" : "Left") + " Castle Icon", header, new Vector2(enemy ? 1 : 0, 0.5f), new Vector2(enemy ? 1 : 0, 0.5f), new Vector2(enemy ? -35 : 35, -1), new Vector2(70, 70));
+        Image castleIcon = AddSpriteOrPanel(castle.gameObject, castlePath, "Castle_0", Color.white, true);
 
         Vector2 labelAnchor = new Vector2(enemy ? 1 : 0, 0.5f);
         AddText(header, label, 29, enemy ? TextAlignmentOptions.Right : TextAlignmentOptions.Left,
@@ -109,6 +113,23 @@ public static class ClashBattleUIBuilder
         fillImage.fillOrigin = enemy ? 1 : 0;
         fillImage.fillAmount = 1f;
         AddText(healthBar, health, 24, TextAlignmentOptions.Center, Vector2.zero, new Vector2(450, 36)).gameObject.name = "Stronghold Health Total";
+        return castleIcon;
+    }
+
+    private static void AssignFactionCastleIcons(Image leftCastleIcon, Image rightCastleIcon)
+    {
+        GameManager gameManager = Object.FindAnyObjectByType<GameManager>();
+        if (gameManager == null)
+        {
+            Debug.LogWarning("Battle UI could not bind faction castle icons because no GameManager exists in the scene.");
+            return;
+        }
+
+        SerializedObject serializedGameManager = new SerializedObject(gameManager);
+        serializedGameManager.FindProperty("leftCastleIcon").objectReferenceValue = leftCastleIcon;
+        serializedGameManager.FindProperty("rightCastleIcon").objectReferenceValue = rightCastleIcon;
+        serializedGameManager.ApplyModifiedProperties();
+        EditorUtility.SetDirty(gameManager);
     }
 
     private static void CreateHealthBarFrame(RectTransform parent)

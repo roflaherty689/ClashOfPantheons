@@ -343,6 +343,48 @@ Team-colour variants provide readable visual alternatives using already imported
 
 ---
 
+## DEC-010 — Faction-owned building presentation with shared gameplay prefabs
+
+**Date:** 2026-07-17
+**Status:** Accepted
+
+### Decision
+
+Each prototype colour faction owns references to its matching Tiny Swords Castle and House3 sprites. The selected faction drives the team's world castle, worker hand-in, and HUD stronghold icon. Both teams continue to use one shared Base gameplay prefab; colour-specific Base prefab variants are not created.
+
+### Context
+
+The scene independently hardcoded a black left castle/hand-in and red right castle/hand-in while both `GameManager` faction fields selected `BlackFaction`. This allowed unit selection, world buildings, and HUD icons to disagree. The user approved Black versus Red as the default, faction-driven HUD icons, House3 for every colour, and the proposed Base prefab refactor.
+
+### Rationale
+
+Presentation sprites are authored faction configuration, while base health, collision, worker economy, and deposit behavior are shared gameplay. Keeping those responsibilities separate makes `FactionData` the single presentation source without duplicating gameplay configuration across five prefabs.
+
+### Consequences
+
+- `FactionData` exposes Castle and House3 presentation sprites in addition to unit mappings.
+- A focused Base presentation component consumes faction art; `WorkerManager` remains responsible for economy and uses the prefab-owned hand-in transform.
+- The shared Base prefab owns its castle and hand-in children, while scene instances retain only team, placement, spawn-point, and gold-vein differences.
+- `GameManager` applies presentation at match startup and updates the corresponding HUD icons.
+- The legacy Default and meme faction assets may omit these sprites; authored prefab fallbacks remain visible and configuration diagnostics are emitted.
+- "Selected faction" currently means the serialized left/right `GameManager` references before a match; live mid-match faction switching is not introduced.
+
+### Alternatives considered
+
+- Five colour-specific Base prefabs: rejected because identical health, collider, worker, and placement configuration would be duplicated and could drift.
+- Keep scene-owned sprite overrides: rejected because it caused the confirmed mismatch between faction selection and presentation.
+- Put art selection in `WorkerManager`: rejected because the economy component should not own faction presentation.
+
+### Related items
+
+- `GAME_DESIGN.md` — Audio and visual direction
+- `ROADMAP.md` — Prototype existing foundation
+- `TODO.md` — Faction-driven prototype building presentation
+- `Assets/Scripts/Factions/FactionData.cs`
+- `Assets/Prefabs/Buildings/Base.prefab`
+
+---
+
 # Decision template
 
 Copy this section for new decisions.

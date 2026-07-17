@@ -140,6 +140,24 @@ Tasks are ordered by dependency and prototype value.
 - [x] Black, blue, purple, red, and yellow melee/archer variants show their matching idle, run, and attack animations in Play Mode; the user verified every colour on 2026-07-17 after loop and transition settings were matched to black.
 - [ ] Verify the shared cavalry, siege, and mythic units still spawn correctly with each team-colour faction. Confirm that switching both team factions does not produce missing references, controller warnings, or unintended mechanical differences.
 
+### Faction-driven prototype building presentation
+
+**Outcome:** The faction selected for either team is the single source of truth for its world Castle, House3 worker hand-in, and HUD stronghold icon without duplicating gameplay prefabs.
+
+**Acceptance criteria:**
+
+- [x] Black, blue, purple, red, and yellow `FactionData` assets reference their matching Tiny Swords Castle and House3 sprites.
+- [x] `GameManager` applies each selected faction to the corresponding world presentation and HUD icon, with Black versus Red as the active scene default.
+- [x] One shared Base prefab owns the castle, hand-in child, worker economy component, and presentation bindings; loose scene hand-in objects and per-instance sprite/tint overrides are removed.
+- [x] Missing presentation data retains authored fallback sprites and produces actionable diagnostics instead of a null exception.
+- [ ] Unity imports the prefab, scene, and new component with no missing scripts or broken serialized references.
+- [ ] In Play Mode, every colour is verified on both Left and Right; Castle, House3, HUD icon, and spawned colour-specific units agree with the selected faction.
+- [ ] Both teams' workers still spawn, mine, return to the inward hand-in point, and increase gold; base damage shake, targeting, destruction, and restart remain correct.
+
+**Progress:** Source, faction assets, shared-prefab structure, scene migration, HUD bindings, and the HUD regeneration tool are implemented. Runtime and Editor assemblies compile externally with zero warnings and errors, and serialized references pass static checks. Unity import and Play Mode acceptance remain pending.
+
+**Status:** Partially implemented
+
 ---
 
 ## P3 — Later

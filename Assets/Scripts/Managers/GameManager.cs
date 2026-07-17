@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 public enum SpawnPattern
 {
@@ -33,6 +34,10 @@ public class GameManager : MonoBehaviour
     [Header("Team Factions")]
     [SerializeField] private FactionData leftFactionData;
     [SerializeField] private FactionData rightFactionData;
+
+    [Header("Faction Presentation")]
+    [SerializeField] private Image leftCastleIcon;
+    [SerializeField] private Image rightCastleIcon;
 
     [Header("Spawn Points")]
     [SerializeField] private Transform leftSpawnPoint;
@@ -85,6 +90,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = Mathf.Max(0f, gameSpeed);
         timeRemaining = Mathf.Max(1f, matchDurationSeconds);
         ResolveBases();
+        ApplyFactionPresentation();
         ValidateConfiguration();
     }
 
@@ -266,6 +272,57 @@ public class GameManager : MonoBehaviour
             {
                 rightBase = battleBase;
             }
+        }
+    }
+
+    private void ApplyFactionPresentation()
+    {
+        ApplyTeamPresentation(Team.Left, leftFactionData, leftBase, leftCastleIcon);
+        ApplyTeamPresentation(Team.Right, rightFactionData, rightBase, rightCastleIcon);
+    }
+
+    private static void ApplyTeamPresentation(
+        Team team,
+        FactionData factionData,
+        Base battleBase,
+        Image castleIcon)
+    {
+        if (battleBase == null)
+        {
+            Debug.LogError($"Cannot apply {team} faction presentation without a stronghold.");
+            return;
+        }
+
+        BasePresentation presentation = battleBase.GetComponent<BasePresentation>();
+        if (presentation == null)
+        {
+            Debug.LogError($"{battleBase.name}: Missing BasePresentation.", battleBase);
+            return;
+        }
+
+        presentation.ValidateReferences();
+        presentation.Apply(factionData, team);
+
+        if (castleIcon != null)
+        {
+            castleIcon.color = Color.white;
+            if (factionData != null && factionData.CastleSprite != null)
+            {
+                castleIcon.sprite = factionData.CastleSprite;
+            }
+        }
+
+        if (factionData == null || !factionData.HasBuildingPresentation)
+        {
+            string factionName = factionData == null ? "<missing>" : factionData.FactionName;
+            Debug.LogWarning(
+                $"{team} faction '{factionName}' has incomplete building presentation; existing sprites will be retained.",
+                factionData);
+        }
+
+        if (castleIcon == null)
+        {
+            Debug.LogWarning($"{team} castle HUD icon is not assigned.");
         }
     }
 

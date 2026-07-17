@@ -9,7 +9,6 @@ public class WorkerManager : MonoBehaviour
     [Header("Worker Setup")]
     [SerializeField] private WorkerUnit workerPrefab;
     [SerializeField] private Transform workerSpawnPoint;
-    [SerializeField] private Transform dropOffPoint;
     [SerializeField] private GoldVein goldVein;
 
     [Header("Worker Counts")]
@@ -23,6 +22,7 @@ public class WorkerManager : MonoBehaviour
     [SerializeField, Min(0f)] private float goldUpgradeMultiplier = 1f;
 
     private GameManager gameManager;
+    private Transform dropOffPoint;
 
     private readonly List<WorkerUnit> workers = new();
     private int currentGold;
@@ -40,6 +40,12 @@ public class WorkerManager : MonoBehaviour
     private void Awake()
     {
         gameManager = FindAnyObjectByType<GameManager>();
+
+        BasePresentation presentation = GetComponent<BasePresentation>();
+        if (presentation != null)
+        {
+            dropOffPoint = presentation.DropOffPoint;
+        }
     }
 
     private void Start()

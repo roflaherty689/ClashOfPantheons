@@ -144,7 +144,7 @@ The functional prototype HUD must communicate gold, worker purchase state, indep
 
 ## Audio and visual direction
 
-Use the colourful, humorous Tiny Swords pixel-art style as the prototype direction. Replacement or supplementary art should preserve that tone while using iconic mythological or cultural details where useful; strict historical accuracy is not the goal. Five mechanically identical Tiny Swords team-colour variants (black, blue, purple, red, and yellow) are available for prototype presentation; only melee and archer currently vary by colour, while cavalry, siege, and mythic remain shared. These palette variants are not five designed mythological factions. Final art and broad faction production remain deferred.
+Use the colourful, humorous Tiny Swords pixel-art style as the prototype direction. Replacement or supplementary art should preserve that tone while using iconic mythological or cultural details where useful; strict historical accuracy is not the goal. Five mechanically identical Tiny Swords team-colour variants (black, blue, purple, red, and yellow) are available for prototype presentation. Each variant owns matching Castle and House3 hand-in sprites for its world presentation and HUD stronghold icon; melee and archer also vary by colour, while cavalry, siege, and mythic remain shared. These palette variants are not five designed mythological factions. Final art and broad faction production remain deferred.
 
 No project-specific audio system or direction is implemented. Music/SFX controls and audio content are later work.
 
