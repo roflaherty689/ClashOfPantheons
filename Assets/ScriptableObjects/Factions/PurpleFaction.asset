@@ -13,9 +13,6 @@ MonoBehaviour:
   m_Name: PurpleFaction
   m_EditorClassIdentifier: Assembly-CSharp::FactionData
   factionName: Purple
-  castleSprite: {fileID: 21300000, guid: 03b438cc1edb849a7978ee3571c43887, type: 3}
-  handInSprite: {fileID: 21300000, guid: 4072398f97c2a4bd69440a0d7d29983b, type: 3}
-  workerPrefab: {fileID: 8120276743538827778, guid: e2a5b8d10c3f46a79b6e2d8f0c415a73, type: 3}
   units:
   - role: 0
     prefab: {fileID: 7886269566354373400, guid: 4e5f60718293a4b5c6d7e8f901ab2c3d, type: 3}
@@ -26,4 +23,7 @@ MonoBehaviour:
   - role: 3
     prefab: {fileID: 521288771715210349, guid: bc038acb326e54b4b9757ac5cf73e186, type: 3}
   - role: 4
-    prefab: {fileID: 7886269566354373400, guid: 4ca44712d4a677443889e9f30c89c515, type: 3}
+    prefab: {fileID: 7824250487751383096, guid: b64b9d12f83427b42b7dc4fa9cf46e40, type: 3}
+  workerPrefab: {fileID: 8120276743538827778, guid: e2a5b8d10c3f46a79b6e2d8f0c415a73, type: 3}
+  castleSprite: {fileID: 21300000, guid: 03b438cc1edb849a7978ee3571c43887, type: 3}
+  handInSprite: {fileID: 21300000, guid: 4072398f97c2a4bd69440a0d7d29983b, type: 3}

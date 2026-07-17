@@ -44,6 +44,15 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
     public Transform Transform => transform;
     public UnitData UnitData => unitData;
     public int ProductionTier => productionTier;
+    public float CurrentHealth => currentHealth;
+    public float MaximumHealth => maximumHealth;
+    public bool IsDead => isDead;
+    public bool IsInCombat { get; private set; }
+
+    protected float StatMultiplier => statMultiplier;
+    protected virtual bool CanAttack => true;
+    protected virtual float TargetPointStoppingDistance => 0f;
+    protected virtual bool SeparateFriendliesWhileMoving => false;
 
     private Team team;
     private UnitRole role;
@@ -112,11 +121,19 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
         if (gameManager != null && gameManager.IsGameOver)
         {
+            IsInCombat = false;
             SetMovingAnimation(false);
             return;
         }
 
-        IDamageable currentTarget = FindTargetInRange();
+        if (TryHandleSpecialAction())
+        {
+            IsInCombat = false;
+            return;
+        }
+
+        IDamageable currentTarget = CanAttack ? FindTargetInRange() : null;
+        IsInCombat = currentTarget != null;
 
         if (currentTarget != null)
         {
@@ -125,6 +142,11 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         }
 
         MoveTowardsTargetPoint();
+    }
+
+    protected virtual bool TryHandleSpecialAction()
+    {
+        return false;
     }
 
     private void HandleCombat(IDamageable target)
@@ -144,17 +166,37 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
             return;
         }
 
+        float distanceToTarget = Mathf.Abs(targetPoint.position.x - transform.position.x);
+        if (distanceToTarget <= Mathf.Max(0f, TargetPointStoppingDistance))
+        {
+            SetMovingAnimation(false);
+            if (SeparateFriendliesWhileMoving)
+            {
+                ApplyFriendlyCombatSeparation();
+            }
+
+            return;
+        }
+
         SetMovingAnimation(true);
 
+        if (SeparateFriendliesWhileMoving)
+        {
+            ApplyFriendlyCombatSeparation();
+        }
+
         float direction = team == Team.Left ? 1f : -1f;
+        float stoppingDistance = Mathf.Max(0f, TargetPointStoppingDistance);
+        float movementDistance = unitData.MoveSpeed * statMultiplier * Time.deltaTime;
+        movementDistance = Mathf.Min(movementDistance, distanceToTarget - stoppingDistance);
 
         Vector3 nextPosition = transform.position;
-        nextPosition.x += direction * unitData.MoveSpeed * statMultiplier * Time.deltaTime;
+        nextPosition.x += direction * movementDistance;
 
         transform.position = nextPosition;
     }
 
-    private void ApplyFriendlyCombatSeparation()
+    protected void ApplyFriendlyCombatSeparation()
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
@@ -330,6 +372,24 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         Destroy(gameObject);
     }
 
+    public float ReceiveHealing(float amount)
+    {
+        if (isDead || amount <= 0f || currentHealth >= maximumHealth)
+        {
+            return 0f;
+        }
+
+        float previousHealth = currentHealth;
+        currentHealth = Mathf.Min(maximumHealth, currentHealth + amount);
+
+        if (healthBar != null)
+        {
+            healthBar.SetHealth(currentHealth, maximumHealth);
+        }
+
+        return currentHealth - previousHealth;
+    }
+
     private void SpawnHealthBar()
     {
         if (healthBarPrefab == null) return;
@@ -363,7 +423,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
             : Color.blue;
     }
 
-    private void SetMovingAnimation(bool isMoving)
+    protected void SetMovingAnimation(bool isMoving)
     {
         if (animator == null) return;
 

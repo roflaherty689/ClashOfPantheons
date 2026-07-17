@@ -174,10 +174,10 @@ Tasks are ordered by dependency and prototype value.
 
 **Phased acceptance criteria:**
 
-- [ ] **Phase 1 - Monk healer:** Create Black, Blue, Purple, Red, and Yellow monk prefabs using their Idle, Run, and Heal clips; loop Idle/Run but not Heal.
-- [ ] Target the most-injured allied combat unit within range 2, excluding self, bases, dead units, and full-health units; stop to heal and resume moving when none is valid and in combat.
-- [ ] Heal 5 every 3 seconds; amount scales 1x/1.5x/2x by tier, cadence stays fixed, multiple monks may share a target, and healing cannot exceed maximum health.
-- [ ] Present the monk's heal animation and its effect around the recipient; safely cancel on target death or match end.
+- [x] **Phase 1 - Monk healer:** Create Black, Blue, Purple, Red, and Yellow monk prefabs using their Idle, Run, and Heal clips; loop Idle/Run but not Heal.
+- [x] Target the most-injured allied combat unit within range 2, excluding self, bases, dead units, and full-health units; stop to heal and resume moving when none is valid and in combat.
+- [x] Heal 5 every 3 seconds; amount scales 1x/1.5x/2x by tier, cadence stays fixed, multiple monks may share a target, and healing cannot exceed maximum health.
+- [x] Present the monk's heal animation and its effect around the recipient; safely cancel on target death or match end.
 - [ ] **Phase 2 - Enemy Pack prefabs:** Create Minotaur-structured mythic prefabs for Bear, Gnoll, Gnome, Harpoon Fish, Lancer, Lizard, Paddle Fish, Panda, Shaman, Skull, Snake, Spider, Thief, Troll, and Turtle; retain Minotaur.
 - [ ] Use Idle, Run/Walk, and Attack clips, treating Gnoll/Harpoon Fish `Throw` as attack equivalents. Loop only Idle and Run/Walk.
 - [ ] Treat Gnoll, Harpoon Fish, and Shaman as ranged mythics. Use their nearby bone, harpoon, and shaman projectile assets instead of the standard archer arrow, with independently configurable `UnitData` for range, cost, cadence, and balance.
@@ -190,7 +190,9 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies/risks:** Existing faction and production data assume one prefab/data pair per role. Healing requires friendly targeting and current/max-health access without costly broad scans. This test expansion must not displace the incomplete AI/core-loop work.
 
-**Status:** Accepted, not started (`DEC-013`).
+**Progress:** Phase 1 is complete. Runtime source provides ally-combat-state tracking, clamped healing, lowest-health ally selection, fixed-cadence tier-scaled monk healing, movement suppression, recipient-owned heal VFX, moving/healing friendly separation, enemy-proximity stopping, and a target-point stopping distance equal to heal range. The Editor builder normalized all five controllers and clip-loop settings, generated the shared `MonkUnitData`, one-shot heal-effect prefab, and five colour monk prefabs, and assigned each colour faction's mythic entry to its matching monk. Runtime and Editor assemblies compile with zero warnings/errors. The user approved the Phase 1 Play Mode behavior after verifying automatic melee/monk testing and enemy-line stopping; the temporary spawn override was removed afterward.
+
+**Status:** Phase 1 complete; Phases 2-3 not started (`DEC-013`).
 
 ### Faction-driven prototype presentation
 
