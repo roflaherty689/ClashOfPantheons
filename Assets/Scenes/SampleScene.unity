@@ -9169,6 +9169,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6148565740065437913, guid: 984db670955470943b97319442394a59, type: 3}
+      propertyPath: startingGold
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 6148565740065437913, guid: 984db670955470943b97319442394a59, type: 3}
       propertyPath: goldVein
       value: 
       objectReference: {fileID: 640958049}

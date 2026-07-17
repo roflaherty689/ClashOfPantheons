@@ -70,20 +70,20 @@ Tasks are ordered by dependency and prototype value.
 
 **Acceptance criteria:**
 
-- [ ] AI purchases consume its gold and respect the same costs, limits, and production rules.
-- [ ] AI can buy workers, use all required roles, and buy star upgrades.
-- [ ] A simple documented strategy creates credible pressure within a five-minute match.
-- [ ] AI stops on match end and resets on restart.
-- [ ] AI decisions are observable enough to debug and tune.
-- [ ] Compilation and representative Play Mode matches are verified.
+- [x] AI purchases consume its gold and respect the same costs, limits, and production rules.
+- [x] AI can buy workers, use all required roles, and buy star upgrades.
+- [x] A simple documented strategy creates credible pressure within a five-minute match.
+- [x] AI stops on match end and resets on restart.
+- [x] AI decisions are observable enough to debug and tune.
+- [x] Compilation and representative Play Mode matches are verified.
 
 **Relevant systems:** future AI policy, economy/production interfaces, match state
 
 **Dependencies:** Task 1
 
-**Progress:** Shared team/role production state and purchase rules now exist, but no AI policy or AI economy purchasing has been implemented. Per the user-approved temporary behavior, every enemy role starts locked and remains inactive until this task is completed; there is no automatic enemy-production bootstrap in the active per-role mode.
+**Progress:** Complete. `EnemyAIController` uses the shared worker, production, tier, and atomic mythic-purchase APIs. Easy/Medium/Hard change cadence and policy quality; enemy-only bonuses produce 200/250/350 initial totals. Medium and Hard gate early workers behind military production to resist rushes. The user verified the integrated AI and difficulty flow in Play Mode on 2026-07-17 and accepted current balance for later fine-tuning.
 
-**Status:** Not started
+**Status:** Complete
 
 ### 3. Complete match timing, result resolution, and restart
 
@@ -140,13 +140,13 @@ Tasks are ordered by dependency and prototype value.
 - [x] **Phase 1 — Title:** A dedicated title scene is first in Build Settings and presents exactly two primary clickable actions: Play and Exit.
 - [x] Play opens the faction-selection view or scene without starting battle simulation.
 - [x] Exit calls the platform quit path in a player build and provides a safe, testable Editor behavior.
-- [ ] **Phase 2 — Faction selection:** Clickable faction options are generated from a serialized, build-safe catalog/list of valid `FactionData` assets; adding a configured faction does not require hand-authoring another button.
-- [ ] Each option displays at least `FactionData.FactionName`, rejects or clearly diagnoses null/invalid entries, and has an unambiguous selected/clickable state.
-- [ ] Choosing a faction carries that exact asset into the battle scene and applies it to the player team before faction presentation, workers, or units initialize.
-- [ ] Existing opponent-faction configuration remains explicit and is not accidentally replaced by the player's selection.
-- [ ] Returning to or restarting a battle does not leave stale duplicate menu/session objects.
-- [ ] **Phase 3 — Animated background:** The title screen includes decorative Tiny Swords-style buildings and non-interactive units moving across the background without invoking combat, economy, or match systems.
-- [ ] Background animation is layered behind interactive UI, does not intercept button input, and remains readable and performant at the prototype's representative PC resolutions.
+- [x] **Phase 2 — Faction selection:** Clickable faction options are generated from a serialized, build-safe catalog/list of valid `FactionData` assets; adding a configured faction does not require hand-authoring another button.
+- [x] Each option displays at least `FactionData.FactionName`, rejects or clearly diagnoses null/invalid entries, and has an unambiguous selected/clickable state.
+- [x] Choosing a faction carries that exact asset into the battle scene and applies it to the player team before faction presentation, workers, or units initialize.
+- [x] Match setup selects a different configured opponent faction so the two teams cannot conflict in colour.
+- [x] Returning to or restarting a battle does not leave stale duplicate menu/session objects.
+- [x] **Phase 3 — Animated background:** The title screen includes decorative Tiny Swords-style buildings and non-interactive units moving across the background without invoking combat, economy, or match systems.
+- [x] Background animation is layered behind interactive UI, does not intercept button input, and remains readable and performant at the prototype's representative PC resolutions.
 - [ ] Menu scripts compile, both scenes are present and ordered correctly in Build Settings, and the title -> selection -> battle path is verified in Play Mode and a player build where practical.
 
 **Relevant systems:** new menu scene/UI and controller, `FactionData`, a serialized faction catalog/menu configuration, scene-loading/session-selection boundary, `GameManager`, Build Settings
@@ -155,7 +155,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Risks and manual Unity work:** Runtime builds cannot use `AssetDatabase` to discover ScriptableObjects, so available factions must be explicitly serialized or supplied through another build-safe content mechanism. Scene creation, Canvas layout, button references, Build Settings ordering, faction catalog contents, multi-resolution inspection, and Play Mode/player-build verification require Unity Editor validation.
 
-**Progress:** Coordinated and accepted in `DEC-012`. The user verified Phase 1 and the functional Phase 2 menu presentation/interaction in Play Mode on 2026-07-17. Phase 2 uses a serialized build-safe faction catalog, generated faction buttons with names and castle art, null/duplicate diagnostics, scene-boundary player selection, and early `GameManager` consumption without replacing the opponent faction. Default and both meme-team assets remain available under `Factions/NonMenu` but are intentionally excluded because catalog generation includes only direct children of the main Factions folder. Phase 3 source adds UI-only Tiny Swords green terrain and buildings plus five-colour melee and archer runners, six-unit patrol groups in each exposed side margin, and four untinted minotaurs across upper and lower lanes below a taller inset wood panel; it does not instantiate battle systems or receive raycasts. The updated title scene needs regeneration through `Tools > Clash of Pantheons > Create Title Menu Scene`, followed by Phase 3 Play Mode, resolution, and player-build verification.
+**Progress:** Coordinated and accepted in `DEC-012` and extended by `DEC-014`. The user verified the title, faction selection, Tiny Swords animated presentation, difficulty selection, distinct opponent faction, and transition into battle in Play Mode on 2026-07-17. Difficulty choices launch battle directly from a parchment-contained Tiny Swords menu. Player-build verification remains pending, so the parent task remains partially implemented.
 
 **Status:** Partially implemented
 

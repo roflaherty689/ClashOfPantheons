@@ -102,8 +102,18 @@ public class GameManager : MonoBehaviour
             leftFactionData = FactionSelectionSession.PlayerFaction;
         }
 
+        if (FactionSelectionSession.EnemyFaction != null)
+        {
+            rightFactionData = FactionSelectionSession.EnemyFaction;
+        }
+
         ResolveBases();
         ApplyFactionPresentation();
+
+        if (FindAnyObjectByType<EnemyAIController>() == null)
+        {
+            gameObject.AddComponent<EnemyAIController>();
+        }
     }
 
     private void Start()

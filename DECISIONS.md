@@ -31,6 +31,8 @@ Do not record trivial implementation details.
 | DEC-010 | Faction-owned building presentation with shared gameplay prefabs | Accepted | 2026-07-17 |
 | DEC-011 | Faction-owned animated worker prefabs | Accepted | 2026-07-17 |
 | DEC-012 | Initial title and faction-selection flow | Accepted | 2026-07-17 |
+| DEC-013 | Selectable test roster for mythic production | Accepted | 2026-07-17 |
+| DEC-014 | Same-rule enemy AI and three difficulties | Accepted | 2026-07-17 |
 
 ---
 
@@ -452,7 +454,7 @@ Separating functional navigation and selection from animated presentation keeps 
 - The title scene becomes the first enabled Build Settings scene; the existing battle remains a separate scene.
 - Menu UI generates options from configured `FactionData` references and reports invalid or duplicate configuration clearly.
 - A small scene-boundary selection/session mechanism must make the chosen player `FactionData` available before `GameManager.Awake` applies faction presentation. It must not create duplicate persistent managers or retain stale state unintentionally.
-- The opponent faction remains an explicit battle configuration until a separate opponent-selection rule is approved.
+- The opponent-faction placeholder was superseded by `DEC-014`: match setup now randomly selects a configured faction other than the player's choice.
 - Exit must work in a built player and have a safe Editor test path.
 - Phase 3 is decorative only: it stays behind the UI, does not intercept input, and does not instantiate or drive combat, economy, or match systems.
 - Scene wiring, Build Settings order, responsive Canvas layout, and end-to-end transitions require Unity Editor and player-build verification.
@@ -498,7 +500,7 @@ A data-driven picker permits rapid comparison without prematurely designing dist
 
 - `FactionData`, `GameManager`, and the HUD need a build-safe option model and per-team match selection while preserving serialized assets.
 - Troll uses Windup as its attack. Troll Recovery and club-breaking animations, Skull and Turtle guard animations, and Boat are excluded.
-- Opponent choice remains explicit until AI selection is implemented; the model must allow later enemy-first reveal and player counter-selection.
+- Opponent mythic choice is now random under `DEC-014`; a later enemy-first reveal and player counter-selection flow remains possible.
 - This expansion remains subordinate to the prototype's incomplete AI and full-match critical path.
 
 ### Alternatives considered
@@ -516,6 +518,45 @@ A data-driven picker permits rapid comparison without prematurely designing dist
 - `Assets/Scripts/Managers/GameManager.cs`
 - `Assets/Scripts/UI/BattleEconomyUI.cs`
 - `Assets/Scripts/Units/BaseUnit.cs`
+
+---
+
+## DEC-014 — Same-rule enemy AI and three difficulties
+
+**Date:** 2026-07-17
+**Status:** Accepted
+
+### Decision
+
+The enemy uses the same worker, gold, production, upgrade, unit, and match rules as the player. The post-faction flow defaults to Easy and offers Easy, Medium, and Hard. Easy receives no extra starting gold, Medium receives +50, and Hard receives +150. Difficulty primarily changes decision cadence and policy quality. The AI selects a random valid mythic and a random configured faction other than the player's faction.
+
+### Context
+
+The prototype enemy began with locked production and no purchasing policy. The user required three difficulties, limited resource advantages, random mythic selection, and a different faction colour from the player.
+
+### Rationale
+
+Calling the shared purchase APIs preserves costs, caps, tiers, and production behavior, while policy and modest starting-resource differences create tunable difficulty without hidden unit-stat advantages. Excluding the selected faction prevents ambiguous same-colour teams.
+
+### Consequences
+
+- Difficulty and both faction selections cross the scene boundary and persist through battle restart.
+- The enemy bonus is applied once before its economy initializes and never affects player gold.
+- Easy makes slower, partly random decisions; Medium balances economy and production; Hard acts faster and prioritizes economy and production breadth.
+- Full Play Mode balance and critical-path verification remain required.
+
+### Alternatives considered
+
+- Unit-stat or cost cheats: rejected because they would violate the shared-rule requirement.
+- Mirroring the player's faction: rejected because identical team colours create a presentation conflict.
+- Fixed mythic selection: rejected in favor of the user's requested random initial behavior.
+
+### Related items
+
+- `GAME_DESIGN.md` — AI and difficulty
+- `TODO.md` — Single-player AI opponent; title and faction selection
+- `Assets/Scripts/Managers/EnemyAIController.cs`
+- `Assets/Scripts/UI/TitleMenuController.cs`
 
 ---
 

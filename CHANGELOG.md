@@ -8,6 +8,10 @@ Git history remains the exact implementation record.
 
 ### Added
 
+- A three-difficulty enemy AI that buys workers, production, upgrades, and a random mythic through the same economy and production rules as the player.
+- A post-faction difficulty screen defaulting to Easy, with enemy starting-gold bonuses of +0/+50/+150 for Easy/Medium/Hard.
+- Random opponent-faction selection that excludes the player's chosen faction to prevent colour conflicts.
+
 - A pre-purchase mythic picker in the right-side role details pane, backed by a build-safe roster containing all five monks, Minotaur, and all 15 qualifying Enemy Pack units.
 - Fifteen animation-complete Enemy Pack mythic prefabs with independent unit data, plus dedicated bone, harpoon, and shaman projectile prefabs for the ranged roster.
 - Phase 1 monk-healer runtime support for lowest-health allied combat targeting, tier-scaled healing on a fixed cadence, clamped health restoration, and recipient-positioned heal effects, plus an Editor builder for all five colour variants.
@@ -33,6 +37,8 @@ Git history remains the exact implementation record.
 - Black, blue, purple, red, and yellow animated worker prefabs owned by their matching faction assets.
 
 ### Changed
+
+- Medium and Hard AI now gate early worker purchases behind military production, with Hard requiring a broader opening composition to resist rushes.
 
 - Completed and accepted the Phase 2 animated Enemy Pack mythic roster and Phase 3 pre-purchase mythic picker after combined Play Mode review.
 - Mythic-picker choices now show their configured avatar beside the unit name and cost, making roster-art review explicit.
@@ -68,6 +74,8 @@ Git history remains the exact implementation record.
 
 ### Fixed
 
+- Aligned both battle economies and the shared Base prefab to 200 starting gold, so AI difficulty bonuses now produce enemy starts of 200, 250, and 350.
+
 - Restored parchment behind the locked crossed-swords mythic art, removed the empty-image grey fill, and mirrored that locked presentation in the hovered role-details panel.
 - Corrected the Minotaur, Lizard, Shaman, Thief, Troll, and Turtle portrait mapping, and stopped shared monk `UnitData` from collapsing every colour variant onto one avatar.
 - Corrected mythic portrait and crossed-swords sprite serialization so the HUD no longer retains one authored Enemy Avatar for every selection or while the slot is locked.
@@ -91,6 +99,8 @@ Git history remains the exact implementation record.
 - Removed duplicate world-space health bars from bases and their obsolete serialized prefab/scene configuration; unit health bars and their shared assets remain in use.
 
 ### Technical
+
+- User-verified the three difficulty selections, distinct enemy faction assignment, corrected starting resources, AI purchasing behavior, and rush-resistant Medium/Hard opening priorities in Play Mode.
 
 - Added persistent Codex project instructions through `AGENTS.md`.
 - Documented that no project-owned automated tests or test assemblies were found during the 2026-07-16 static review.
@@ -116,7 +126,7 @@ Git history remains the exact implementation record.
 
 ### Known Issues
 
-- Unit production purchasing and tier presentation still require broader Play Mode verification; enemy production remains locked until AI purchasing is implemented.
+- Unit production purchasing, AI decision behavior, all three difficulty bonuses, and tier presentation require broader Play Mode verification.
 - Health-tiebreak, exact-draw, base-destruction result-overlay, and restart-reset paths still require targeted Play Mode verification.
 - Exact role values and matchups remain subject to implementation and playtest tuning.
 - Targeted projectile/worker edge cases and stale serialized fields on the non-animated archer prefab remain to be verified or cleaned.

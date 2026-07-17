@@ -87,10 +87,22 @@ public static class ClashTitleMenuBuilder
         Button factionTemplate = CreateFactionButtonTemplate(content);
         Button back = CreateButton(selectionCard, "Back Button", "BACK", new Vector2(0, -330));
 
+        RectTransform difficultyView = CreateRect("Difficulty Selection View", canvasObject.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        RectTransform difficultyCard = CreateRect("Difficulty Card", difficultyView, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 800));
+        AddTinySwordsSprite(difficultyCard.gameObject, TinySwordsUi + "/Papers/RegularPaper.png", "RegularPaper_4", Panel, false);
+        RectTransform difficultyBanner = CreateRect("Difficulty Banner", difficultyCard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 245), new Vector2(650, 120));
+        AddTinySwordsSprite(difficultyBanner.gameObject, TinySwordsUi + "/Banners/Banner.png", "Banner_4", Trim, false);
+        AddText(difficultyBanner, "CHOOSE DIFFICULTY", 48, Vector2.zero, new Vector2(620, 90));
+        Button easy = CreateButton(difficultyCard, "Easy Difficulty Button", "EASY", new Vector2(0, 95));
+        Button medium = CreateButton(difficultyCard, "Medium Difficulty Button", "MEDIUM", new Vector2(0, -10));
+        Button hard = CreateButton(difficultyCard, "Hard Difficulty Button", "HARD", new Vector2(0, -115));
+        Button difficultyBack = CreateButton(difficultyCard, "Difficulty Back Button", "BACK", new Vector2(0, -245));
+
         TitleMenuController controller = canvasObject.GetComponent<TitleMenuController>();
         SerializedObject serializedController = new SerializedObject(controller);
         serializedController.FindProperty("titleView").objectReferenceValue = titleView.gameObject;
         serializedController.FindProperty("factionSelectionView").objectReferenceValue = selectionView.gameObject;
+        serializedController.FindProperty("difficultySelectionView").objectReferenceValue = difficultyView.gameObject;
         serializedController.FindProperty("factionCatalog").objectReferenceValue = catalog;
         serializedController.FindProperty("factionButtonContainer").objectReferenceValue = content;
         serializedController.FindProperty("factionButtonTemplate").objectReferenceValue = factionTemplate;
@@ -100,7 +112,12 @@ public static class ClashTitleMenuBuilder
         UnityEventTools.AddPersistentListener(play.onClick, controller.Play);
         UnityEventTools.AddPersistentListener(exit.onClick, controller.Exit);
         UnityEventTools.AddPersistentListener(back.onClick, controller.ShowTitle);
+        UnityEventTools.AddPersistentListener(easy.onClick, controller.BeginEasyBattle);
+        UnityEventTools.AddPersistentListener(medium.onClick, controller.BeginMediumBattle);
+        UnityEventTools.AddPersistentListener(hard.onClick, controller.BeginHardBattle);
+        UnityEventTools.AddPersistentListener(difficultyBack.onClick, controller.ShowFactionSelection);
         selectionView.gameObject.SetActive(false);
+        difficultyView.gameObject.SetActive(false);
 
         EditorSceneManager.SaveScene(scene, ScenePath);
         ConfigureBuildSettings();

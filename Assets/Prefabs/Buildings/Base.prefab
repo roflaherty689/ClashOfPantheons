@@ -302,7 +302,7 @@ MonoBehaviour:
   goldVein: {fileID: 0}
   startingWorkers: 1
   maxWorkers: 5
-  startingGold: 0
+  startingGold: 200
   workerCost: 100
   baseGoldPerTrip: 5
   goldUpgradeMultiplier: 1

@@ -18,7 +18,7 @@ Checked entry conditions are based on repository inspection, not a new Unity lau
 ### Exit criteria
 
 - [ ] A player can use gold to buy workers, establish independent unit-type production, and buy one-, two-, and three-star upgrades.
-- [ ] An AI opponent makes economy, production, composition, and upgrade decisions under the same match rules.
+- [x] An AI opponent makes economy, production, composition, and upgrade decisions under the same match rules.
 - [ ] Units autonomously resolve combat on one shared lane and can destroy either stronghold.
 - [ ] An approximately five-minute timer resolves matches by stronghold health, then lower total value of units lost when health is equal.
 - [ ] The result is clearly presented and a new match can start without Editor intervention.
@@ -55,12 +55,12 @@ These checks confirm repository presence only. Their integrated runtime behavior
 
 - [x] Accept `DEC-007`: first purchase unlocks continuous role production; the next two purchases upgrade future spawns to two and three stars.
 - [ ] Connect the player's gold and worker systems to independent production for all five roles.
-- [ ] Implement an AI decision layer that participates in the same economy and production game.
+- [x] Implement an AI decision layer that participates in the same economy and production game, with three Play Mode-verified difficulties, same-rule purchasing, and random mythic/opponent selection.
 - [ ] Implement the five-minute timer, stronghold-health comparison, unit-loss-value tiebreaker, result states, and restart flow.
 - [ ] Implement the three star tiers with clear costs, effects, and production/UI feedback.
 - [x] Move recurring production cadence ownership from the global spawn interval into each role's `UnitData`; retain per-role cost ownership there. Initial values and selectable spawn patterns were user-verified in Play Mode on 2026-07-16.
 - [ ] Replace static mock HUD values and shared-queue presentation with functional prototype state.
-- [ ] Add a player-facing title -> faction selection -> battle flow. Generate faction choices from a build-safe configured `FactionData` catalog and carry the chosen player faction into the battle scene.
+- [x] Add a player-facing title -> faction selection -> difficulty selection -> battle flow, verified in Play Mode; player-build coverage remains tracked separately.
 - [ ] Validate role readability and at least one meaningful economy-versus-pressure decision through playtesting.
 - [ ] Add focused tests for deterministic economy, production, and result rules, plus a documented Play Mode critical-path check.
 - [x] Deliver the accepted selectable mythic test roster in sequence: five colour monk healers, reusable animated Enemy Pack melee/ranged prefabs, then a pre-purchase details-pane picker with per-match selection and data-owned balance.

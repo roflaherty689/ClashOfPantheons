@@ -26,6 +26,7 @@ public class WorkerManager : MonoBehaviour
 
     private readonly List<WorkerUnit> workers = new();
     private int currentGold;
+    private int startingGoldBonus;
 
     public Team Team => team;
     public int CurrentGold => currentGold;
@@ -36,6 +37,11 @@ public class WorkerManager : MonoBehaviour
     public int GoldPerWorkerTrip => Mathf.RoundToInt(baseGoldPerTrip * goldUpgradeMultiplier);
     public int TotalGoldPerTrip => Mathf.RoundToInt(baseGoldPerTrip * goldUpgradeMultiplier * WorkerCount);
     public bool HasWorkerCapacity => WorkerCount < maxWorkers;
+
+    public void SetStartingGoldBonus(int bonus)
+    {
+        startingGoldBonus = Mathf.Max(0, bonus);
+    }
 
     public void ApplyWorkerPrefab(WorkerUnit factionWorkerPrefab)
     {
@@ -61,7 +67,7 @@ public class WorkerManager : MonoBehaviour
 
     private void Start()
     {
-        currentGold = Mathf.Max(0, startingGold);
+        currentGold = Mathf.Max(0, startingGold + startingGoldBonus);
 
         int workersToSpawn = Mathf.Min(Mathf.Max(0, startingWorkers), Mathf.Max(1, maxWorkers));
         for (int i = 0; i < workersToSpawn; i++)

@@ -24,7 +24,7 @@ This file defines the intended player experience, rules, systems, and scope. **I
 
 The player indirectly commands a mythological faction. They invest in workers, unit production, composition, and upgrades, then watch autonomous forces turn those strategic choices into an escalating push.
 
-There is no direct unit control. The prototype is primarily single-player against AI. The current build instead drives both armies through automatic spawn logic and has no strategic AI.
+There is no direct unit control. The prototype is primarily single-player against AI. The enemy now has a source-implemented strategic purchasing policy; full Play Mode validation remains pending.
 
 ## Design pillars
 
@@ -57,12 +57,12 @@ There is no direct unit control. The prototype is primarily single-player agains
 
 ### Current prototype loop — implemented, not Play Mode verified in this pass
 
-1. Both sides begin with every production role locked. The player can spend gold to unlock independent per-role `UnitData` cadences; the enemy remains inactive until AI purchasing is implemented. A legacy free-spawn pattern remains available only for prototype/debug testing.
+1. Both sides begin with every production role locked. The player and AI spend their own gold to unlock independent per-role `UnitData` cadences. A legacy free-spawn pattern remains available only for prototype/debug testing.
 2. Units march, acquire targets, and fight automatically.
 3. Workers independently mine and deposit gold.
 4. Destroying a base or reaching the time limit ends the match and displays the result.
 
-The player HUD now presents live economy and stronghold state, a five-minute countdown, timeout results, restart, and production purchasing in source. Player roles start locked; purchases spend gold to unlock or upgrade their independent tracks, with locked art greyed out. Both teams start locked, and no AI strategy or enemy purchasing exists yet, so the enemy produces no units in the active per-role mode until that work is completed. Production purchasing remains to be Play Mode verified. Countdown expiry and the lost-unit-value timeout resolver were Play Mode verified in a shortened 20-second match on 2026-07-17; the remaining result branches still need targeted verification.
+The player HUD now presents live economy and stronghold state, a five-minute countdown, timeout results, restart, and production purchasing in source. Both teams start with locked roles and spend their own gold to unlock or upgrade independent tracks. The enemy AI purchasing policy is implemented in source but still needs Play Mode verification and tuning. Production purchasing remains to be broadly Play Mode verified. Countdown expiry and the lost-unit-value timeout resolver were Play Mode verified in a shortened 20-second match on 2026-07-17; the remaining result branches still need targeted verification.
 
 **Short-loop rhythm:** Worker trips and independent recurring production cadences. Buying a locked role unlocks its continuous production; later purchases advance that role to two and three stars.
 
@@ -126,13 +126,13 @@ Campaign and persistent progression are deferred beyond the core prototype. No s
 - **Prototype battlefield:** One shared horizontal lane with a stronghold and resource area for each side.
 - **Opponent:** Single-player against AI.
 - **Target length:** Approximately five minutes.
-- **Transitions:** Accepted direction is a title screen with Play and Exit actions, followed by a faction-selection screen populated from the available `FactionData` assets before entering the battle. This flow is not implemented.
+- **Transitions:** Implemented in source: title, player-faction selection, difficulty selection, then battle. Difficulty defaults to Easy; the opponent randomly receives a different configured faction.
 - **Replay:** Restart or rematch after the result; not implemented.
 - **Later possibilities:** Alternative maps, lane structures, or endless mode may be reconsidered after prototype validation.
 
 ## AI and difficulty
 
-The AI should use the same economy, production, upgrade, and match rules as the player. Its purchasing policy is not implemented; all enemy roles therefore remain locked and produce nothing in the active per-role mode. Its decision model and difficulty controls are unresolved. Possible strategic profiles such as economy-focused or early pressure are ideas, not accepted prototype requirements. Online matchmaking is deferred with multiplayer.
+The AI uses the same worker, gold-spending, production, tier, mythic-selection, spawn, and match rules as the player. Easy makes slower, partly idle/random decisions and receives no starting bonus. Medium establishes production before each early worker investment, then balances workers with varied production at a moderate cadence, and receives +50 starting gold. Hard makes faster decisions, requires a broader military opening before expanding its economy, and receives +150 starting gold. The bonus applies once to the enemy only. The AI randomly chooses a valid mythic and a configured faction other than the player's faction. This system is implemented in source and awaits full Play Mode tuning and verification. Online matchmaking remains deferred.
 
 ## UI and feedback
 
