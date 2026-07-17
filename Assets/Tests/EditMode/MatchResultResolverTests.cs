@@ -93,6 +93,17 @@ public class MatchResultTextTests
 
 public class ProductionTierRulesTests
 {
+    [TestCase(-1, 1f)]
+    [TestCase(0, 1f)]
+    [TestCase(1, 1f)]
+    [TestCase(2, 1.25f)]
+    [TestCase(3, 1.5f)]
+    [TestCase(4, 1.5f)]
+    public void GetStatMultiplier_UsesAcceptedStarCurve(int tier, float expected)
+    {
+        Assert.That(ProductionTierRules.GetStatMultiplier(tier), Is.EqualTo(expected));
+    }
+
     [TestCase(0, 1)]
     [TestCase(1, 2)]
     [TestCase(2, 3)]

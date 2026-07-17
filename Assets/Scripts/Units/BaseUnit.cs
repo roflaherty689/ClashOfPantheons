@@ -83,12 +83,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         this.targetPoint = targetPoint;
         this.role = role;
         productionTier = Mathf.Clamp(tier, 1, GameManager.MaximumProductionTier);
-        statMultiplier = productionTier switch
-        {
-            2 => 1.25f,
-            3 => 1.5f,
-            _ => 1f
-        };
+        statMultiplier = ProductionTierRules.GetStatMultiplier(productionTier);
 
         if (unitData == null)
         {

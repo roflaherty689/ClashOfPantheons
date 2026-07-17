@@ -97,6 +97,16 @@ public static class ProductionTierRules
 {
     public const int MaximumTier = 3;
 
+    public static float GetStatMultiplier(int tier)
+    {
+        if (tier >= MaximumTier)
+        {
+            return 1.5f;
+        }
+
+        return tier == 2 ? 1.25f : 1f;
+    }
+
     public static bool TryAdvance(
         int currentTier,
         bool requiresInitialSelection,
