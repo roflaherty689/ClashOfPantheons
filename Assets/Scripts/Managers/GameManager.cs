@@ -53,26 +53,20 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
     [SerializeField, Min(1f)] private float matchDurationSeconds = 300f;
     [SerializeField] private bool setTeamColour = true;
 
-    private readonly int[,] unitLossCounts = new int[2, SpawnRoles.Length];
-    private readonly int[] totalUnitLossValues = new int[2];
     private readonly ProductionStateController productionState = new ProductionStateController();
+    private readonly MatchStateController matchState = new MatchStateController();
 
     private float globalSpawnTimer;
     private int leftSpawnIndex;
     private int rightSpawnIndex;
-    private bool gameOver;
-    private bool hasWinner;
-    private Team winningTeam;
-    private MatchEndReason endReason;
-    private float timeRemaining;
     private Base leftBase;
     private Base rightBase;
 
-    public bool IsGameOver => gameOver;
-    public bool HasWinner => hasWinner;
-    public Team WinningTeam => winningTeam;
-    public MatchEndReason EndReason => endReason;
-    public float TimeRemaining => Mathf.Max(0f, timeRemaining);
+    public bool IsGameOver => matchState.IsGameOver;
+    public bool HasWinner => matchState.HasWinner;
+    public Team WinningTeam => matchState.WinningTeam;
+    public MatchEndReason EndReason => matchState.EndReason;
+    public float TimeRemaining => matchState.TimeRemaining;
     public bool SetTeamColour => setTeamColour;
     public MythicUnitRoster MythicUnitRoster => mythicUnitRoster;
 
@@ -105,13 +99,13 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
     private void Start()
     {
         Time.timeScale = Mathf.Max(0f, gameSpeed);
-        timeRemaining = Mathf.Max(1f, matchDurationSeconds);
+        matchState.Start(matchDurationSeconds);
         ValidateConfiguration();
     }
 
     private void Update()
     {
-        if (gameOver) return;
+        if (matchState.IsGameOver) return;
 
         if (spawnPattern == SpawnPattern.PerUnitInterval)
         {
@@ -125,10 +119,7 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
 
     private void LateUpdate()
     {
-        if (gameOver) return;
-
-        timeRemaining = Mathf.Max(0f, timeRemaining - Time.deltaTime);
-        if (timeRemaining <= 0f)
+        if (matchState.AdvanceClock(Time.deltaTime))
         {
             ResolveTimeout();
         }
@@ -136,30 +127,22 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
 
     public void EndGame(Team winningTeam)
     {
-        CompleteMatch(winningTeam, MatchEndReason.StrongholdDestroyed);
+        matchState.CompleteWithWinner(winningTeam, MatchEndReason.StrongholdDestroyed);
     }
 
     public void RegisterUnitDeath(Team team, UnitRole role, int unitCost)
     {
-        if (gameOver) return;
-
-        int teamIndex = GetTeamIndex(team);
-        int roleIndex = GetRoleIndex(role);
-        if (roleIndex < 0) return;
-
-        unitLossCounts[teamIndex, roleIndex]++;
-        totalUnitLossValues[teamIndex] += Mathf.Max(0, unitCost);
+        matchState.RegisterUnitDeath(team, role, unitCost);
     }
 
     public int GetUnitLossCount(Team team, UnitRole role)
     {
-        int roleIndex = GetRoleIndex(role);
-        return roleIndex < 0 ? 0 : unitLossCounts[GetTeamIndex(team), roleIndex];
+        return matchState.GetUnitLossCount(team, role);
     }
 
     public int GetTotalUnitLossValue(Team team)
     {
-        return totalUnitLossValues[GetTeamIndex(team)];
+        return matchState.GetTotalUnitLossValue(team);
     }
 
     public int GetProductionTier(Team team, UnitRole role)
@@ -191,7 +174,7 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
 
     public bool TryPurchaseProduction(Team team, UnitRole role, WorkerManager economy)
     {
-        if (gameOver || economy == null || economy.Team != team) return false;
+        if (matchState.IsGameOver || economy == null || economy.Team != team) return false;
 
         int roleIndex = GetRoleIndex(role);
         if (roleIndex < 0) return false;
@@ -224,7 +207,7 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
 
     public bool HasMythicChoices(Team team)
     {
-        if (gameOver || mythicUnitRoster == null ||
+        if (matchState.IsGameOver || mythicUnitRoster == null ||
             GetProductionTier(team, UnitRole.Mythic) != 0)
         {
             return false;
@@ -243,7 +226,7 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
 
     public bool TrySelectAndPurchaseMythic(Team team, BaseUnit prefab, WorkerManager economy)
     {
-        if (gameOver || economy == null || economy.Team != team || prefab == null ||
+        if (matchState.IsGameOver || economy == null || economy.Team != team || prefab == null ||
             mythicUnitRoster == null || !mythicUnitRoster.Contains(prefab))
         {
             return false;
@@ -283,7 +266,7 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
         if (leftBase == null || rightBase == null)
         {
             Debug.LogError($"{name}: Cannot resolve match timeout without both team strongholds.", this);
-            CompleteDraw(MatchEndReason.TimeoutDraw);
+            matchState.CompleteDraw(MatchEndReason.TimeoutDraw);
             return;
         }
 
@@ -295,30 +278,11 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
 
         if (result.HasWinner)
         {
-            CompleteMatch(result.Winner, result.Reason);
+            matchState.CompleteWithWinner(result.Winner, result.Reason);
             return;
         }
 
-        CompleteDraw(result.Reason);
-    }
-
-    private void CompleteMatch(Team winner, MatchEndReason reason)
-    {
-        if (gameOver) return;
-
-        gameOver = true;
-        hasWinner = true;
-        winningTeam = winner;
-        endReason = reason;
-    }
-
-    private void CompleteDraw(MatchEndReason reason)
-    {
-        if (gameOver) return;
-
-        gameOver = true;
-        hasWinner = false;
-        endReason = reason;
+        matchState.CompleteDraw(result.Reason);
     }
 
     private void ResolveBases()
@@ -405,11 +369,6 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
         {
             Debug.LogWarning($"{team} castle HUD icon is not assigned.");
         }
-    }
-
-    private static int GetTeamIndex(Team team)
-    {
-        return team == Team.Left ? 0 : 1;
     }
 
     private static int GetRoleIndex(UnitRole role)
