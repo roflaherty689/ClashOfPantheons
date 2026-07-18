@@ -1,7 +1,5 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class BattleEconomyUI : MonoBehaviour
@@ -10,33 +8,7 @@ public class BattleEconomyUI : MonoBehaviour
     private const string PlayerHealthPath = "Safe Area/Top HUD/Player Stronghold/Health Bar/";
     private const string EnemyHealthPath = "Safe Area/Top HUD/Enemy Stronghold/Health Bar/";
     private const string ResultPath = "Safe Area/Game Over Overlay/Result Panel/";
-    private const string ProductionPath = "Safe Area/Bottom HUD/Independent Production/";
     private const string SelectedRolePath = "Safe Area/Bottom HUD/Selected Role/";
-
-    private static readonly UnitRole[] ProductionRoles =
-    {
-        UnitRole.Melee,
-        UnitRole.Archer,
-        UnitRole.Cavalry,
-        UnitRole.Siege,
-        UnitRole.Mythic
-    };
-
-    private sealed class ProductionUIBinding
-    {
-        public UnitRole Role;
-        public Transform Card;
-        public Button Button;
-        public Image Art;
-        public TextMeshProUGUI StatusText;
-        public TextMeshProUGUI TierText;
-        public TextMeshProUGUI ActionText;
-        public Color UnlockedColour;
-        public UnityAction PurchaseAction;
-        public EventTrigger InteractionTrigger;
-        public EventTrigger.Entry HoverEntry;
-        public EventTrigger.Entry PointerDownEntry;
-    }
 
     [SerializeField] private Team playerTeam = Team.Left;
 
@@ -58,7 +30,7 @@ public class BattleEconomyUI : MonoBehaviour
     private TextMeshProUGUI resultTitleText;
     private TextMeshProUGUI resultReasonText;
     private Button restartButton;
-    private readonly ProductionUIBinding[] productionBindings = new ProductionUIBinding[ProductionRoles.Length];
+    private ProductionCardPresenter productionCardPresenter;
     private UnitRole selectedRole = UnitRole.Melee;
     private Button selectedRoleButton;
     private Image selectedRoleIcon;
@@ -77,6 +49,11 @@ public class BattleEconomyUI : MonoBehaviour
         ResolveWorkerManager();
         ResolveBases();
         ResolveUI();
+        productionCardPresenter = new ProductionCardPresenter(
+            transform,
+            playerTeam,
+            PurchaseProduction,
+            SelectProductionRole);
         mythicPickerController = new MythicPickerController(
             selectedRolePanel,
             selectedRoleTitleText != null ? selectedRoleTitleText.font : null,
@@ -103,7 +80,7 @@ public class BattleEconomyUI : MonoBehaviour
             restartButton.onClick.AddListener(RestartMatch);
         }
 
-        BindProductionButtons();
+        BindSelectedRoleButton();
 
         SetResultOverlayVisible(false);
 
@@ -142,27 +119,7 @@ public class BattleEconomyUI : MonoBehaviour
             restartButton.onClick.RemoveListener(RestartMatch);
         }
 
-
-        foreach (ProductionUIBinding binding in productionBindings)
-        {
-            if (binding?.Button != null && binding.PurchaseAction != null)
-            {
-                binding.Button.onClick.RemoveListener(binding.PurchaseAction);
-            }
-
-            if (binding?.InteractionTrigger != null)
-            {
-                if (binding.HoverEntry != null)
-                {
-                    binding.InteractionTrigger.triggers.Remove(binding.HoverEntry);
-                }
-
-                if (binding.PointerDownEntry != null)
-                {
-                    binding.InteractionTrigger.triggers.Remove(binding.PointerDownEntry);
-                }
-            }
-        }
+        productionCardPresenter?.Dispose();
 
         if (selectedRoleButton != null)
         {
@@ -238,7 +195,7 @@ public class BattleEconomyUI : MonoBehaviour
         Transform restartTransform = transform.Find(ResultPath + "Restart Match");
         restartButton = restartTransform != null ? restartTransform.GetComponent<Button>() : null;
 
-        ResolveProductionUI();
+        ResolveSelectedRoleUI();
 
         if (battleSummaryText != null)
         {
@@ -249,33 +206,8 @@ public class BattleEconomyUI : MonoBehaviour
         }
     }
 
-    private void ResolveProductionUI()
+    private void ResolveSelectedRoleUI()
     {
-        for (int i = 0; i < ProductionRoles.Length; i++)
-        {
-            UnitRole role = ProductionRoles[i];
-            string roleName = role.ToString().ToUpperInvariant();
-            string cardPath = ProductionPath + roleName + " Production/";
-            Transform cardTransform = transform.Find(cardPath.TrimEnd('/'));
-            Transform buttonTransform = transform.Find(cardPath + "Unlock " + roleName);
-            Transform artTransform = transform.Find(cardPath + roleName + " Art");
-            Image art = artTransform != null ? artTransform.GetComponent<Image>() : null;
-
-            productionBindings[i] = new ProductionUIBinding
-            {
-                Role = role,
-                Card = cardTransform,
-                Button = buttonTransform != null ? buttonTransform.GetComponent<Button>() : null,
-                Art = art,
-                StatusText = FindDirectTextContaining(cardTransform, "LOCKED"),
-                TierText = FindDirectTextContaining(cardTransform, "STARS"),
-                ActionText = buttonTransform != null
-                    ? buttonTransform.GetComponentInChildren<TextMeshProUGUI>(true)
-                    : null,
-                UnlockedColour = art != null ? art.color : Color.white
-            };
-        }
-
         Transform selectedRoleTransform = transform.Find(SelectedRolePath.TrimEnd('/'));
         selectedRolePanel = selectedRoleTransform as RectTransform;
         selectedRoleIcon = FindImage(SelectedRolePath + "Role Icon", SelectedRolePath + "Melee Icon");
@@ -292,26 +224,8 @@ public class BattleEconomyUI : MonoBehaviour
             : null;
     }
 
-    private void BindProductionButtons()
+    private void BindSelectedRoleButton()
     {
-        foreach (ProductionUIBinding binding in productionBindings)
-        {
-            if (binding == null) continue;
-
-            BindProductionCardInteraction(binding);
-
-            if (binding.Button == null) continue;
-
-            if (binding.Button.targetGraphic != null)
-            {
-                binding.Button.targetGraphic.raycastTarget = true;
-            }
-
-            UnitRole role = binding.Role;
-            binding.PurchaseAction = () => PurchaseProduction(role);
-            binding.Button.onClick.AddListener(binding.PurchaseAction);
-        }
-
         if (selectedRoleButton != null)
         {
             if (selectedRoleButton.targetGraphic != null)
@@ -321,44 +235,6 @@ public class BattleEconomyUI : MonoBehaviour
 
             selectedRoleButton.onClick.AddListener(PurchaseSelectedRole);
         }
-    }
-
-    private void BindProductionCardInteraction(ProductionUIBinding binding)
-    {
-        if (binding.Card == null) return;
-
-        if (binding.Card.TryGetComponent(out Graphic cardGraphic))
-        {
-            cardGraphic.raycastTarget = true;
-        }
-
-        binding.InteractionTrigger = binding.Card.GetComponent<EventTrigger>();
-        if (binding.InteractionTrigger == null)
-        {
-            binding.InteractionTrigger = binding.Card.gameObject.AddComponent<EventTrigger>();
-        }
-
-        UnitRole role = binding.Role;
-        binding.HoverEntry = CreateInteractionEntry(
-            EventTriggerType.PointerEnter,
-            _ => SelectProductionRole(role));
-        binding.PointerDownEntry = CreateInteractionEntry(
-            EventTriggerType.PointerDown,
-            _ => SelectProductionRole(role));
-        binding.InteractionTrigger.triggers.Add(binding.HoverEntry);
-        binding.InteractionTrigger.triggers.Add(binding.PointerDownEntry);
-    }
-
-    private static EventTrigger.Entry CreateInteractionEntry(
-        EventTriggerType eventType,
-        UnityAction<BaseEventData> action)
-    {
-        EventTrigger.Entry entry = new EventTrigger.Entry
-        {
-            eventID = eventType
-        };
-        entry.callback.AddListener(action);
-        return entry;
     }
 
     private Image FindImage(params string[] paths)
@@ -498,67 +374,7 @@ public class BattleEconomyUI : MonoBehaviour
     {
         if (gameManager == null || workerManager == null) return;
 
-        foreach (ProductionUIBinding binding in productionBindings)
-        {
-            if (binding == null) continue;
-
-            int tier = gameManager.GetProductionTier(playerTeam, binding.Role);
-            bool hasData = gameManager.TryGetProductionData(playerTeam, binding.Role, out UnitData data);
-            int cost = hasData ? data.Cost : 0;
-            bool needsMythicChoice = binding.Role == UnitRole.Mythic && tier == 0;
-            bool canPurchase = needsMythicChoice
-                ? gameManager.HasMythicChoices(playerTeam)
-                : hasData && tier < GameManager.MaximumProductionTier &&
-                    workerManager.CurrentGold >= cost && !gameManager.IsGameOver;
-
-            if (binding.Art != null)
-            {
-                if (binding.Role == UnitRole.Mythic && gameManager.MythicUnitRoster != null)
-                {
-                    BaseUnit selectedMythic = gameManager.GetSelectedMythicUnit(playerTeam);
-                    UpdateMythicCardArt(binding.Art, selectedMythic);
-                }
-
-                bool lockedMythic = binding.Role == UnitRole.Mythic && tier == 0;
-                binding.Art.color = lockedMythic
-                    ? Color.clear
-                    : tier == 0
-                        ? new Color(0.35f, 0.35f, 0.35f, binding.UnlockedColour.a)
-                        : binding.UnlockedColour;
-
-                SetCrossedSwordsColour(
-                    binding.Art,
-                    lockedMythic ? new Color(0.35f, 0.35f, 0.35f, 1f) : binding.Art.color);
-            }
-
-            if (binding.StatusText != null)
-            {
-                binding.StatusText.text = tier == 0 ? "LOCKED" : "PRODUCING";
-            }
-
-            if (binding.TierText != null)
-            {
-                binding.TierText.text = $"{tier} / {GameManager.MaximumProductionTier} STARS";
-            }
-
-            if (binding.ActionText != null)
-            {
-                binding.ActionText.enableAutoSizing = true;
-                binding.ActionText.fontSizeMin = 11f;
-                binding.ActionText.fontSizeMax = 18f;
-                binding.ActionText.alignment = TextAlignmentOptions.Center;
-                binding.ActionText.text = tier >= GameManager.MaximumProductionTier
-                    ? "MAX"
-                    : needsMythicChoice ? "CHOOSE"
-                    : tier == 0 ? $"UNLOCK {cost}" : $"UPGRADE {cost}";
-            }
-
-            if (binding.Button != null)
-            {
-                binding.Button.interactable = canPurchase;
-            }
-        }
-
+        productionCardPresenter?.Refresh(gameManager, workerManager);
         RefreshSelectedRole();
         mythicPickerController?.Refresh(gameManager, workerManager);
     }
@@ -588,11 +404,11 @@ public class BattleEconomyUI : MonoBehaviour
             else
             {
                 HideCrossedSwords(selectedRoleIcon);
-                ProductionUIBinding selectedBinding = GetProductionBinding(selectedRole);
-                if (selectedBinding?.Art != null)
+                Image selectedArt = productionCardPresenter?.GetArt(selectedRole);
+                if (selectedArt != null)
                 {
-                    selectedRoleIcon.sprite = selectedBinding.Art.sprite;
-                    selectedRoleIcon.color = selectedBinding.Art.color;
+                    selectedRoleIcon.sprite = selectedArt.sprite;
+                    selectedRoleIcon.color = selectedArt.color;
                     selectedRoleIcon.preserveAspect = true;
                 }
             }
@@ -707,9 +523,9 @@ public class BattleEconomyUI : MonoBehaviour
 
     private Sprite GetMythicParchmentSprite()
     {
-        ProductionUIBinding mythicBinding = GetProductionBinding(UnitRole.Mythic);
-        Transform parchment = mythicBinding?.Card != null
-            ? mythicBinding.Card.Find("Portrait Paper")
+        Image mythicArt = productionCardPresenter?.GetArt(UnitRole.Mythic);
+        Transform parchment = mythicArt != null && mythicArt.transform.parent != null
+            ? mythicArt.transform.parent.Find("Portrait Paper")
             : null;
         return parchment != null && parchment.TryGetComponent(out Image image)
             ? image.sprite
@@ -764,19 +580,6 @@ public class BattleEconomyUI : MonoBehaviour
             .Replace("MonkUnit", " Monk")
             .Replace("Fish", " Fish")
             .Trim();
-    }
-
-    private ProductionUIBinding GetProductionBinding(UnitRole role)
-    {
-        foreach (ProductionUIBinding binding in productionBindings)
-        {
-            if (binding != null && binding.Role == role)
-            {
-                return binding;
-            }
-        }
-
-        return null;
     }
 
     private void RefreshMatchState()
