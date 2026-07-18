@@ -55,6 +55,7 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
 
     private readonly ProductionStateController productionState = new ProductionStateController();
     private readonly MatchStateController matchState = new MatchStateController();
+    private FactionTeamInitializer factionTeamInitializer;
 
     private float globalSpawnTimer;
     private int leftSpawnIndex;
@@ -77,18 +78,13 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
             mythicUnitRoster = Resources.Load<MythicUnitRoster>("MythicUnitRoster");
         }
 
-        if (FactionSelectionSession.PlayerFaction != null)
-        {
-            leftFactionData = FactionSelectionSession.PlayerFaction;
-        }
-
-        if (FactionSelectionSession.EnemyFaction != null)
-        {
-            rightFactionData = FactionSelectionSession.EnemyFaction;
-        }
-
-        ResolveBases();
-        ApplyFactionPresentation();
+        factionTeamInitializer = new FactionTeamInitializer(
+            leftFactionData,
+            rightFactionData,
+            leftCastleIcon,
+            rightCastleIcon);
+        factionTeamInitializer.Initialize();
+        SynchronizeFactionInitialization();
 
         if (FindAnyObjectByType<EnemyAIController>() == null)
         {
@@ -287,88 +283,18 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
 
     private void ResolveBases()
     {
-        leftBase = null;
-        rightBase = null;
-
-        foreach (Base battleBase in FindObjectsByType<Base>())
-        {
-            if (battleBase.Team == Team.Left)
-            {
-                leftBase = battleBase;
-            }
-            else
-            {
-                rightBase = battleBase;
-            }
-        }
+        factionTeamInitializer?.ResolveBases();
+        SynchronizeFactionInitialization();
     }
 
-    private void ApplyFactionPresentation()
+    private void SynchronizeFactionInitialization()
     {
-        ApplyTeamPresentation(Team.Left, leftFactionData, leftBase, leftCastleIcon);
-        ApplyTeamPresentation(Team.Right, rightFactionData, rightBase, rightCastleIcon);
-    }
+        if (factionTeamInitializer == null) return;
 
-    private static void ApplyTeamPresentation(
-        Team team,
-        FactionData factionData,
-        Base battleBase,
-        Image castleIcon)
-    {
-        if (battleBase == null)
-        {
-            Debug.LogError($"Cannot apply {team} faction presentation without a stronghold.");
-            return;
-        }
-
-        BasePresentation presentation = battleBase.GetComponent<BasePresentation>();
-        if (presentation == null)
-        {
-            Debug.LogError($"{battleBase.name}: Missing BasePresentation.", battleBase);
-            return;
-        }
-
-        presentation.ValidateReferences();
-        presentation.Apply(factionData, team);
-
-        WorkerManager workerManager = battleBase.GetComponent<WorkerManager>();
-        if (workerManager == null)
-        {
-            Debug.LogError($"{battleBase.name}: Missing WorkerManager.", battleBase);
-        }
-        else if (factionData != null && factionData.WorkerPrefab != null)
-        {
-            workerManager.ApplyWorkerPrefab(factionData.WorkerPrefab);
-        }
-        else
-        {
-            string factionName = factionData == null ? "<missing>" : factionData.FactionName;
-            Debug.LogWarning(
-                $"{team} faction '{factionName}' has no worker prefab; the existing WorkerManager fallback will be retained.",
-                factionData);
-        }
-
-        if (castleIcon != null)
-        {
-            castleIcon.color = Color.white;
-            if (factionData != null && factionData.CastleSprite != null)
-            {
-                castleIcon.sprite = factionData.CastleSprite;
-            }
-        }
-
-        if (factionData == null || !factionData.HasBuildingPresentation)
-        {
-            string factionName = factionData == null ? "<missing>" : factionData.FactionName;
-            Debug.LogWarning(
-                $"{team} faction '{factionName}' has incomplete building presentation; existing sprites will be retained.",
-                factionData);
-        }
-
-        if (castleIcon == null)
-        {
-            Debug.LogWarning($"{team} castle HUD icon is not assigned.");
-        }
+        leftFactionData = factionTeamInitializer.LeftFaction;
+        rightFactionData = factionTeamInitializer.RightFaction;
+        leftBase = factionTeamInitializer.LeftBase;
+        rightBase = factionTeamInitializer.RightBase;
     }
 
     private static int GetRoleIndex(UnitRole role)

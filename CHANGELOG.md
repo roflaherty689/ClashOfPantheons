@@ -115,6 +115,7 @@ Git history remains the exact implementation record.
 
 ### Technical
 
+- Extracted session faction overrides, base discovery, faction-driven base/worker presentation, and castle HUD icons from `GameManager` into `FactionTeamInitializer`; the user verified authored defaults, menu selections, both teams' presentation/economy, result handling, restart, and fallback diagnostics in Play Mode.
 - Extracted the match clock, terminal result state, per-team/per-role death counts, and total lost-unit values from `GameManager` into `MatchStateController`; the user verified base destruction, all timeout outcomes, post-game loss immutability, system stopping, result presentation, and restart reset in Play Mode.
 - Moved locked-timer resets, cadence advancement, interval clamping, ready-role scanning, slot consumption, spawn-timer consumption, and fairness rotation into `ProductionStateController`; the user verified player/AI cadence, simultaneous readiness, cap-resume, failure handling, match-end, and restart behavior in Play Mode.
 - Extracted both teams' production tiers, selected mythics, per-role timers, ready-role indices, and role mapping from `GameManager` into `ProductionStateController`; the user verified unlock, upgrade, cadence, mythic, AI, cap-resume, match-end, and restart behavior in Play Mode.
