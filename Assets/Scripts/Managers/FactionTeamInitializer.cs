@@ -22,6 +22,7 @@ public sealed class FactionTeamInitializer
     public FactionData RightFaction { get; private set; }
     public Base LeftBase { get; private set; }
     public Base RightBase { get; private set; }
+    public WorkerManager RightEconomy => RightBase != null ? RightBase.GetComponent<WorkerManager>() : null;
 
     public void Initialize()
     {
@@ -36,8 +37,7 @@ public sealed class FactionTeamInitializer
         LeftBase = null;
         RightBase = null;
 
-        foreach (Base battleBase in
-            Object.FindObjectsByType<Base>(FindObjectsSortMode.None))
+        foreach (Base battleBase in Object.FindObjectsByType<Base>())
         {
             if (battleBase.Team == Team.Left)
             {

@@ -212,63 +212,8 @@ public sealed class TitleMenuController : MonoBehaviour
 
     private void PopulateFactionButtons()
     {
-        if (factionCatalog == null || factionButtonContainer == null || factionButtonTemplate == null)
-        {
-            Debug.LogError($"{name}: Faction selection configuration is incomplete.", this);
-            return;
-        }
-
-        factionButtonTemplate.gameObject.SetActive(false);
-        HashSet<FactionData> createdFactions = new HashSet<FactionData>();
-
-        if (factionCatalog.Factions == null)
-        {
-            Debug.LogError($"{name}: Faction catalog has no faction list.", factionCatalog);
-            return;
-        }
-
-        foreach (FactionData faction in factionCatalog.Factions)
-        {
-            if (faction == null)
-            {
-                Debug.LogWarning($"{name}: Faction catalog contains a null entry.", factionCatalog);
-                continue;
-            }
-
-            if (!createdFactions.Add(faction))
-            {
-                Debug.LogWarning($"{name}: Ignoring duplicate faction '{faction.FactionName}'.", factionCatalog);
-                continue;
-            }
-
-            Button option = Instantiate(factionButtonTemplate, factionButtonContainer);
-            option.name = $"{faction.FactionName} Faction Button";
-            option.interactable = true;
-            if (option.targetGraphic != null)
-            {
-                option.targetGraphic.raycastTarget = true;
-            }
-            option.gameObject.SetActive(true);
-
-            TMP_Text label = option.GetComponentInChildren<TMP_Text>();
-            if (label != null)
-            {
-                label.text = faction.FactionName;
-            }
-
-            Image icon = option.transform.Find("Faction Icon")?.GetComponent<Image>();
-            if (icon != null)
-            {
-                icon.sprite = faction.CastleSprite;
-                icon.enabled = faction.CastleSprite != null;
-            }
-
-            FactionData selectedFaction = faction;
-            option.onClick.AddListener(() => SelectFaction(selectedFaction));
-        }
-
-        Canvas.ForceUpdateCanvases();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(factionButtonContainer);
+        new FactionSelectionPresenter(this, factionCatalog, factionButtonContainer, factionButtonTemplate)
+            .Populate(SelectFaction);
     }
 
     private void SelectFaction(FactionData faction)
@@ -367,5 +312,61 @@ public sealed class TitleMenuController : MonoBehaviour
 #else
         Application.Quit();
 #endif
+    }
+}
+
+internal sealed class FactionSelectionPresenter
+{
+    private readonly MonoBehaviour owner;
+    private readonly FactionCatalog catalog;
+    private readonly RectTransform container;
+    private readonly Button template;
+
+    public FactionSelectionPresenter(MonoBehaviour owner, FactionCatalog catalog, RectTransform container, Button template)
+    {
+        this.owner = owner;
+        this.catalog = catalog;
+        this.container = container;
+        this.template = template;
+    }
+
+    public void Populate(UnityEngine.Events.UnityAction<FactionData> onSelected)
+    {
+        if (catalog?.Factions == null || container == null || template == null)
+        {
+            Debug.LogError($"{owner.name}: Faction selection configuration is incomplete.", owner);
+            return;
+        }
+
+        template.gameObject.SetActive(false);
+        HashSet<FactionData> created = new HashSet<FactionData>();
+        foreach (FactionData faction in catalog.Factions)
+        {
+            if (faction == null)
+            {
+                Debug.LogWarning($"{owner.name}: Faction catalog contains a null entry.", catalog);
+                continue;
+            }
+            if (!created.Add(faction))
+            {
+                Debug.LogWarning($"{owner.name}: Ignoring duplicate faction '{faction.FactionName}'.", catalog);
+                continue;
+            }
+
+            Button option = Object.Instantiate(template, container);
+            option.name = $"{faction.FactionName} Faction Button";
+            option.interactable = true;
+            if (option.targetGraphic != null) option.targetGraphic.raycastTarget = true;
+            option.gameObject.SetActive(true);
+            TMP_Text label = option.GetComponentInChildren<TMP_Text>();
+            if (label != null) label.text = faction.FactionName;
+            Image icon = option.transform.Find("Faction Icon")?.GetComponent<Image>();
+            if (icon != null) { icon.sprite = faction.CastleSprite; icon.enabled = faction.CastleSprite != null; }
+            FactionData selected = faction;
+            option.onClick.AddListener(() => onSelected(selected));
+        }
+
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(container);
     }
 }

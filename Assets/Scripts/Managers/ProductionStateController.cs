@@ -51,7 +51,7 @@ public sealed class ProductionStateController
 
         int teamIndex = GetTeamIndex(team);
         int scanStartIndex = readySpawnIndices[teamIndex];
-        int availableSpawnSlots = spawnContext.GetAvailableSpawnSlots(team);
+        int availableSpawnSlots = -1;
 
         for (int offset = 0; offset < RoleCount; offset++)
         {
@@ -72,6 +72,11 @@ public sealed class ProductionStateController
             if (timers[teamIndex, roleIndex] < interval)
             {
                 continue;
+            }
+
+            if (availableSpawnSlots < 0)
+            {
+                availableSpawnSlots = spawnContext.GetAvailableSpawnSlots(team);
             }
 
             if (availableSpawnSlots <= 0 ||

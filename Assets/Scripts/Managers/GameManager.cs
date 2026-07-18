@@ -9,7 +9,7 @@ public enum SpawnPattern
     PerUnitInterval
 }
 
-public class GameManager : MonoBehaviour, IProductionSpawnContext
+public class GameManager : MonoBehaviour
 {
     public const int MaximumProductionTier = ProductionTierRules.MaximumTier;
 
@@ -56,10 +56,7 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
     private readonly ProductionStateController productionState = new ProductionStateController();
     private readonly MatchStateController matchState = new MatchStateController();
     private FactionTeamInitializer factionTeamInitializer;
-
-    private float globalSpawnTimer;
-    private int leftSpawnIndex;
-    private int rightSpawnIndex;
+    private UnitSpawnController unitSpawnController;
     private Base leftBase;
     private Base rightBase;
 
@@ -85,11 +82,20 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
             rightCastleIcon);
         factionTeamInitializer.Initialize();
         SynchronizeFactionInitialization();
+        unitSpawnController = new UnitSpawnController(
+            leftFactionData,
+            rightFactionData,
+            leftSpawnPoint,
+            rightSpawnPoint,
+            leftTargetPoint,
+            rightTargetPoint,
+            productionState,
+            maxUnitsPerTeam,
+            randomiseSpawns);
 
-        if (FindAnyObjectByType<EnemyAIController>() == null)
-        {
-            gameObject.AddComponent<EnemyAIController>();
-        }
+        EnemyAIController enemyAI = FindAnyObjectByType<EnemyAIController>();
+        if (enemyAI == null) enemyAI = gameObject.AddComponent<EnemyAIController>();
+        enemyAI.Configure(this, factionTeamInitializer.RightEconomy);
     }
 
     private void Start()
@@ -110,7 +116,7 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
             return;
         }
 
-        UpdateGlobalSpawns();
+        unitSpawnController?.UpdateGlobalSpawns(Time.deltaTime, spawnInterval);
     }
 
     private void LateUpdate()
@@ -302,170 +308,11 @@ public class GameManager : MonoBehaviour, IProductionSpawnContext
         return ProductionStateController.GetRoleIndex(role);
     }
 
-    private void UpdateGlobalSpawns()
-    {
-        globalSpawnTimer += Time.deltaTime;
-
-        if (globalSpawnTimer < Mathf.Max(0.1f, spawnInterval)) return;
-
-        globalSpawnTimer -= Mathf.Max(0.1f, spawnInterval);
-        TrySpawnGlobalUnit(Team.Left);
-        TrySpawnGlobalUnit(Team.Right);
-    }
-
     private void UpdatePerUnitSpawns(Team team, FactionData factionData)
     {
         if (factionData == null) return;
 
-        productionState.UpdateSpawns(team, Time.deltaTime, this);
-    }
-
-    private void TrySpawnGlobalUnit(Team team)
-    {
-        if (GetAvailableSpawnSlots(team) <= 0) return;
-
-        if (randomiseSpawns)
-        {
-            if (TrySelectWeightedRole(team, out UnitRole selectedRole))
-            {
-                TrySpawnUnit(team, selectedRole, 1);
-            }
-
-            return;
-        }
-
-        int scanStartIndex = team == Team.Left ? leftSpawnIndex : rightSpawnIndex;
-        for (int offset = 0; offset < SpawnRoles.Length; offset++)
-        {
-            int roleIndex = (scanStartIndex + offset) % SpawnRoles.Length;
-            if (!TrySpawnUnit(team, SpawnRoles[roleIndex], 1))
-            {
-                continue;
-            }
-
-            int nextSpawnIndex = (roleIndex + 1) % SpawnRoles.Length;
-            if (team == Team.Left)
-            {
-                leftSpawnIndex = nextSpawnIndex;
-            }
-            else
-            {
-                rightSpawnIndex = nextSpawnIndex;
-            }
-
-            return;
-        }
-    }
-
-    private bool TrySelectWeightedRole(Team team, out UnitRole selectedRole)
-    {
-        FactionData factionData = GetFactionData(team);
-        float totalWeight = 0f;
-
-        foreach (UnitRole role in SpawnRoles)
-        {
-            if (factionData != null && factionData.TryGetUnitData(role, out UnitData data))
-            {
-                totalWeight += GetSpawnWeight(data);
-            }
-        }
-
-        if (totalWeight <= 0f)
-        {
-            selectedRole = default;
-            return false;
-        }
-
-        selectedRole = default;
-        float roll = Random.Range(0f, totalWeight);
-        foreach (UnitRole role in SpawnRoles)
-        {
-            if (factionData == null || !factionData.TryGetUnitData(role, out UnitData data))
-            {
-                continue;
-            }
-
-            selectedRole = role;
-            roll -= GetSpawnWeight(data);
-            if (roll <= 0f)
-            {
-                return true;
-            }
-        }
-
-        return true;
-    }
-
-    private static float GetSpawnWeight(UnitData data)
-    {
-        return 1f / Mathf.Max(1, data.Cost);
-    }
-
-    int IProductionSpawnContext.GetAvailableSpawnSlots(Team team)
-    {
-        return GetAvailableSpawnSlots(team);
-    }
-
-    bool IProductionSpawnContext.TryGetSpawnInterval(
-        Team team,
-        UnitRole role,
-        out float interval)
-    {
-        FactionData factionData = GetFactionData(team);
-        if (factionData != null && factionData.TryGetUnitData(role, out UnitData data))
-        {
-            interval = data.SpawnInterval;
-            return true;
-        }
-
-        interval = 0f;
-        return false;
-    }
-
-    bool IProductionSpawnContext.TrySpawnUnit(
-        Team team,
-        UnitRole role,
-        int productionTier)
-    {
-        return TrySpawnUnit(team, role, productionTier);
-    }
-
-    private int GetAvailableSpawnSlots(Team team)
-    {
-        BaseUnit[] allUnits = FindObjectsByType<BaseUnit>();
-        int teamUnitCount = 0;
-
-        foreach (BaseUnit unit in allUnits)
-        {
-            if (unit.Team == team)
-            {
-                teamUnitCount++;
-            }
-        }
-
-        return Mathf.Max(0, maxUnitsPerTeam - teamUnitCount);
-    }
-
-    private bool TrySpawnUnit(Team team, UnitRole role, int productionTier)
-    {
-        FactionData factionData = GetFactionData(team);
-        Transform spawnPoint = team == Team.Left ? leftSpawnPoint : rightSpawnPoint;
-        Transform targetPoint = team == Team.Left ? leftTargetPoint : rightTargetPoint;
-
-        if (factionData == null || spawnPoint == null || targetPoint == null)
-        {
-            return false;
-        }
-
-        BaseUnit prefab = role == UnitRole.Mythic ? GetSelectedMythicUnit(team) : null;
-        if (prefab == null && !factionData.TryGetUnitPrefab(role, out prefab))
-        {
-            return false;
-        }
-
-        BaseUnit unitInstance = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
-        unitInstance.Initialize(team, targetPoint, role, productionTier);
-        return true;
+        productionState.UpdateSpawns(team, Time.deltaTime, unitSpawnController);
     }
 
     private FactionData GetFactionData(Team team)

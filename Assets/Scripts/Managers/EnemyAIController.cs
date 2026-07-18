@@ -22,17 +22,26 @@ public sealed class EnemyAIController : MonoBehaviour
 
     private void Awake()
     {
-        gameManager = FindAnyObjectByType<GameManager>();
-        foreach (WorkerManager candidate in FindObjectsByType<WorkerManager>())
+        difficulty = FactionSelectionSession.Difficulty;
+    }
+
+    public void Configure(GameManager manager, WorkerManager workerManager)
+    {
+        gameManager = manager;
+        economy = workerManager;
+    }
+
+    private void ResolveFallbackDependencies()
+    {
+        gameManager ??= FindAnyObjectByType<GameManager>();
+        if (economy == null)
         {
-            if (candidate.Team == team)
+            foreach (WorkerManager candidate in FindObjectsByType<WorkerManager>())
             {
-                economy = candidate;
-                break;
+                if (candidate.Team == team) { economy = candidate; break; }
             }
         }
 
-        difficulty = FactionSelectionSession.Difficulty;
         if (economy != null)
         {
             economy.SetStartingGoldBonus(GetStartingGoldBonus(difficulty));
@@ -41,6 +50,7 @@ public sealed class EnemyAIController : MonoBehaviour
 
     private IEnumerator Start()
     {
+        ResolveFallbackDependencies();
         if (gameManager == null || economy == null)
         {
             Debug.LogError($"{name}: Enemy AI requires a GameManager and {team} WorkerManager.", this);
