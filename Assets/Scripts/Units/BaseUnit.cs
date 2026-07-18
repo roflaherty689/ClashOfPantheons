@@ -1,8 +1,10 @@
 using System.Collections;
 using UnityEngine;
-
+using Unity.Profiling;
 public abstract class BaseUnit : MonoBehaviour, IDamageable
 {
+    private static readonly ProfilerMarker FriendlySeparationMarker = new("Clash.Units.FriendlySeparation");
+    private static readonly ProfilerMarker TargetAcquisitionMarker = new("Clash.Units.TargetAcquisition");
     [Header("Data")]
     [SerializeField] protected UnitData unitData;
 
@@ -194,6 +196,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
     protected void ApplyFriendlyCombatSeparation()
     {
+        using ProfilerMarker.AutoScope _ = FriendlySeparationMarker.Auto();
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
             friendlySeparationRadius
@@ -241,6 +244,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
 
     private IDamageable FindTargetInRange()
     {
+        using ProfilerMarker.AutoScope _ = TargetAcquisitionMarker.Auto();
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
             unitData.AttackRange * statMultiplier

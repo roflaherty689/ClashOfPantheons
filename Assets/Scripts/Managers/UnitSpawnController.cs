@@ -1,7 +1,9 @@
 using UnityEngine;
+using Unity.Profiling;
 
 public sealed class UnitSpawnController : IProductionSpawnContext
 {
+    private static readonly ProfilerMarker CapacityScanMarker = new("Clash.Production.CapacityScan");
     private static readonly UnitRole[] Roles =
     {
         UnitRole.Melee,
@@ -60,6 +62,7 @@ public sealed class UnitSpawnController : IProductionSpawnContext
 
     public int GetAvailableSpawnSlots(Team team)
     {
+        using ProfilerMarker.AutoScope _ = CapacityScanMarker.Auto();
         int teamUnitCount = 0;
         foreach (BaseUnit unit in Object.FindObjectsByType<BaseUnit>())
         {

@@ -119,6 +119,8 @@ Git history remains the exact implementation record.
 
 ### Technical
 
+- Added focused Unity Profiler markers around unit target acquisition, friendly separation, monk ally/enemy searches, and production capacity scans so a representative 60-versus-60 capture can guide any allocation or registry changes.
+- Retained the current physics-query and unit-count architecture after the user judged representative prototype performance sufficient; the new markers remain available for regression investigation.
 - Replaced runtime production-card hierarchy-name lookups with serialized `ProductionCardView` bindings, updated the HUD builder to author them, and added a guarded migration for the five existing scene cards.
 - Extracted global and per-role spawn selection, capacity checks, prefab resolution, weighted choice, and unit instantiation from `GameManager` into `UnitSpawnController`; idle production frames now avoid scene-wide capacity scans until at least one cadence is ready.
 - Extracted economy, worker, stronghold, countdown, result-overlay, restart, and listener lifecycle presentation from `BattleEconomyUI` into `BattleHudReadoutPresenter`.

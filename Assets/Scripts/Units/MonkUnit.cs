@@ -1,7 +1,10 @@
 using UnityEngine;
+using Unity.Profiling;
 
 public class MonkUnit : BaseUnit
 {
+    private static readonly ProfilerMarker AllySearchMarker = new("Clash.Units.MonkAllySearch");
+    private static readonly ProfilerMarker EnemySearchMarker = new("Clash.Units.MonkEnemySearch");
     [Header("Healing")]
     [SerializeField, Min(0f)] private float healRange = 2f;
     [SerializeField, Min(0f)] private float baseHealAmount = 5f;
@@ -54,6 +57,7 @@ public class MonkUnit : BaseUnit
 
     private BaseUnit FindMostInjuredAllyInCombat()
     {
+        using ProfilerMarker.AutoScope _ = AllySearchMarker.Auto();
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
             Mathf.Max(0f, healRange));
@@ -91,6 +95,7 @@ public class MonkUnit : BaseUnit
 
     private bool HasEnemyUnitInRange()
     {
+        using ProfilerMarker.AutoScope _ = EnemySearchMarker.Auto();
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
             Mathf.Max(0f, healRange));
