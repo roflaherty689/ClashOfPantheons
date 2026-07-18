@@ -36,6 +36,7 @@ public static class ClashBattleUIBuilder
 
         GameObject root = new GameObject(RootName, typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         Undo.RegisterCreatedObjectUndo(root, "Create Battle UI");
+        root.GetComponent<RectTransform>().localScale = Vector3.one;
 
         Canvas canvas = root.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;

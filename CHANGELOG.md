@@ -8,6 +8,7 @@ Git history remains the exact implementation record.
 
 ### Added
 
+- A guarded Unity Editor migration for removing the isolated legacy battle `Canvas/Canvas/VictoryText` hierarchy and normalizing the active HUD root scale.
 - Role-aware unit damage matchups, with a 1.2x first-pass counter triangle: melee beats cavalry, archers beat melee, and cavalry beats archers.
 
 - A three-difficulty enemy AI that buys workers, production, upgrades, and a random mythic through the same economy and production rules as the player.
@@ -89,6 +90,7 @@ Git history remains the exact implementation record.
 
 ### Fixed
 
+- The battle-HUD builder now explicitly initializes its root RectTransform to unit scale, preventing regenerated scene UI from retaining a serialized zero scale.
 - Aligned both battle economies and the shared Base prefab to 200 starting gold, so AI difficulty bonuses now produce enemy starts of 200, 250, and 350.
 
 - Restored parchment behind the locked crossed-swords mythic art, removed the empty-image grey fill, and mirrored that locked presentation in the hovered role-details panel.
