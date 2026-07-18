@@ -66,7 +66,7 @@ public static class ClashGoldVeinPrefabMigration
     private static Dictionary<WorkerManager, bool> CaptureManagerSides(GoldVein left, GoldVein right)
     {
         Dictionary<WorkerManager, bool> result = new Dictionary<WorkerManager, bool>();
-        foreach (WorkerManager manager in Object.FindObjectsByType<WorkerManager>(FindObjectsSortMode.None))
+        foreach (WorkerManager manager in Object.FindObjectsByType<WorkerManager>())
         {
             SerializedProperty property = new SerializedObject(manager).FindProperty("goldVein");
             if (property.objectReferenceValue == left) result.Add(manager, true);

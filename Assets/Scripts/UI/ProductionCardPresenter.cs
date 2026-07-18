@@ -7,8 +7,6 @@ using UnityEngine.UI;
 
 public sealed class ProductionCardPresenter
 {
-    private const string ProductionPath = "Safe Area/Bottom HUD/Independent Production/";
-
     private static readonly UnitRole[] Roles =
     {
         UnitRole.Melee,
@@ -21,7 +19,7 @@ public sealed class ProductionCardPresenter
     private sealed class CardBinding
     {
         public UnitRole Role;
-        public Transform Card;
+        public ProductionCardView View;
         public Button Button;
         public Image Art;
         public TextMeshProUGUI StatusText;
@@ -134,27 +132,21 @@ public sealed class ProductionCardPresenter
 
     private void ResolveBindings()
     {
-        for (int i = 0; i < Roles.Length; i++)
+        ProductionCardView[] views = root.GetComponentsInChildren<ProductionCardView>(true);
+        foreach (ProductionCardView view in views)
         {
-            UnitRole role = Roles[i];
-            string roleName = role.ToString().ToUpperInvariant();
-            string cardPath = ProductionPath + roleName + " Production/";
-            Transform card = root.Find(cardPath.TrimEnd('/'));
-            Transform button = root.Find(cardPath + "Unlock " + roleName);
-            Transform artTransform = root.Find(cardPath + roleName + " Art");
-            Image art = artTransform != null ? artTransform.GetComponent<Image>() : null;
-
-            bindings[i] = new CardBinding
+            int index = Array.IndexOf(Roles, view.Role);
+            if (index < 0 || bindings[index] != null || !view.HasCompleteBindings) continue;
+            Image art = view.Artwork;
+            bindings[index] = new CardBinding
             {
-                Role = role,
-                Card = card,
-                Button = button != null ? button.GetComponent<Button>() : null,
+                Role = view.Role,
+                View = view,
+                Button = view.PurchaseButton,
                 Art = art,
-                StatusText = FindDirectTextContaining(card, "LOCKED"),
-                TierText = FindDirectTextContaining(card, "STARS"),
-                ActionText = button != null
-                    ? button.GetComponentInChildren<TextMeshProUGUI>(true)
-                    : null,
+                StatusText = view.StatusText,
+                TierText = view.TierText,
+                ActionText = view.ActionText,
                 UnlockedColour = art != null ? art.color : Color.white
             };
         }
@@ -182,17 +174,14 @@ public sealed class ProductionCardPresenter
 
     private void BindCardSelection(CardBinding binding)
     {
-        if (binding.Card == null) return;
+        if (binding.View == null) return;
+        Graphic cardGraphic = binding.View.InteractionGraphic;
+        cardGraphic.raycastTarget = true;
 
-        if (binding.Card.TryGetComponent(out Graphic cardGraphic))
-        {
-            cardGraphic.raycastTarget = true;
-        }
-
-        binding.InteractionTrigger = binding.Card.GetComponent<EventTrigger>();
+        binding.InteractionTrigger = binding.View.GetComponent<EventTrigger>();
         if (binding.InteractionTrigger == null)
         {
-            binding.InteractionTrigger = binding.Card.gameObject.AddComponent<EventTrigger>();
+            binding.InteractionTrigger = binding.View.gameObject.AddComponent<EventTrigger>();
         }
 
         UnitRole role = binding.Role;
@@ -234,12 +223,7 @@ public sealed class ProductionCardPresenter
     private Sprite GetMythicParchmentSprite()
     {
         CardBinding mythic = GetBinding(UnitRole.Mythic);
-        Transform authoredParchment = mythic?.Card != null
-            ? mythic.Card.Find("Portrait Paper")
-            : null;
-        return authoredParchment != null && authoredParchment.TryGetComponent(out Image image)
-            ? image.sprite
-            : null;
+        return mythic?.View != null ? mythic.View.PortraitPaperSprite : null;
     }
 
     private static EventTrigger.Entry CreateInteractionEntry(
@@ -258,22 +242,6 @@ public sealed class ProductionCardPresenter
             if (binding != null && binding.Role == role)
             {
                 return binding;
-            }
-        }
-
-        return null;
-    }
-
-    private static TextMeshProUGUI FindDirectTextContaining(Transform parent, string content)
-    {
-        if (parent == null) return null;
-
-        for (int i = 0; i < parent.childCount; i++)
-        {
-            if (parent.GetChild(i).TryGetComponent(out TextMeshProUGUI text) &&
-                text.text.Contains(content))
-            {
-                return text;
             }
         }
 

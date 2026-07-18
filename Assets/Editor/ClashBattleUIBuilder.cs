@@ -231,17 +231,17 @@ public static class ClashBattleUIBuilder
     private static void CreateRoleCard(RectTransform parent, string role, string cost, string artPath, string artSprite, Vector2 pos)
     {
         RectTransform card = CreateRect(role + " Production", parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), pos, new Vector2(258, 274));
-        AddPanel(card.gameObject, Panel);
+        Image cardImage = AddPanel(card.gameObject, Panel);
         AddBorder(card, new Color32(126, 109, 75, 255), 3);
 
         AddText(card, role, 23, TextAlignmentOptions.Center, new Vector2(0, 111), new Vector2(220, 34), Color.white);
         RectTransform portraitPaper = CreateRect("Portrait Paper", card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 32), new Vector2(154, 142));
-        AddSpriteOrPanel(portraitPaper.gameObject, UiRoot + "/Papers/RegularPaper.png", "RegularPaper_4", new Color32(212, 196, 151, 255), false);
+        Image portraitPaperImage = AddSpriteOrPanel(portraitPaper.gameObject, UiRoot + "/Papers/RegularPaper.png", "RegularPaper_4", new Color32(212, 196, 151, 255), false);
         RectTransform art = CreateRect(role + " Art", card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 32), new Vector2(132, 132));
-        AddSpriteOrPanel(art.gameObject, artPath, artSprite, Color.white, true);
+        Image artImage = AddSpriteOrPanel(art.gameObject, artPath, artSprite, Color.white, true);
 
-        AddText(card, "LOCKED", 21, TextAlignmentOptions.Center, new Vector2(0, -47), new Vector2(210, 30), Gold);
-        AddText(card, "0 / 3 STARS", 17, TextAlignmentOptions.Center, new Vector2(0, -74), new Vector2(210, 26), Muted);
+        TextMeshProUGUI statusText = AddText(card, "LOCKED", 21, TextAlignmentOptions.Center, new Vector2(0, -47), new Vector2(210, 30), Gold);
+        TextMeshProUGUI tierText = AddText(card, "0 / 3 STARS", 17, TextAlignmentOptions.Center, new Vector2(0, -74), new Vector2(210, 26), Muted);
 
         RectTransform button = CreateRect("Unlock " + role, card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -111), new Vector2(218, 52));
         Image buttonImage = AddSpriteOrPanel(button.gameObject, UiRoot + "/Buttons/BigBlueButton_Regular.png", "BigBlueButton_Regular_4", new Color32(43, 102, 127, 255), false);
@@ -250,7 +250,11 @@ public static class ClashBattleUIBuilder
         buttonImage.raycastTarget = true;
         RectTransform coin = CreateRect("Gold Icon", button, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-48, 0), new Vector2(30, 30));
         AddSpriteOrPanel(coin.gameObject, UiRoot + "/Icons/Icon_03.png", "Icon_03_0", Gold, true);
-        AddText(button, cost, 22, TextAlignmentOptions.Left, new Vector2(31, 0), new Vector2(90, 32), Color.white);
+        TextMeshProUGUI actionText = AddText(button, cost, 22, TextAlignmentOptions.Left, new Vector2(31, 0), new Vector2(90, 32), Color.white);
+
+        ProductionCardView view = card.gameObject.AddComponent<ProductionCardView>();
+        view.Configure((UnitRole)System.Enum.Parse(typeof(UnitRole), role, true), cardImage, selectable,
+            artImage, portraitPaperImage, statusText, tierText, actionText);
     }
 
     private static void CreateRoleDetailPanel(RectTransform parent)

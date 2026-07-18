@@ -10,6 +10,7 @@ Git history remains the exact implementation record.
 
 - A guarded Unity Editor migration for removing the isolated legacy battle `Canvas/Canvas/VictoryText` hierarchy and normalizing the active HUD root scale.
 - A guarded Unity Editor migration for converting the mirrored battle gold nodes to a shared prefab while retaining side transforms, internal mine points, and worker-economy references.
+- User-verified both worker loops after the battle gold nodes were converted to shared prefab instances.
 - Role-aware unit damage matchups, with a 1.2x first-pass counter triangle: melee beats cavalry, archers beat melee, and cavalry beats archers.
 
 - A three-difficulty enemy AI that buys workers, production, upgrades, and a random mythic through the same economy and production rules as the player.
@@ -118,6 +119,7 @@ Git history remains the exact implementation record.
 
 ### Technical
 
+- Replaced runtime production-card hierarchy-name lookups with serialized `ProductionCardView` bindings, updated the HUD builder to author them, and added a guarded migration for the five existing scene cards.
 - Extracted global and per-role spawn selection, capacity checks, prefab resolution, weighted choice, and unit instantiation from `GameManager` into `UnitSpawnController`; idle production frames now avoid scene-wide capacity scans until at least one cadence is ready.
 - Extracted economy, worker, stronghold, countdown, result-overlay, restart, and listener lifecycle presentation from `BattleEconomyUI` into `BattleHudReadoutPresenter`.
 - Extracted title-menu faction-option generation and binding into a focused presenter, and changed enemy AI startup to receive its manager/economy dependencies from the initialized faction boundary while retaining a legacy-scene fallback.
