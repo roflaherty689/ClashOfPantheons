@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -39,12 +38,6 @@ public class BattleEconomyUI : MonoBehaviour
         public EventTrigger.Entry PointerDownEntry;
     }
 
-    private sealed class MythicChoiceBinding
-    {
-        public BaseUnit Prefab;
-        public Button Button;
-    }
-
     [SerializeField] private Team playerTeam = Team.Left;
 
     private WorkerManager workerManager;
@@ -75,8 +68,7 @@ public class BattleEconomyUI : MonoBehaviour
     private TextMeshProUGUI selectedRoleDescriptionText;
     private TextMeshProUGUI selectedRoleActionText;
     private RectTransform selectedRolePanel;
-    private GameObject mythicPicker;
-    private readonly List<MythicChoiceBinding> mythicChoiceBindings = new List<MythicChoiceBinding>();
+    private MythicPickerController mythicPickerController;
     private string battleSummarySuffix = string.Empty;
 
     private void Awake()
@@ -85,6 +77,11 @@ public class BattleEconomyUI : MonoBehaviour
         ResolveWorkerManager();
         ResolveBases();
         ResolveUI();
+        mythicPickerController = new MythicPickerController(
+            selectedRolePanel,
+            selectedRoleTitleText != null ? selectedRoleTitleText.font : null,
+            playerTeam,
+            Refresh);
 
         if (buyWorkerButton != null)
         {
@@ -172,7 +169,7 @@ public class BattleEconomyUI : MonoBehaviour
             selectedRoleButton.onClick.RemoveListener(PurchaseSelectedRole);
         }
 
-        CloseMythicPicker();
+        mythicPickerController?.Close();
     }
 
     private void ResolveGameManager()
@@ -424,7 +421,7 @@ public class BattleEconomyUI : MonoBehaviour
         if (role == UnitRole.Mythic && gameManager != null &&
             gameManager.GetProductionTier(playerTeam, UnitRole.Mythic) == 0)
         {
-            OpenMythicPicker();
+            mythicPickerController?.Open(gameManager, workerManager);
             return;
         }
 
@@ -436,7 +433,7 @@ public class BattleEconomyUI : MonoBehaviour
     {
         if (role != UnitRole.Mythic)
         {
-            CloseMythicPicker();
+            mythicPickerController?.Close();
         }
 
         selectedRole = role;
@@ -563,7 +560,7 @@ public class BattleEconomyUI : MonoBehaviour
         }
 
         RefreshSelectedRole();
-        RefreshMythicPicker();
+        mythicPickerController?.Refresh(gameManager, workerManager);
     }
 
     private void RefreshSelectedRole()
@@ -642,192 +639,6 @@ public class BattleEconomyUI : MonoBehaviour
                 : hasData && tier < GameManager.MaximumProductionTier &&
                     workerManager.CurrentGold >= cost && !gameManager.IsGameOver;
         }
-    }
-
-    private void OpenMythicPicker()
-    {
-        if (selectedRolePanel == null || gameManager?.MythicUnitRoster == null || mythicPicker != null)
-        {
-            return;
-        }
-
-        for (int i = 0; i < selectedRolePanel.childCount; i++)
-        {
-            selectedRolePanel.GetChild(i).gameObject.SetActive(false);
-        }
-
-        mythicPicker = CreateUIObject("Mythic Picker", selectedRolePanel).gameObject;
-        RectTransform pickerRect = mythicPicker.GetComponent<RectTransform>();
-        pickerRect.anchorMin = Vector2.zero;
-        pickerRect.anchorMax = Vector2.one;
-        pickerRect.offsetMin = new Vector2(10f, 10f);
-        pickerRect.offsetMax = new Vector2(-10f, -10f);
-        Image background = mythicPicker.AddComponent<Image>();
-        background.color = new Color32(31, 36, 37, 252);
-
-        RectTransform viewport = CreateUIObject("Viewport", pickerRect);
-        viewport.anchorMin = new Vector2(0f, 0f);
-        viewport.anchorMax = new Vector2(1f, 1f);
-        viewport.offsetMin = new Vector2(8f, 8f);
-        viewport.offsetMax = new Vector2(-8f, -8f);
-        Image viewportImage = viewport.gameObject.AddComponent<Image>();
-        viewportImage.color = new Color(0f, 0f, 0f, 0.12f);
-        viewport.gameObject.AddComponent<RectMask2D>();
-
-        RectTransform content = CreateUIObject("Choices", viewport);
-        content.anchorMin = new Vector2(0f, 1f);
-        content.anchorMax = new Vector2(1f, 1f);
-        content.pivot = new Vector2(0.5f, 1f);
-        content.anchoredPosition = Vector2.zero;
-        content.sizeDelta = Vector2.zero;
-        GridLayoutGroup grid = content.gameObject.AddComponent<GridLayoutGroup>();
-        grid.cellSize = new Vector2(190f, 58f);
-        grid.spacing = new Vector2(8f, 7f);
-        grid.padding = new RectOffset(3, 3, 3, 3);
-        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = 2;
-        ContentSizeFitter fitter = content.gameObject.AddComponent<ContentSizeFitter>();
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        ScrollRect scroll = mythicPicker.AddComponent<ScrollRect>();
-        scroll.viewport = viewport;
-        scroll.content = content;
-        scroll.horizontal = false;
-        scroll.vertical = true;
-        scroll.movementType = ScrollRect.MovementType.Clamped;
-        scroll.scrollSensitivity = 28f;
-
-        List<BaseUnit> orderedMythics = new List<BaseUnit>();
-        foreach (BaseUnit prefab in gameManager.MythicUnitRoster.Units)
-        {
-            if (prefab != null && prefab.UnitData != null)
-            {
-                orderedMythics.Add(prefab);
-            }
-        }
-
-        orderedMythics.Sort((left, right) =>
-        {
-            int costComparison = left.UnitData.Cost.CompareTo(right.UnitData.Cost);
-            return costComparison != 0
-                ? costComparison
-                : string.Compare(GetDisplayName(left), GetDisplayName(right), System.StringComparison.Ordinal);
-        });
-
-        foreach (BaseUnit prefab in orderedMythics)
-        {
-            Button choice = CreatePickerButton(content, GetDisplayName(prefab), Vector2.zero, grid.cellSize);
-            TextMeshProUGUI label = choice.GetComponentInChildren<TextMeshProUGUI>();
-            label.text = $"{GetDisplayName(prefab)}\n{prefab.UnitData.Cost} GOLD";
-            label.fontSize = 14f;
-            label.alignment = TextAlignmentOptions.MidlineLeft;
-            RectTransform labelRect = (RectTransform)label.transform;
-            labelRect.anchoredPosition = new Vector2(25f, 0f);
-            labelRect.sizeDelta = new Vector2(128f, 52f);
-
-            Sprite avatar = gameManager.MythicUnitRoster.GetAvatar(prefab) ?? GetUnitSprite(prefab);
-            CreatePickerAvatar(choice.transform, avatar);
-            BaseUnit selectedPrefab = prefab;
-            choice.onClick.AddListener(() => PurchaseMythicChoice(selectedPrefab));
-            mythicChoiceBindings.Add(new MythicChoiceBinding
-            {
-                Prefab = prefab,
-                Button = choice
-            });
-        }
-
-        RefreshMythicPicker();
-    }
-
-    private void PurchaseMythicChoice(BaseUnit prefab)
-    {
-        if (gameManager != null && gameManager.TrySelectAndPurchaseMythic(playerTeam, prefab, workerManager))
-        {
-            CloseMythicPicker();
-            Refresh();
-        }
-    }
-
-    private void RefreshMythicPicker()
-    {
-        if (mythicPicker == null || workerManager == null || gameManager == null) return;
-
-        foreach (MythicChoiceBinding binding in mythicChoiceBindings)
-        {
-            bool valid = binding.Prefab != null && binding.Prefab.UnitData != null;
-            binding.Button.interactable = valid && !gameManager.IsGameOver &&
-                workerManager.CurrentGold >= binding.Prefab.UnitData.Cost;
-        }
-    }
-
-    private void CloseMythicPicker()
-    {
-        GameObject pickerToDestroy = mythicPicker;
-        mythicPicker = null;
-        if (pickerToDestroy != null)
-        {
-            pickerToDestroy.SetActive(false);
-            Destroy(pickerToDestroy);
-        }
-
-        mythicChoiceBindings.Clear();
-        if (selectedRolePanel == null) return;
-
-        for (int i = 0; i < selectedRolePanel.childCount; i++)
-        {
-            GameObject child = selectedRolePanel.GetChild(i).gameObject;
-            if (child != pickerToDestroy)
-            {
-                child.SetActive(true);
-            }
-        }
-    }
-
-    private Button CreatePickerButton(Transform parent, string objectName, Vector2 position, Vector2 size)
-    {
-        RectTransform rect = CreateUIObject(objectName, parent);
-        rect.sizeDelta = size;
-        rect.anchoredPosition = position;
-        Image image = rect.gameObject.AddComponent<Image>();
-        image.color = new Color32(43, 102, 127, 255);
-        Button button = rect.gameObject.AddComponent<Button>();
-        button.targetGraphic = image;
-        CreatePickerText(rect, objectName, 16f, Vector2.zero, size - new Vector2(8f, 4f));
-        return button;
-    }
-
-    private TextMeshProUGUI CreatePickerText(
-        Transform parent,
-        string value,
-        float fontSize,
-        Vector2 position,
-        Vector2 size)
-    {
-        RectTransform rect = CreateUIObject(value + " Text", parent);
-        rect.sizeDelta = size;
-        rect.anchoredPosition = position;
-        TextMeshProUGUI text = rect.gameObject.AddComponent<TextMeshProUGUI>();
-        text.text = value;
-        text.font = selectedRoleTitleText != null ? selectedRoleTitleText.font : null;
-        text.fontSize = fontSize;
-        text.color = Color.white;
-        text.alignment = TextAlignmentOptions.Center;
-        text.raycastTarget = false;
-        return text;
-    }
-
-    private static void CreatePickerAvatar(Transform parent, Sprite avatar)
-    {
-        RectTransform avatarRect = CreateUIObject("Avatar", parent);
-        avatarRect.anchorMin = new Vector2(0.5f, 0.5f);
-        avatarRect.anchorMax = new Vector2(0.5f, 0.5f);
-        avatarRect.sizeDelta = new Vector2(48f, 48f);
-        avatarRect.anchoredPosition = new Vector2(-66f, 0f);
-        Image avatarImage = avatarRect.gameObject.AddComponent<Image>();
-        avatarImage.sprite = avatar;
-        avatarImage.color = Color.white;
-        avatarImage.preserveAspect = true;
-        avatarImage.raycastTarget = false;
     }
 
     private static RectTransform CreateUIObject(string objectName, Transform parent)

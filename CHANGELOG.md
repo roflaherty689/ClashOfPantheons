@@ -115,6 +115,7 @@ Git history remains the exact implementation record.
 
 ### Technical
 
+- Extracted runtime mythic-picker construction, ordering, affordability, purchase routing, and cleanup from `BattleEconomyUI` into a focused controller; the user verified the complete picker interaction in Play Mode.
 - Moved battle countdown formatting into the tested Core presentation rules; all 38 Core Edit Mode cases passed in Unity, including clamping and minute-boundary behavior.
 - Centralized the accepted 1x/1.25x/1.5x star-tier stat curve in the Core production rules; all 32 Core Edit Mode cases passed in Unity.
 - Extracted production-tier transition rules into the Core assembly; all 26 Core Edit Mode cases passed in Unity, including normal progression, the tier cap, and selection-based mythic unlock behavior.
