@@ -9,7 +9,7 @@ public enum SpawnPattern
     PerUnitInterval
 }
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviour, IProductionSpawnContext
 {
     public const int MaximumProductionTier = ProductionTierRules.MaximumTier;
 
@@ -432,54 +432,7 @@ public class GameManager : MonoBehaviour
     {
         if (factionData == null) return;
 
-        for (int i = 0; i < SpawnRoles.Length; i++)
-        {
-            UnitRole role = SpawnRoles[i];
-            if (GetProductionTier(team, role) <= 0)
-            {
-                productionState.ResetTimer(team, role);
-                continue;
-            }
-
-            productionState.AdvanceTimer(team, role, Time.deltaTime);
-        }
-
-        int scanStartIndex = productionState.GetReadySpawnIndex(team);
-        int availableSpawnSlots = GetAvailableSpawnSlots(team);
-
-        for (int offset = 0; offset < SpawnRoles.Length; offset++)
-        {
-            int roleIndex = (scanStartIndex + offset) % SpawnRoles.Length;
-            UnitRole role = SpawnRoles[roleIndex];
-
-            int productionTier = GetProductionTier(team, role);
-            if (productionTier <= 0)
-            {
-                continue;
-            }
-
-            if (!factionData.TryGetUnitData(role, out UnitData data))
-            {
-                continue;
-            }
-
-            float roleSpawnInterval = data.SpawnInterval;
-            productionState.ClampTimer(team, role, roleSpawnInterval);
-
-            if (productionState.GetTimer(team, role) < roleSpawnInterval)
-            {
-                continue;
-            }
-
-            if (availableSpawnSlots <= 0 || !TrySpawnUnit(team, role, productionTier))
-            {
-                continue;
-            }
-
-            productionState.ConsumeTimer(team, role, roleSpawnInterval);
-            availableSpawnSlots--;
-            productionState.SetReadySpawnIndex(team, (roleIndex + 1) % SpawnRoles.Length);
-        }
+        productionState.UpdateSpawns(team, Time.deltaTime, this);
     }
 
     private void TrySpawnGlobalUnit(Team team)
@@ -561,6 +514,35 @@ public class GameManager : MonoBehaviour
     private static float GetSpawnWeight(UnitData data)
     {
         return 1f / Mathf.Max(1, data.Cost);
+    }
+
+    int IProductionSpawnContext.GetAvailableSpawnSlots(Team team)
+    {
+        return GetAvailableSpawnSlots(team);
+    }
+
+    bool IProductionSpawnContext.TryGetSpawnInterval(
+        Team team,
+        UnitRole role,
+        out float interval)
+    {
+        FactionData factionData = GetFactionData(team);
+        if (factionData != null && factionData.TryGetUnitData(role, out UnitData data))
+        {
+            interval = data.SpawnInterval;
+            return true;
+        }
+
+        interval = 0f;
+        return false;
+    }
+
+    bool IProductionSpawnContext.TrySpawnUnit(
+        Team team,
+        UnitRole role,
+        int productionTier)
+    {
+        return TrySpawnUnit(team, role, productionTier);
     }
 
     private int GetAvailableSpawnSlots(Team team)

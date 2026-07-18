@@ -1,5 +1,12 @@
 using System;
 
+public interface IProductionSpawnContext
+{
+    int GetAvailableSpawnSlots(Team team);
+    bool TryGetSpawnInterval(Team team, UnitRole role, out float interval);
+    bool TrySpawnUnit(Team team, UnitRole role, int productionTier);
+}
+
 public sealed class ProductionStateController
 {
     public const int RoleCount = 5;
@@ -33,10 +40,51 @@ public sealed class ProductionStateController
         selectedMythics[GetTeamIndex(team)] = prefab;
     }
 
-    public float GetTimer(Team team, UnitRole role)
+    public void UpdateSpawns(
+        Team team,
+        float deltaTime,
+        IProductionSpawnContext spawnContext)
     {
-        int roleIndex = GetRoleIndex(role);
-        return roleIndex < 0 ? 0f : timers[GetTeamIndex(team), roleIndex];
+        if (spawnContext == null) return;
+
+        AdvanceUnlockedTimers(team, deltaTime);
+
+        int teamIndex = GetTeamIndex(team);
+        int scanStartIndex = readySpawnIndices[teamIndex];
+        int availableSpawnSlots = spawnContext.GetAvailableSpawnSlots(team);
+
+        for (int offset = 0; offset < RoleCount; offset++)
+        {
+            int roleIndex = (scanStartIndex + offset) % RoleCount;
+            int productionTier = tiers[teamIndex, roleIndex];
+            if (productionTier <= 0)
+            {
+                continue;
+            }
+
+            UnitRole role = GetRole(roleIndex);
+            if (!spawnContext.TryGetSpawnInterval(team, role, out float interval))
+            {
+                continue;
+            }
+
+            timers[teamIndex, roleIndex] = Math.Min(timers[teamIndex, roleIndex], interval);
+            if (timers[teamIndex, roleIndex] < interval)
+            {
+                continue;
+            }
+
+            if (availableSpawnSlots <= 0 ||
+                !spawnContext.TrySpawnUnit(team, role, productionTier))
+            {
+                continue;
+            }
+
+            timers[teamIndex, roleIndex] =
+                Math.Max(0f, timers[teamIndex, roleIndex] - interval);
+            availableSpawnSlots--;
+            readySpawnIndices[teamIndex] = (roleIndex + 1) % RoleCount;
+        }
     }
 
     public void ResetTimer(Team team, UnitRole role)
@@ -45,42 +93,6 @@ public sealed class ProductionStateController
         if (roleIndex < 0) return;
 
         timers[GetTeamIndex(team), roleIndex] = 0f;
-    }
-
-    public void AdvanceTimer(Team team, UnitRole role, float deltaTime)
-    {
-        int roleIndex = GetRoleIndex(role);
-        if (roleIndex < 0) return;
-
-        timers[GetTeamIndex(team), roleIndex] += Math.Max(0f, deltaTime);
-    }
-
-    public void ClampTimer(Team team, UnitRole role, float maximum)
-    {
-        int roleIndex = GetRoleIndex(role);
-        if (roleIndex < 0) return;
-
-        int teamIndex = GetTeamIndex(team);
-        timers[teamIndex, roleIndex] = Math.Min(timers[teamIndex, roleIndex], maximum);
-    }
-
-    public void ConsumeTimer(Team team, UnitRole role, float duration)
-    {
-        int roleIndex = GetRoleIndex(role);
-        if (roleIndex < 0) return;
-
-        int teamIndex = GetTeamIndex(team);
-        timers[teamIndex, roleIndex] = Math.Max(0f, timers[teamIndex, roleIndex] - duration);
-    }
-
-    public int GetReadySpawnIndex(Team team)
-    {
-        return readySpawnIndices[GetTeamIndex(team)];
-    }
-
-    public void SetReadySpawnIndex(Team team, int index)
-    {
-        readySpawnIndices[GetTeamIndex(team)] = index;
     }
 
     public static int GetRoleIndex(UnitRole role)
@@ -93,6 +105,36 @@ public sealed class ProductionStateController
             UnitRole.Siege => 3,
             UnitRole.Mythic => 4,
             _ => -1
+        };
+    }
+
+    private void AdvanceUnlockedTimers(Team team, float deltaTime)
+    {
+        int teamIndex = GetTeamIndex(team);
+        float safeDeltaTime = Math.Max(0f, deltaTime);
+
+        for (int roleIndex = 0; roleIndex < RoleCount; roleIndex++)
+        {
+            if (tiers[teamIndex, roleIndex] <= 0)
+            {
+                timers[teamIndex, roleIndex] = 0f;
+                continue;
+            }
+
+            timers[teamIndex, roleIndex] += safeDeltaTime;
+        }
+    }
+
+    private static UnitRole GetRole(int roleIndex)
+    {
+        return roleIndex switch
+        {
+            0 => UnitRole.Melee,
+            1 => UnitRole.Archer,
+            2 => UnitRole.Cavalry,
+            3 => UnitRole.Siege,
+            4 => UnitRole.Mythic,
+            _ => default
         };
     }
 
