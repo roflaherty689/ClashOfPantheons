@@ -53,16 +53,11 @@ public class GameManager : MonoBehaviour
     [SerializeField, Min(1f)] private float matchDurationSeconds = 300f;
     [SerializeField] private bool setTeamColour = true;
 
-    private readonly float[] leftUnitSpawnTimers = new float[SpawnRoles.Length];
-    private readonly float[] rightUnitSpawnTimers = new float[SpawnRoles.Length];
     private readonly int[,] unitLossCounts = new int[2, SpawnRoles.Length];
     private readonly int[] totalUnitLossValues = new int[2];
-    private readonly int[,] productionTiers = new int[2, SpawnRoles.Length];
-    private readonly BaseUnit[] selectedMythicUnits = new BaseUnit[2];
+    private readonly ProductionStateController productionState = new ProductionStateController();
 
     private float globalSpawnTimer;
-    private int leftReadySpawnIndex;
-    private int rightReadySpawnIndex;
     private int leftSpawnIndex;
     private int rightSpawnIndex;
     private bool gameOver;
@@ -120,16 +115,8 @@ public class GameManager : MonoBehaviour
 
         if (spawnPattern == SpawnPattern.PerUnitInterval)
         {
-            UpdatePerUnitSpawns(
-                Team.Left,
-                leftFactionData,
-                leftUnitSpawnTimers,
-                ref leftReadySpawnIndex);
-            UpdatePerUnitSpawns(
-                Team.Right,
-                rightFactionData,
-                rightUnitSpawnTimers,
-                ref rightReadySpawnIndex);
+            UpdatePerUnitSpawns(Team.Left, leftFactionData);
+            UpdatePerUnitSpawns(Team.Right, rightFactionData);
             return;
         }
 
@@ -177,8 +164,7 @@ public class GameManager : MonoBehaviour
 
     public int GetProductionTier(Team team, UnitRole role)
     {
-        int roleIndex = GetRoleIndex(role);
-        return roleIndex < 0 ? 0 : productionTiers[GetTeamIndex(team), roleIndex];
+        return productionState.GetTier(team, role);
     }
 
     public bool TryGetProductionData(Team team, UnitRole role, out UnitData data)
@@ -210,9 +196,8 @@ public class GameManager : MonoBehaviour
         int roleIndex = GetRoleIndex(role);
         if (roleIndex < 0) return false;
 
-        int teamIndex = GetTeamIndex(team);
         if (!ProductionTierRules.TryAdvance(
-                productionTiers[teamIndex, roleIndex],
+                productionState.GetTier(team, role),
                 role == UnitRole.Mythic,
                 out int nextTier))
         {
@@ -222,11 +207,11 @@ public class GameManager : MonoBehaviour
         if (!TryGetProductionData(team, role, out UnitData data)) return false;
         if (!economy.TrySpendGold(data.Cost)) return false;
 
-        productionTiers[teamIndex, roleIndex] = nextTier;
+        productionState.SetTier(team, role, nextTier);
 
         if (nextTier == 1)
         {
-            GetSpawnTimers(team)[roleIndex] = 0f;
+            productionState.ResetTimer(team, role);
         }
 
         return true;
@@ -234,7 +219,7 @@ public class GameManager : MonoBehaviour
 
     public BaseUnit GetSelectedMythicUnit(Team team)
     {
-        return selectedMythicUnits[GetTeamIndex(team)];
+        return productionState.GetSelectedMythic(team);
     }
 
     public bool HasMythicChoices(Team team)
@@ -265,10 +250,9 @@ public class GameManager : MonoBehaviour
         }
 
         int roleIndex = GetRoleIndex(UnitRole.Mythic);
-        int teamIndex = GetTeamIndex(team);
         if (roleIndex < 0 ||
             !ProductionTierRules.TryUnlockSelectedOption(
-                productionTiers[teamIndex, roleIndex],
+                productionState.GetTier(team, UnitRole.Mythic),
                 out int nextTier) ||
             prefab.UnitData == null ||
             !economy.TrySpendGold(prefab.UnitData.Cost))
@@ -276,9 +260,9 @@ public class GameManager : MonoBehaviour
             return false;
         }
 
-        selectedMythicUnits[teamIndex] = prefab;
-        productionTiers[teamIndex, roleIndex] = nextTier;
-        GetSpawnTimers(team)[roleIndex] = 0f;
+        productionState.SetSelectedMythic(team, prefab);
+        productionState.SetTier(team, UnitRole.Mythic, nextTier);
+        productionState.ResetTimer(team, UnitRole.Mythic);
         return true;
     }
 
@@ -430,17 +414,7 @@ public class GameManager : MonoBehaviour
 
     private static int GetRoleIndex(UnitRole role)
     {
-        for (int i = 0; i < SpawnRoles.Length; i++)
-        {
-            if (SpawnRoles[i] == role) return i;
-        }
-
-        return -1;
-    }
-
-    private float[] GetSpawnTimers(Team team)
-    {
-        return team == Team.Left ? leftUnitSpawnTimers : rightUnitSpawnTimers;
+        return ProductionStateController.GetRoleIndex(role);
     }
 
     private void UpdateGlobalSpawns()
@@ -454,26 +428,23 @@ public class GameManager : MonoBehaviour
         TrySpawnGlobalUnit(Team.Right);
     }
 
-    private void UpdatePerUnitSpawns(
-        Team team,
-        FactionData factionData,
-        float[] timers,
-        ref int readySpawnIndex)
+    private void UpdatePerUnitSpawns(Team team, FactionData factionData)
     {
         if (factionData == null) return;
 
         for (int i = 0; i < SpawnRoles.Length; i++)
         {
-            if (GetProductionTier(team, SpawnRoles[i]) <= 0)
+            UnitRole role = SpawnRoles[i];
+            if (GetProductionTier(team, role) <= 0)
             {
-                timers[i] = 0f;
+                productionState.ResetTimer(team, role);
                 continue;
             }
 
-            timers[i] += Time.deltaTime;
+            productionState.AdvanceTimer(team, role, Time.deltaTime);
         }
 
-        int scanStartIndex = readySpawnIndex;
+        int scanStartIndex = productionState.GetReadySpawnIndex(team);
         int availableSpawnSlots = GetAvailableSpawnSlots(team);
 
         for (int offset = 0; offset < SpawnRoles.Length; offset++)
@@ -493,9 +464,9 @@ public class GameManager : MonoBehaviour
             }
 
             float roleSpawnInterval = data.SpawnInterval;
-            timers[roleIndex] = Mathf.Min(timers[roleIndex], roleSpawnInterval);
+            productionState.ClampTimer(team, role, roleSpawnInterval);
 
-            if (timers[roleIndex] < roleSpawnInterval)
+            if (productionState.GetTimer(team, role) < roleSpawnInterval)
             {
                 continue;
             }
@@ -505,9 +476,9 @@ public class GameManager : MonoBehaviour
                 continue;
             }
 
-            timers[roleIndex] -= roleSpawnInterval;
+            productionState.ConsumeTimer(team, role, roleSpawnInterval);
             availableSpawnSlots--;
-            readySpawnIndex = (roleIndex + 1) % SpawnRoles.Length;
+            productionState.SetReadySpawnIndex(team, (roleIndex + 1) % SpawnRoles.Length);
         }
     }
 
