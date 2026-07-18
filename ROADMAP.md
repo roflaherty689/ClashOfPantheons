@@ -101,6 +101,7 @@ These checks confirm repository presence only. Their integrated runtime behavior
 - [ ] Representative visual direction
 - [x] Add animated title-screen background presentation using buildings and non-interactive units; this was pulled forward and completed during the Prototype milestone.
 - [ ] Representative audio and feedback
+- [x] Pull forward an initial prototype SFX layer for UI, economy, production, combat, healing, strongholds, and match results; representative final mixing, controls, and Play Mode review remain part of this milestone's audio outcome.
 - [ ] Stable UI flow
 - [ ] Initial accessibility support
 - [ ] Core systems integrated

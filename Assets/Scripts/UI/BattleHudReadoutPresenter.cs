@@ -68,6 +68,7 @@ public sealed class BattleHudReadoutPresenter
             : string.Empty;
 
         BindButton(buyWorkerButton, BuyWorker);
+        SoundManager.SuppressGenericClick(buyWorkerButton);
         BindButton(restartButton, Restart);
         SetResultOverlayVisible(false);
     }

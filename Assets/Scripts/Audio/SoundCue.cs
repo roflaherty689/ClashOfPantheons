@@ -1,0 +1,19 @@
+public enum SoundCue
+{
+    UiClick,
+    UiReject,
+    Purchase,
+    WorkerDeposit,
+    UnitSpawn,
+    MeleeAttack,
+    RangedAttack,
+    SiegeAttack,
+    MythicAttack,
+    UnitDeath,
+    Heal,
+    StrongholdHit,
+    StrongholdDestroyed,
+    Victory,
+    Defeat,
+    Draw
+}

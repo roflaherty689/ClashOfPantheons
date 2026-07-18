@@ -92,7 +92,10 @@ public class BattleEconomyUI : MonoBehaviour
 
     private void BuyWorker()
     {
-        workerManager?.TryBuyWorker();
+        if (workerManager == null || !workerManager.TryBuyWorker())
+        {
+            SoundManager.Play(SoundCue.UiReject);
+        }
         Refresh();
     }
 
@@ -106,7 +109,10 @@ public class BattleEconomyUI : MonoBehaviour
             return;
         }
 
-        gameManager?.TryPurchaseProduction(playerTeam, role, workerManager);
+        if (gameManager == null || !gameManager.TryPurchaseProduction(playerTeam, role, workerManager))
+        {
+            SoundManager.Play(SoundCue.UiReject);
+        }
         Refresh();
     }
 

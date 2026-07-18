@@ -307,6 +307,7 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         float finalDamage = unitData.GetDamageAgainst(target.TargetType, targetRole) * statMultiplier;
 
         PlayAttackAnimation();
+        SoundManager.PlayAt(GetAttackSound(), transform.position);
 
         if (usesProjectile)
         {
@@ -369,8 +370,20 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable
         if (currentHealth > 0f) return;
 
         isDead = true;
+        SoundManager.PlayAt(SoundCue.UnitDeath, transform.position);
         gameManager?.RegisterUnitDeath(team, role, unitData.Cost);
         Destroy(gameObject);
+    }
+
+    private SoundCue GetAttackSound()
+    {
+        return role switch
+        {
+            UnitRole.Archer => SoundCue.RangedAttack,
+            UnitRole.Siege => SoundCue.SiegeAttack,
+            UnitRole.Mythic => SoundCue.MythicAttack,
+            _ => SoundCue.MeleeAttack
+        };
     }
 
     public float ReceiveHealing(float amount)

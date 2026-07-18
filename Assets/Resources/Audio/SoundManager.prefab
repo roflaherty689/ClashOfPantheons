@@ -1,0 +1,144 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1236464976142500139
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1303441273126195085}
+  - component: {fileID: 4704090160991743688}
+  m_Layer: 0
+  m_Name: SoundManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1303441273126195085
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1236464976142500139}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4704090160991743688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1236464976142500139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc955ae585d65304b94054be057726bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SoundManager
+  cues:
+  - cue: 0
+    clip: {fileID: 8300000, guid: eab56dda595ce1545a7ec242e1136223, type: 3}
+    volume: 0.35
+    cooldown: 0.04
+    spatialBlend: 0
+    pitchVariation: 0.04
+  - cue: 1
+    clip: {fileID: 8300000, guid: 48fcda5e4d8ba7e45a3e02c541437a1f, type: 3}
+    volume: 0.4
+    cooldown: 0.2
+    spatialBlend: 0
+    pitchVariation: 0.01
+  - cue: 2
+    clip: {fileID: 8300000, guid: df61d7365757bdb499c1f591b708788c, type: 3}
+    volume: 0.55
+    cooldown: 0.08
+    spatialBlend: 0
+    pitchVariation: 0.04
+  - cue: 3
+    clip: {fileID: 8300000, guid: 3f429d703a2d4704e88a3aa5750502c8, type: 3}
+    volume: 0.3
+    cooldown: 0.25
+    spatialBlend: 0.25
+    pitchVariation: 0.06
+  - cue: 4
+    clip: {fileID: 8300000, guid: f4587d2a644c52b4c9b2bca5ef0e5f69, type: 3}
+    volume: 0.25
+    cooldown: 0.18
+    spatialBlend: 0.35
+    pitchVariation: 0.08
+  - cue: 5
+    clip: {fileID: 8300000, guid: 03999c50e76023f4a8528c35597876ba, type: 3}
+    volume: 0.28
+    cooldown: 0.11
+    spatialBlend: 0.45
+    pitchVariation: 0.08
+  - cue: 6
+    clip: {fileID: 8300000, guid: 65259e70eb5e3044bb99da97f9f1d533, type: 3}
+    volume: 0.25
+    cooldown: 0.12
+    spatialBlend: 0.45
+    pitchVariation: 0.08
+  - cue: 7
+    clip: {fileID: 8300000, guid: e9323b287a5a804419ae583518c49fa0, type: 3}
+    volume: 0.4
+    cooldown: 0.22
+    spatialBlend: 0.5
+    pitchVariation: 0.05
+  - cue: 8
+    clip: {fileID: 8300000, guid: 7d458652b93fd8b41b5c76d3d1bd7220, type: 3}
+    volume: 0.36
+    cooldown: 0.14
+    spatialBlend: 0.5
+    pitchVariation: 0.08
+  - cue: 9
+    clip: {fileID: 8300000, guid: c4aac6aa7376fd047bbbd78fa6d7e697, type: 3}
+    volume: 0.26
+    cooldown: 0.1
+    spatialBlend: 0.45
+    pitchVariation: 0.1
+  - cue: 10
+    clip: {fileID: 8300000, guid: f930783c70502584a875182164fc8113, type: 3}
+    volume: 0.4
+    cooldown: 0.2
+    spatialBlend: 0.4
+    pitchVariation: 0.04
+  - cue: 11
+    clip: {fileID: 8300000, guid: c8b99ebab0dbb1748afebb52ef5c7fd2, type: 3}
+    volume: 0.55
+    cooldown: 0.12
+    spatialBlend: 0.5
+    pitchVariation: 0.04
+  - cue: 12
+    clip: {fileID: 8300000, guid: 5ee4fbef1a0f1e34a89fcc67b37f11b7, type: 3}
+    volume: 0.7
+    cooldown: 0.5
+    spatialBlend: 0.5
+    pitchVariation: 0.03
+  - cue: 13
+    clip: {fileID: 8300000, guid: 4f518b92c1d1ac04d88a19c7a53a9ff1, type: 3}
+    volume: 0.75
+    cooldown: 0.5
+    spatialBlend: 0
+    pitchVariation: 0
+  - cue: 14
+    clip: {fileID: 8300000, guid: 258bb72da5027844baacc723f7a0ac5e, type: 3}
+    volume: 0.7
+    cooldown: 0.5
+    spatialBlend: 0
+    pitchVariation: 0
+  - cue: 15
+    clip: {fileID: 8300000, guid: b8b049d3fd3fe6346a2486ac8a039b6b, type: 3}
+    volume: 0.65
+    cooldown: 0.5
+    spatialBlend: 0
+    pitchVariation: 0
+  masterVolume: 0.8

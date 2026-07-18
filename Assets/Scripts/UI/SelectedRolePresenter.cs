@@ -54,6 +54,7 @@ public sealed class SelectedRolePresenter
             }
 
             actionButton.onClick.AddListener(PurchaseSelectedRole);
+            SoundManager.SuppressGenericClick(actionButton);
         }
     }
 

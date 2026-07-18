@@ -148,7 +148,9 @@ The functional prototype HUD must communicate gold, worker purchase state, indep
 
 Use the colourful, humorous Tiny Swords pixel-art style as the prototype direction. Replacement or supplementary art should preserve that tone while using iconic mythological or cultural details where useful; strict historical accuracy is not the goal. Five mechanically identical Tiny Swords team-colour variants (black, blue, purple, red, and yellow) are available for prototype presentation. Each variant owns matching Castle and House3 hand-in sprites, an animated worker prefab, and animated melee/archer prefabs; cavalry, siege, and mythic remain shared. The selected faction drives its world presentation, HUD stronghold icon, and spawned worker colour. These palette variants are not five designed mythological factions. Final art and broad faction production remain deferred.
 
-No project-specific audio system or direction is implemented. Music/SFX controls and audio content are later work.
+**Implemented in source, pending Play Mode mix review:** A persistent project-owned SFX service provides an initial feedback layer using the imported 400 Sounds Pack. It covers menu/UI input, purchases and rejections, worker deposits, unit spawning, role-aware attacks, deaths, monk healing, stronghold damage/destruction, and victory/defeat/draw. Repeated battlefield cues use category cooldowns, limited simultaneous voices, modest pitch variation, and partial spatial blending to preserve readability during large clashes.
+
+The supplied pack does not provide a suitable continuous music direction, so background music remains unimplemented. Player-facing music/SFX volume controls, mixer groups, final clip selection, and a full Play Mode mix/accessibility review remain later work.
 
 The title screen should eventually use the same colourful Tiny Swords presentation, with decorative buildings and units moving across its background. This animated background is presentation polish after the functional title and faction-selection flow; it must not own or mutate battle simulation state.
 

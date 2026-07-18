@@ -82,10 +82,12 @@ public class Base : MonoBehaviour, IDamageable
         currentHealth = Mathf.Max(0f, currentHealth - damage);
 
         PlayDamageAnimation();
+        SoundManager.PlayAt(SoundCue.StrongholdHit, transform.position);
 
         if (currentHealth > 0f) return;
 
         isDestroyed = true;
+        SoundManager.PlayAt(SoundCue.StrongholdDestroyed, transform.position);
         Team winningTeam = team == Team.Left ? Team.Right : Team.Left;
         gameManager?.EndGame(winningTeam);
     }

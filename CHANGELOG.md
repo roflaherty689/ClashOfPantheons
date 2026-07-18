@@ -8,6 +8,8 @@ Git history remains the exact implementation record.
 
 ### Added
 
+- An initial 16-cue SFX layer sourced from the imported 400 Sounds Pack, covering UI input and rejection, purchases, worker deposits, spawning, role-aware combat, deaths, healing, stronghold feedback, and victory/defeat/draw results.
+- A persistent, scene-independent sound service with limited voices, per-cue cooldowns, spatial blending, pitch variation, and an Editor builder that retains direct references to the source pack without duplicating clips.
 - A guarded Unity Editor migration for removing the isolated legacy battle `Canvas/Canvas/VictoryText` hierarchy and normalizing the active HUD root scale.
 - A guarded Unity Editor migration for converting the mirrored battle gold nodes to a shared prefab while retaining side transforms, internal mine points, and worker-economy references.
 - User-verified both worker loops after the battle gold nodes were converted to shared prefab instances.

@@ -168,6 +168,7 @@ public sealed class MythicPickerController
             MythicArtworkPresenter.GetUnitSprite(prefab);
         CreateAvatar(choice.transform, avatar);
         choice.onClick.AddListener(() => Purchase(prefab));
+        SoundManager.SuppressGenericClick(choice);
         choiceBindings.Add(new ChoiceBinding { Prefab = prefab, Button = choice });
     }
 
@@ -176,6 +177,7 @@ public sealed class MythicPickerController
         if (gameManager == null ||
             !gameManager.TrySelectAndPurchaseMythic(playerTeam, prefab, workerManager))
         {
+            SoundManager.Play(SoundCue.UiReject);
             return;
         }
 

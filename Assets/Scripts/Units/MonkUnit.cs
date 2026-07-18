@@ -51,6 +51,7 @@ public class MonkUnit : BaseUnit
         }
 
         PlayAttackAnimation();
+        SoundManager.PlayAt(SoundCue.Heal, target.transform.position);
         SpawnHealEffect(target);
         return true;
     }

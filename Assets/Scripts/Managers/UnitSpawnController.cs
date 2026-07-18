@@ -108,6 +108,7 @@ public sealed class UnitSpawnController : IProductionSpawnContext
 
         BaseUnit instance = Object.Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
         instance.Initialize(team, targetPoint, role, productionTier);
+        SoundManager.PlayAt(SoundCue.UnitSpawn, spawnPoint.position);
         return true;
     }
 

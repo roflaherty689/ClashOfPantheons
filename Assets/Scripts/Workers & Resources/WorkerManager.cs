@@ -93,6 +93,7 @@ public class WorkerManager : MonoBehaviour
         if (!TrySpawnWorker()) return false;
 
         currentGold -= cost;
+        if (team == Team.Left) SoundManager.Play(SoundCue.Purchase);
 
         return true;
     }
@@ -116,6 +117,7 @@ public class WorkerManager : MonoBehaviour
     public void DepositWorkerGold()
     {
         AddGold(GoldPerWorkerTrip);
+        if (team == Team.Left) SoundManager.PlayAt(SoundCue.WorkerDeposit, dropOffPoint.position);
     }
 
     internal void UnregisterWorker(WorkerUnit worker)

@@ -169,6 +169,7 @@ public sealed class ProductionCardPresenter
             UnitRole role = binding.Role;
             binding.PurchaseAction = () => purchaseRequested?.Invoke(role);
             binding.Button.onClick.AddListener(binding.PurchaseAction);
+            SoundManager.SuppressGenericClick(binding.Button);
         }
     }
 

@@ -130,6 +130,7 @@ public class GameManager : MonoBehaviour
     public void EndGame(Team winningTeam)
     {
         matchState.CompleteWithWinner(winningTeam, MatchEndReason.StrongholdDestroyed);
+        SoundManager.Play(winningTeam == Team.Left ? SoundCue.Victory : SoundCue.Defeat);
     }
 
     public void RegisterUnitDeath(Team team, UnitRole role, int unitCost)
@@ -193,6 +194,7 @@ public class GameManager : MonoBehaviour
         if (!economy.TrySpendGold(data.Cost)) return false;
 
         productionState.SetTier(team, role, nextTier);
+        if (team == Team.Left) SoundManager.Play(SoundCue.Purchase);
 
         if (nextTier == 1)
         {
@@ -248,6 +250,7 @@ public class GameManager : MonoBehaviour
         productionState.SetSelectedMythic(team, prefab);
         productionState.SetTier(team, UnitRole.Mythic, nextTier);
         productionState.ResetTimer(team, UnitRole.Mythic);
+        if (team == Team.Left) SoundManager.Play(SoundCue.Purchase);
         return true;
     }
 
@@ -281,10 +284,12 @@ public class GameManager : MonoBehaviour
         if (result.HasWinner)
         {
             matchState.CompleteWithWinner(result.Winner, result.Reason);
+            SoundManager.Play(result.Winner == Team.Left ? SoundCue.Victory : SoundCue.Defeat);
             return;
         }
 
         matchState.CompleteDraw(result.Reason);
+        SoundManager.Play(SoundCue.Draw);
     }
 
     private void ResolveBases()
