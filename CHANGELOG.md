@@ -115,6 +115,7 @@ Git history remains the exact implementation record.
 
 ### Technical
 
+- Consolidated mythic avatars, fallback sprites, display names, parchment, crossed-swords construction, visibility, and tinting into one shared artwork presenter; the user verified card, selected-role, picker, and restart presentation in Play Mode.
 - Extracted selected-role icon, title, status, tier, description, affordability, action text, and action-button ownership from `BattleEconomyUI`; the user verified the complete selected-role interaction in Play Mode.
 - Extracted the five production cards' bindings, hover/tap routing, affordability, tier/action text, mythic artwork, purchase listeners, and cleanup from `BattleEconomyUI`; the user verified the complete card behavior in Play Mode.
 - Extracted runtime mythic-picker construction, ordering, affordability, purchase routing, and cleanup from `BattleEconomyUI` into a focused controller; the user verified the complete picker interaction in Play Mode.

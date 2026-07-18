@@ -144,14 +144,17 @@ public sealed class MythicPickerController
             int costComparison = left.UnitData.Cost.CompareTo(right.UnitData.Cost);
             return costComparison != 0
                 ? costComparison
-                : string.Compare(GetDisplayName(left), GetDisplayName(right), StringComparison.Ordinal);
+                : string.Compare(
+                    MythicArtworkPresenter.GetDisplayName(left),
+                    MythicArtworkPresenter.GetDisplayName(right),
+                    StringComparison.Ordinal);
         });
         return orderedMythics;
     }
 
     private void CreateChoice(Transform parent, Vector2 size, BaseUnit prefab)
     {
-        string displayName = GetDisplayName(prefab);
+        string displayName = MythicArtworkPresenter.GetDisplayName(prefab);
         Button choice = CreateButton(parent, displayName, size);
         TextMeshProUGUI label = choice.GetComponentInChildren<TextMeshProUGUI>();
         label.text = $"{displayName}\n{prefab.UnitData.Cost} GOLD";
@@ -161,7 +164,8 @@ public sealed class MythicPickerController
         labelRect.anchoredPosition = new Vector2(25f, 0f);
         labelRect.sizeDelta = new Vector2(128f, 52f);
 
-        Sprite avatar = gameManager.MythicUnitRoster.GetAvatar(prefab) ?? GetUnitSprite(prefab);
+        Sprite avatar = gameManager.MythicUnitRoster.GetAvatar(prefab) ??
+            MythicArtworkPresenter.GetUnitSprite(prefab);
         CreateAvatar(choice.transform, avatar);
         choice.onClick.AddListener(() => Purchase(prefab));
         choiceBindings.Add(new ChoiceBinding { Prefab = prefab, Button = choice });
@@ -240,23 +244,4 @@ public sealed class MythicPickerController
         return rect;
     }
 
-    private static Sprite GetUnitSprite(BaseUnit prefab)
-    {
-        SpriteRenderer renderer = prefab != null
-            ? prefab.GetComponentInChildren<SpriteRenderer>(true)
-            : null;
-        return renderer != null ? renderer.sprite : null;
-    }
-
-    private static string GetDisplayName(BaseUnit prefab)
-    {
-        if (prefab == null) return "Unknown";
-
-        return prefab.name
-            .Replace("MythicUnit", string.Empty)
-            .Replace("MeleeMythicAnimatedUnit", "Minotaur")
-            .Replace("MonkUnit", " Monk")
-            .Replace("Fish", " Fish")
-            .Trim();
-    }
 }
