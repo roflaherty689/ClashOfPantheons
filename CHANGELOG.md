@@ -115,6 +115,7 @@ Git history remains the exact implementation record.
 
 ### Technical
 
+- Extracted selected-role icon, title, status, tier, description, affordability, action text, and action-button ownership from `BattleEconomyUI`; the user verified the complete selected-role interaction in Play Mode.
 - Extracted the five production cards' bindings, hover/tap routing, affordability, tier/action text, mythic artwork, purchase listeners, and cleanup from `BattleEconomyUI`; the user verified the complete card behavior in Play Mode.
 - Extracted runtime mythic-picker construction, ordering, affordability, purchase routing, and cleanup from `BattleEconomyUI` into a focused controller; the user verified the complete picker interaction in Play Mode.
 - Moved battle countdown formatting into the tested Core presentation rules; all 38 Core Edit Mode cases passed in Unity, including clamping and minute-boundary behavior.
