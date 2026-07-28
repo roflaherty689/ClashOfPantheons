@@ -35,6 +35,7 @@ Do not record trivial implementation details.
 | DEC-014 | Same-rule enemy AI and three difficulties | Accepted | 2026-07-17 |
 | DEC-015 | First-pass combat scale and role counters | Accepted | 2026-07-17 |
 | DEC-016 | Remove legacy meme factions | Accepted | 2026-07-28 |
+| DEC-017 | In-game menu enters Prototype scope | Accepted | 2026-07-28 |
 
 ---
 
@@ -645,6 +646,42 @@ Deleting the unused faction data and all internally linked content removes obsol
 - `Assets/Prefabs/Units/Factions/MemeTeam2`
 - `TODO.md` — removal evidence and Unity smoke verification
 - `CHANGELOG.md` — Unreleased / Removed
+
+---
+
+## DEC-017 — In-game menu enters Prototype scope
+
+**Date:** 2026-07-28
+**Status:** Accepted
+
+### Decision
+
+Add an in-game menu to the battle flow as required Prototype work.
+
+### Context
+
+After several successful end-to-end matches, the user identified the missing in-game menu as the remaining functional player-flow gap outside balance and later audio refinement.
+
+### Rationale
+
+A player must be able to interrupt or leave an active solo match without relying on the result screen or closing the application.
+
+### Consequences
+
+- `TODO.md` tracks a minimal in-game menu as P1 work.
+- The exact action set and pause semantics remain unresolved and must be confirmed before implementation.
+- Settings, audio sliders, save/load, and controller navigation are not implicitly added by this decision.
+
+### Alternatives considered
+
+- Rely only on the result overlay: rejected because it provides no active-match escape path.
+- Add a full settings system now: deferred beyond the minimal menu requirement.
+
+### Related items
+
+- `GAME_DESIGN.md` — UI and feedback; Prototype scope
+- `ROADMAP.md` — Prototype planned outcomes
+- `TODO.md` — Add a minimal in-game menu
 
 ---
 

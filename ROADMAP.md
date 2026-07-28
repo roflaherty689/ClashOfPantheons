@@ -3,7 +3,7 @@
 ## Current milestone
 
 **Milestone:** Prototype  
-**Status:** In progress — critical loop integrated in source; complete validation, tuning, and regression coverage remain
+**Status:** In progress — representative critical loop verified in Play Mode; in-game menu, balance correction, player-build validation, and regression coverage remain
 
 **Primary outcome:** Deliver one complete economy → production → autonomous combat → result → restart match against AI.
 
@@ -17,14 +17,14 @@ Checked entry conditions are based on repository inspection, not a new Unity lau
 
 ### Exit criteria
 
-- [ ] A player can use gold to buy workers, establish independent unit-type production, and buy one-, two-, and three-star upgrades.
+- [x] A player can use gold to buy workers, establish independent unit-type production, and buy one-, two-, and three-star upgrades.
 - [x] An AI opponent makes economy, production, composition, and upgrade decisions under the same match rules.
-- [ ] Units autonomously resolve combat on one shared lane and can destroy either stronghold.
-- [ ] An approximately five-minute timer resolves matches by stronghold health, then lower total value of units lost when health is equal.
-- [ ] The result is clearly presented and a new match can start without Editor intervention.
-- [ ] The functional HUD accurately communicates gold, workers, production, upgrades, time, stronghold health, and result state.
-- [ ] Exact equality after both timeout comparisons produces a draw with no winner or loser.
-- [ ] The project compiles without known blocking errors and the complete critical path is verified in Play Mode.
+- [x] Units autonomously resolve combat on one shared lane and can destroy either stronghold.
+- [x] An approximately five-minute timer resolves matches by stronghold health, then lower total value of units lost when health is equal.
+- [x] The result is clearly presented and a new match can start without Editor intervention.
+- [x] The functional HUD accurately communicates gold, workers, production, upgrades, time, stronghold health, and result state in representative matches.
+- [x] Exact equality after both timeout comparisons produces a draw with no winner or loser.
+- [x] The project compiles without known blocking errors and the complete critical path is verified in Play Mode.
 - [ ] Critical economy, production, and result rules have proportionate automated coverage or documented manual verification where automation is impractical.
 - [ ] Material assumptions and the next milestone's entry conditions are documented.
 
@@ -34,8 +34,9 @@ _No confirmed implementation blocker._
 
 ### Current risks and coverage gaps
 
-- No project-owned automated tests or test assemblies were found during the 2026-07-16 static review.
-- The complete economy → production → combat → result → restart path has not been verified end to end.
+- The existing 38 Core Edit Mode cases cover timeout resolution, result/countdown presentation rules, and tier transitions/scaling, but economy transactions, production scheduling, match integration, and scene flow need proportionate coverage.
+- Several complete Play Mode matches and representative aspect ratios are user-verified, but a packaged player build and targeted edge-case matrix remain.
+- Three-star melee is a reported near-deterministic strategy across all difficulties, while mythics appear too weak for their cost.
 
 ---
 
@@ -51,7 +52,7 @@ _No confirmed implementation blocker._
 - [x] Workers can mine and deposit gold; the player HUD displays live worker economy state and can buy workers up to capacity.
 - [x] Faction data can map roles to faction-specific prefabs.
 - [x] Black, blue, purple, red, and yellow prototype faction assets map colour-specific animated worker, melee, and archer prefabs while sharing cavalry, siege, and mythic.
-- [x] The five prototype colour factions own matching Castle and House3 presentation references consumed by one shared Base prefab and the stronghold HUD; integrated Play Mode verification remains pending.
+- [x] The five prototype colour factions own matching Castle and House3 presentation references consumed by one shared Base prefab and the stronghold HUD; the user exhaustively verified the faction-colour visual combinations in Play Mode.
 - [x] Prototype health, hit, animation, projectile, and victory feedback exists.
 
 These checks confirm repository presence only. Their integrated runtime behavior remains subject to compilation and Play Mode verification.
@@ -59,16 +60,17 @@ These checks confirm repository presence only. Their integrated runtime behavior
 ### Planned outcomes
 
 - [x] Accept `DEC-007`: first purchase unlocks continuous role production; the next two purchases upgrade future spawns to two and three stars.
-- [ ] Complete Play Mode verification of the source-integrated player gold, worker, and independent production paths across all five roles.
+- [x] Complete representative Play Mode verification of the source-integrated player gold, worker, and independent production paths; exhaustive all-role and edge-case coverage remains tracked separately.
 - [x] Implement an AI decision layer that participates in the same economy and production game, with three Play Mode-verified difficulties, same-rule purchasing, and random mythic/opponent selection.
-- [ ] Complete targeted verification of the implemented five-minute timer, stronghold-health comparison, unit-loss-value tiebreaker, result states, and restart/reset flow.
-- [ ] Complete all-role verification of the implemented three star tiers, costs, effects, and production/UI feedback.
+- [x] Complete targeted verification of the implemented five-minute timer, stronghold-health comparison, unit-loss-value tiebreaker, result states, and restart/reset flow.
+- [ ] Correct the dominant three-star melee strategy and establish credible mythic value through controlled balance diagnosis and tuning.
 - [x] Move recurring production cadence ownership from the global spawn interval into each role's `UnitData`; retain per-role cost ownership there. Initial values and selectable spawn patterns were user-verified in Play Mode on 2026-07-16.
-- [ ] Validate the source-integrated functional HUD at representative resolutions and across the complete critical path.
+- [x] Validate the functional HUD at representative resolutions and across the complete critical path in Play Mode.
+- [ ] Add a minimal in-game menu with confirmed pause and navigation behavior.
 - [x] Add a player-facing title -> faction selection -> difficulty selection -> battle flow, verified in Play Mode; player-build coverage remains tracked separately.
-- [ ] Validate role readability and at least one meaningful economy-versus-pressure decision through playtesting.
-- [ ] Playtest the implemented first-pass role counters, differentiated mythic roster, reduced 1x/1.25x/1.5x star curve, and roster/base values across equal-gold, mixed-composition, and tiered matchups; tune from observed five-minute match pacing.
-- [ ] Add focused tests for deterministic economy, production, and result rules, plus a documented Play Mode critical-path check.
+- [x] Validate role readability and at least one meaningful economy-versus-pressure decision through playtesting; balance defects remain tracked separately.
+- [ ] Diagnose and retune the implemented role counters, mythic roster, star curve, and roster/base values across equal-gold, equal-time, mixed-composition, and tiered matchups.
+- [ ] Add focused tests for deterministic economy, production, and result rules; representative Play Mode critical-path verification is complete.
 - [x] Deliver the accepted selectable mythic test roster in sequence: five colour monk healers, reusable animated Enemy Pack melee/ranged prefabs, then a pre-purchase details-pane picker with per-match selection and data-owned balance.
 - [ ] Review the broad initial mythic roster after animation, balance, and counter-selection testing; do not let this expansion displace the AI and complete-match critical path.
 

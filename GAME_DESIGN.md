@@ -16,7 +16,7 @@ This file defines the intended player experience, rules, systems, and scope. **I
 
 **Target audience:** Broad-age strategy players interested in mythology or ancient warfare; exact age rating and audience positioning remain unconfirmed.
 
-**Current stage:** Prototype — the player-facing loop is integrated in source and partially Play Mode verified; complete critical-path, restart, build, and balance validation remain.
+**Current stage:** Late Prototype — the player-facing loop is integrated and the user has completed several clean end-to-end Play Mode matches through result and restart. Player-build validation, targeted regression coverage, an in-game menu, and balance tuning remain.
 
 **Pitch:** Build a mythological war economy, shape an autonomous army, and push along a contested lane to destroy the rival stronghold before time runs out.
 
@@ -24,7 +24,7 @@ This file defines the intended player experience, rules, systems, and scope. **I
 
 The player indirectly commands a mythological faction. They invest in workers, unit production, composition, and upgrades, then watch autonomous forces turn those strategic choices into an escalating push.
 
-There is no direct unit control. The prototype is primarily single-player against AI. The enemy now has a source-implemented strategic purchasing policy; full Play Mode validation remains pending.
+There is no direct unit control. The prototype is primarily single-player against AI. The enemy uses a Play Mode-verified strategic purchasing policy; its balance and resistance to dominant strategies remain under review.
 
 ## Design pillars
 
@@ -62,7 +62,7 @@ There is no direct unit control. The prototype is primarily single-player agains
 3. Workers independently mine and deposit gold.
 4. Destroying a base or reaching the time limit ends the match and displays the result.
 
-The player HUD now presents live economy and stronghold state, a five-minute countdown, timeout results, restart, and production purchasing in source. Both teams start with locked roles and spend their own gold to unlock or upgrade independent tracks. The enemy AI purchasing policy is implemented in source but still needs Play Mode verification and tuning. Production purchasing remains to be broadly Play Mode verified. Countdown expiry and the lost-unit-value timeout resolver were Play Mode verified in a shortened 20-second match on 2026-07-17; the remaining result branches still need targeted verification.
+The player HUD presents live economy and stronghold state, a five-minute countdown, timeout results, restart, and production purchasing. Both teams start with locked roles and spend their own gold to unlock or upgrade independent tracks. The user completed several clean end-to-end Play Mode matches through result and restart by 2026-07-28. Earlier focused verification also covered AI purchasing, production scheduling, timeout branches, match stopping, and reset behavior. Targeted regression automation and a packaged player build remain incomplete.
 
 **Short-loop rhythm:** Worker trips and independent recurring production cadences. Buying a locked role unlocks its continuous production; later purchases advance that role to two and three stars.
 
@@ -105,15 +105,17 @@ Heroes and bosses are not prototype scope.
 
 The first-pass combat scale uses 100 health for one-star melee units and 1,000 health for strongholds. One-star role baselines are tuned together with production cost and cadence. Star tiers scale health, damage, attack rate, range, and movement by 1×/1.25×/1.5×. Because damage and attack rate both scale, effective damage per second becomes 1×/1.5625×/2.25× rather than the previous 1×/2.25×/4×; high-tier pacing still requires targeted playtesting.
 
+**Confirmed balance problem:** The user reports that upgrading a melee production track to three stars wins roughly 99% of matches across Easy, Medium, and Hard, while mythic units feel too weak relative to their cost. This violates the intended composition and counterplay pillar. The next balance pass must separate upgrade-curve strength from AI-policy weakness, compare equal-gold and equal-time throughput, and investigate other dominant or non-viable choices before approving new values.
+
 **Implemented in source, partially Play Mode verified:** A match also ends when the configurable timer expires. The healthier stronghold wins. If health is equal, the side with the lower total value of units lost wins. Lost-unit value is accumulated from the purchase cost of each destroyed unit's production slot, with per-role death counts retained for inspection. If both comparisons are equal, the match is a draw with no winner or loser. Countdown expiry and the lost-value resolver were user-verified in a shortened match on 2026-07-17.
 
-The result overlay identifies victory, defeat, or draw and its resolution condition. Its restart action reloads the active battle scene to reset current runtime state; this path still requires Play Mode verification.
+The result overlay identifies victory, defeat, or draw and its resolution condition. Its restart action reloads the active battle scene to reset current runtime state; representative end-to-end restart behavior is user-verified, while targeted reset regression coverage remains.
 
 ### Economy and production
 
 **Implemented:** Workers repeatedly travel to a gold vein, mine, return, and deposit gold. Starting and maximum worker counts, worker cost, base gold per trip, and a future-facing income-upgrade multiplier are configurable on `WorkerManager`. The player starts with one worker in the active scene, and the live HUD can buy workers up to the five-worker capacity while displaying current gold, worker count, and aggregate income per trip.
 
-**Implemented in source, partially Play Mode verified:** Gold is the only prototype currency. It funds workers, five independent unit-production types, and three star tiers of in-match upgrades for both the player and AI. Favour, essence, and shared-queue presentation are excluded from the functional battle HUD. All-role cadence, insufficient-funds, edge-case, and restart-reset coverage remain incomplete.
+**Implemented and representatively Play Mode verified:** Gold is the only prototype currency. It funds workers, five independent unit-production types, and three star tiers of in-match upgrades for both the player and AI. Favour, essence, and shared-queue presentation are excluded from the functional battle HUD. Deterministic transaction tests, exhaustive all-role coverage, and targeted edge cases remain incomplete.
 
 ### Progression and persistence
 
@@ -129,26 +131,30 @@ Campaign and persistent progression are deferred beyond the core prototype. No s
 - **Opponent:** Single-player against AI.
 - **Target length:** Approximately five minutes.
 - **Transitions:** Implemented in source: title, player-faction selection, difficulty selection, then battle. Difficulty defaults to Easy; the opponent randomly receives a different configured faction.
-- **Replay:** Active-scene restart is implemented in source and exposed by the result HUD; complete reset behavior still requires targeted Play Mode verification. A distinct rematch flow is not implemented.
+- **Replay:** Active-scene restart is implemented, exposed by the result HUD, and representatively verified through complete matches; targeted reset regression coverage remains. A distinct rematch flow is not implemented.
 - **Later possibilities:** Alternative maps, lane structures, or endless mode may be reconsidered after prototype validation.
 
 ## AI and difficulty
 
-The AI uses the same worker, gold-spending, production, tier, mythic-selection, spawn, and match rules as the player. Easy makes slower, partly idle/random decisions and receives no starting bonus. Medium establishes production before each early worker investment, then balances workers with varied production at a moderate cadence, and receives +50 starting gold. Hard makes faster decisions, requires a broader military opening before expanding its economy, and receives +150 starting gold. The bonus applies once to the enemy only. The AI randomly chooses a valid mythic and a configured faction other than the player's faction. This system is implemented in source and awaits full Play Mode tuning and verification. Online matchmaking remains deferred.
+The AI uses the same worker, gold-spending, production, tier, mythic-selection, spawn, and match rules as the player. Easy makes slower, partly idle/random decisions and receives no starting bonus. Medium establishes production before each early worker investment, then balances workers with varied production at a moderate cadence, and receives +50 starting gold. Hard makes faster decisions, requires a broader military opening before expanding its economy, and receives +150 starting gold. The bonus applies once to the enemy only. The AI randomly chooses a valid mythic and a configured faction other than the player's faction. This system is representatively Play Mode verified, but the three-star melee dominance report shows that difficulty and purchasing policy require balance diagnosis. Online matchmaking remains deferred.
 
 ## UI and feedback
 
 **Implemented:** Units display world-space damage health bars. Stronghold health is shown as live current/maximum text and proportional bars in the battle HUD, without duplicate world-space bars above the bases. Base hits shake the base visual; animated attacks and projectile arcs provide combat feedback; victory text identifies the winning team.
 
-**Partially implemented:** The redesigned scene HUD presents the accepted single-gold economy and independent role cards. Its player gold, aggregate worker income, worker count, buy-worker button, five production purchase controls, locked/producing and tier states, affordability, greyed locked art, both stronghold-health displays, match timer, result overlay, resolution reason, and restart button are live in source. Production purchasing requires Play Mode verification. The shortened countdown and lost-value result were Play Mode verified on 2026-07-17; the other result and restart paths remain targeted verification work.
+**Implemented and representatively Play Mode verified:** The redesigned scene HUD presents the accepted single-gold economy and independent role cards. Its player gold, aggregate worker income, worker count, buy-worker button, five production purchase controls, locked/producing and tier states, affordability, greyed locked art, both stronghold-health displays, match timer, result overlay, resolution reason, and restart button are live. Focused presenter verification and several complete matches cover the representative flow; the user confirmed readability at the tested aspect ratios. Targeted edge-case regression remains.
 
-The functional prototype HUD must communicate gold, worker purchase state, independent production, star tiers, remaining time, base health, and the final result. A results/restart flow is required. The accepted initial front-end flow is a title screen with Play and Exit, then a faction-selection screen whose clickable options are generated from configured `FactionData` assets. The chosen player faction must drive the existing faction-owned battle presentation and unit mappings. Basic onboarding and most feedback remain unimplemented.
+The functional prototype HUD must communicate gold, worker purchase state, independent production, star tiers, remaining time, base health, and the final result. A results/restart flow is required. The accepted initial front-end flow is a title screen with Play and Exit, then a faction-selection screen whose clickable options are generated from configured `FactionData` assets. The chosen player faction must drive the existing faction-owned battle presentation and unit mappings. An in-game menu is now accepted scope; its exact actions and pause semantics remain to be finalized before implementation. Basic onboarding and most feedback remain unimplemented.
+
+The implemented front-end menu comprises title, faction selection, and difficulty selection. The accepted active-match in-game menu is a separate, not-yet-implemented feature.
+
+Unit health bars are faction-neutral: a black backing contains a health-state fill that moves from red through yellow to green and is hidden at full health. Stronghold HUD bars use fixed player-side blue and opponent-side red fills, supplemented by current/maximum text and proportional fill length. No five-faction health-bar permutation is currently intended.
 
 ## Audio and visual direction
 
 Use the colourful, humorous Tiny Swords pixel-art style as the prototype direction. Replacement or supplementary art should preserve that tone while using iconic mythological or cultural details where useful; strict historical accuracy is not the goal. Five mechanically identical Tiny Swords team-colour variants (black, blue, purple, red, and yellow) are available for prototype presentation. Each variant owns matching Castle and House3 hand-in sprites, an animated worker prefab, and animated melee/archer prefabs; cavalry, siege, and mythic remain shared. The selected faction drives its world presentation, HUD stronghold icon, and spawned worker colour. These palette variants are not five designed mythological factions. Final art and broad faction production remain deferred.
 
-**Implemented in source, pending Play Mode mix review:** A persistent project-owned SFX service provides an initial feedback layer using the imported 400 Sounds Pack. It covers menu/UI input, purchases and rejections, worker deposits, unit spawning, role-aware attacks, deaths, monk healing, stronghold damage/destruction, and victory/defeat/draw. Repeated battlefield cues use category cooldowns, limited simultaneous voices, modest pitch variation, and partial spatial blending to preserve readability during large clashes.
+**Implemented and accepted as a prototype first pass:** A persistent project-owned SFX service provides an initial feedback layer using the imported 400 Sounds Pack. It covers menu/UI input, purchases and rejections, worker deposits, unit spawning, role-aware attacks, deaths, monk healing, stronghold damage/destruction, and victory/defeat/draw. Repeated battlefield cues use category cooldowns, limited simultaneous voices, modest pitch variation, and partial spatial blending to preserve readability during large clashes. Sound-level and cue-selection refinements remain for a later audio pass.
 
 The supplied pack does not provide a suitable continuous music direction, so background music remains unimplemented. Player-facing music/SFX volume controls, mixer groups, final clip selection, and a full Play Mode mix/accessibility review remain later work.
 
@@ -172,6 +178,7 @@ The title screen should eventually use the same colourful Tiny Swords presentati
 - Meaningful economy-versus-pressure and composition decisions.
 - Approximately five-minute matches with base-destruction and timeout results.
 - Minimal functional HUD and clear feedback.
+- A minimal in-game menu for leaving or restarting a match and returning to play.
 - Play Mode verification of the critical path.
 
 ### Should have

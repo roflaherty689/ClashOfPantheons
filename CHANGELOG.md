@@ -121,6 +121,9 @@ Git history remains the exact implementation record.
 
 ### Technical
 
+- User verified several complete end-to-end Play Mode matches through result and restart.
+- User accepted the current SFX layer as a prototype first pass; sound-level and cue-selection refinement remains later work.
+- User confirmed meaningful strategic choices, readable existing menus/HUD across the tested aspect ratios, and exhaustive faction-colour visual combinations on both team sides.
 - Added focused Unity Profiler markers around unit target acquisition, friendly separation, monk ally/enemy searches, and production capacity scans so a representative 60-versus-60 capture can guide any allocation or registry changes.
 - Retained the current physics-query and unit-count architecture after the user judged representative prototype performance sufficient; the new markers remain available for regression investigation.
 - Replaced runtime production-card hierarchy-name lookups with serialized `ProductionCardView` bindings, updated the HUD builder to author them, and added a guarded migration for the five existing scene cards.
@@ -169,12 +172,11 @@ Git history remains the exact implementation record.
 
 ### Known Issues
 
-- Recurring production cadence across all five roles, insufficient-funds behavior, revised tier scaling/counters, and restart reset require broader Play Mode verification. Representative AI purchasing, all three difficulty selections and bonuses, and opening behavior were already user-verified.
-- Health-tiebreak, exact-draw, base-destruction result-overlay, and restart-reset paths still require targeted Play Mode verification.
-- Exact role values and matchups remain subject to implementation and playtest tuning.
+- Three-star melee is reported to win roughly 99% of matches across Easy, Medium, and Hard; upgrades are too strong and mythics are too weak relative to their cost. Controlled diagnosis and retuning are required.
+- The representative full loop and tested aspect ratios are user-verified, but a packaged player build and proportional automated coverage for economy, production scheduling, and match integration remain.
 - Targeted projectile/worker edge cases and stale serialized fields on the non-animated archer prefab remain to be verified or cleaned.
-- Shared cavalry, siege, and mythic spawning and both-team faction switching still require Play Mode verification across the five team-colour faction assets.
-- Faction-driven Castle, House3 hand-in, HUD icon, worker-deposit, base-damage, and restart behavior still require complete Play Mode verification across both team sides.
+- Shared cavalry, siege, and mythic spawning retain targeted behavioral regression gaps despite exhaustive faction-colour visual verification.
+- Stronghold health fills use fixed team-side colours rather than faction colours; the later health-bar frame pass should confirm whether that convention remains.
 
 ---
 

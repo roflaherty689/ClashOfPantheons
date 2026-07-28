@@ -51,16 +51,16 @@ Tasks are ordered by dependency and prototype value.
 - [x] Favourable matchups apply a 1.2× damage multiplier.
 - [x] Star tiers multiply every configured unit stat except purchase cost by 1×/1.25×/1.5× and affect future spawns only.
 - [x] Each `UnitData` asset owns that role's purchase cost and recurring production cadence; the global spawn interval no longer defines all roles.
-- [ ] Production stops correctly when the match ends and resets correctly for a new match.
-- [ ] Costs, failed purchases, and production state are visibly communicated.
+- [x] Production stops correctly when the match ends and resets correctly for a new match in representative Play Mode verification.
+- [x] Costs, failed purchases, and production state are visibly communicated in representative Play Mode verification.
 - [ ] Deterministic economy and production rules have focused automated tests where practical.
-- [ ] Compilation and relevant Play Mode paths are verified.
+- [x] Compilation and representative Play Mode paths are verified.
 
 **Relevant systems:** `WorkerManager`, `GameManager`, `UnitData`, faction data, battle UI, scene wiring
 
 **Dependencies:** `DEC-004` and `DEC-007`; initial values require balance tuning during implementation
 
-**Progress:** `UnitData` owns each role's cost and cadence. Player production purchasing is now implemented in source: all roles begin locked, a successful purchase atomically spends player gold, the first purchase starts that role's fresh recurring timer, the next two purchases snapshot 1.25×/1.5× stats onto future units, and a fourth purchase is rejected. The implemented counter triangle applies 1.2× favourable damage for melee against cavalry, archers against melee, and cavalry against archers. The five production cards show live locked/producing state, tier, unlock/upgrade/max actions, affordability, and greyed locked art; the selected-role panel mirrors the chosen role. The user Play Mode verified clickable production controls, successful melee unlock/upgrade processing through the three-purchase cap, and live 0/3 → 1/3 → 2/3 → 3/3 tier-counter updates on 2026-07-17, and accepted the revised curve and counter implementation on 2026-07-17. The completed AI task now purchases and runs enemy production through the same APIs. Runtime and Editor assemblies compile externally with zero warnings and errors. Recurring spawn cadence, revised stat scaling, matchup behavior, insufficient-funds behavior, all five roles, and restart reset still require targeted Play Mode verification; focused automated tests remain absent.
+**Progress:** `UnitData` owns each role's cost and cadence. Player production purchasing uses atomic spending, fresh unlock timers, future-spawn tier snapshots, and a three-purchase cap. The production cards and selected-role panel communicate live state and affordability. Verification commits record cadence, simultaneous readiness, cap resume, failures, match-end stopping, and restart behavior; the user has also completed several clean end-to-end matches. Existing Core tests cover tier transitions/scaling, but focused economy transactions and production scheduling tests remain. Balance is not accepted: the user reports three-star melee wins roughly 99% across all difficulties and mythics are too weak for their cost.
 
 **Status:** Partially implemented
 
@@ -98,17 +98,17 @@ Tasks are ordered by dependency and prototype value.
 - [x] Lost value uses production-slot purchase cost multiplied by the number of that unit type destroyed.
 - [x] Exact equality after both timeout comparisons produces a draw with no winner or loser.
 - [x] Result UI identifies the winner and resolution reason.
-- [ ] Restart resets time, gold, workers, production, upgrades, units, AI, strongholds, and UI.
-- [ ] Base-destruction, health-tiebreak, value-tiebreak, and exact-equality behavior have tests or explicit verification cases.
-- [ ] Compilation and full Play Mode result/restart paths are verified.
+- [x] Restart resets time, gold, workers, production, upgrades, units, AI, strongholds, and UI in representative Play Mode verification.
+- [x] Base-destruction, health-tiebreak, value-tiebreak, and exact-equality behavior have tests or explicit verification cases.
+- [x] Compilation and representative full Play Mode result/restart paths are verified.
 
 **Relevant systems:** `GameManager`, `Base`, `BaseUnit`, economy/production, result UI
 
 **Dependencies:** Tasks 1–2
 
-**Progress:** `GameManager` now owns a configurable 300-second countdown, typed match-end reasons, per-team/per-role death counts, total purchase-value losses, and active-scene reload restart. Deterministic timeout comparison has been extracted into the engine-independent `MatchResultResolver`, with Edit Mode characterization tests for both health winners, both lost-value winners, and exact draws. All five Edit Mode cases passed in Unity on 2026-07-18. Lethal unit damage records the destroyed unit's production-slot cost exactly once. The battle HUD shows live remaining time, player-relative victory/defeat/draw state, the resolution reason, loss totals for value tiebreaks, and a functional restart action in source. Runtime and Editor assemblies previously compiled externally with zero warnings and errors. The user Play Mode verified countdown expiry and correct lost-gold resolution with a shortened 20-second match on 2026-07-17. Targeted Play Mode coverage of base destruction, the health-tiebreak presentation, exact-draw presentation, overlay input, and complete reset behavior remains required, so this task is not complete.
+**Progress:** `MatchStateController` owns the configurable countdown, terminal state, death counts, and lost-unit values. Core Edit Mode cases cover both health winners, both lost-value winners, exact draws, and result/countdown presentation. Commit `26db1b4` records user verification of base destruction, every timeout outcome, post-game immutability, system stopping, result presentation, and restart reset. The user subsequently completed several clean end-to-end matches through result and restart. Additional automation for controller integration remains follow-up coverage rather than a blocker to representative loop validation.
 
-**Status:** Partially implemented
+**Status:** Complete
 
 ### 4. Replace the static HUD with a functional prototype HUD and validate the loop
 
@@ -119,15 +119,15 @@ Tasks are ordered by dependency and prototype value.
 - [x] HUD shows live gold, workers, five independent production states, star tiers, timer, both stronghold health values, and results in source; complete-loop and multi-resolution verification remain below.
 - [x] Favour, essence, and shared FIFO queue presentation are removed or clearly excluded from the functional prototype UI.
 - [ ] Player purchase and upgrade controls provide success, failure, affordability, and cooldown/cadence feedback.
-- [ ] Critical state does not rely on red/blue colour alone and text is readable at the chosen prototype resolution.
-- [ ] At least one complete economy → production → combat → result → restart match is verified in Play Mode.
-- [ ] Playtesting confirms at least one meaningful economy-versus-pressure choice and identifies required balance follow-up separately.
+- [x] Critical state does not rely on red/blue colour alone and text is readable at the chosen prototype resolutions.
+- [x] At least one complete economy → production → combat → result → restart match is verified in Play Mode.
+- [x] Playtesting confirms meaningful strategic choices and identifies the dominant three-star melee and weak-mythic balance follow-up separately.
 
 **Relevant systems:** battle HUD, UI bindings, safe area, all critical-loop systems
 
 **Dependencies:** Tasks 1–3
 
-**Progress:** The editor-authored battle HUD has been redesigned around the accepted Tiny Swords direction. Gold, workers, both strongholds, timer, results, restart, and all five independent production cards are now bound in source. Production cards display live locked/producing state, tier, affordability, greyed locked art, and unlock/upgrade/max actions; the selected-role panel follows the last production card hovered over, clicked, tapped, or purchased from and remains pinned after the pointer leaves. Its icon mirrors the selected card's unit artwork, the redundant production/independent row has been removed, and the role-icon container was doubled from 54×54 to 108×108. The user verified the complete selected-role interaction and visual update in Play Mode on 2026-07-17. Worker, stronghold, countdown-expiry, and lost-gold paths were previously user-verified. Broader production purchasing and the remaining result/restart paths still need targeted Play Mode verification. The generated HUD requires multi-resolution Unity inspection and complete-loop Play Mode verification. The attempted three-part Tiny Swords stronghold health-bar frame did not produce an acceptable result; its stretched middle segment is temporarily commented out pending a later UI pass.
+**Progress:** The editor-authored Tiny Swords battle HUD binds gold, workers, both strongholds, timer, results, restart, and all five independent production cards. Focused verification covers its presenters and interactions, and the user has completed several clean end-to-end Play Mode matches. The user confirmed the existing menus and HUD are readable at the tested aspect ratios and that the game provides meaningful strategic choices. The attempted three-part stronghold health-bar frame remains deferred pending a later UI pass.
 
 **Status:** Partially implemented
 
@@ -147,7 +147,8 @@ Tasks are ordered by dependency and prototype value.
 - [x] Returning to or restarting a battle does not leave stale duplicate menu/session objects.
 - [x] **Phase 3 — Animated background:** The title screen includes decorative Tiny Swords-style buildings and non-interactive units moving across the background without invoking combat, economy, or match systems.
 - [x] Background animation is layered behind interactive UI, does not intercept button input, and remains readable and performant at the prototype's representative PC resolutions.
-- [ ] Menu scripts compile, both scenes are present and ordered correctly in Build Settings, and the title -> selection -> battle path is verified in Play Mode and a player build where practical.
+- [x] Menu scripts compile, both scenes are present and ordered correctly in Build Settings, and the title -> selection -> battle path is verified in Play Mode.
+- [ ] The same flow, including Exit, is verified in a packaged player build.
 
 **Relevant systems:** new menu scene/UI and controller, `FactionData`, a serialized faction catalog/menu configuration, scene-loading/session-selection boundary, `GameManager`, Build Settings
 
@@ -155,15 +156,50 @@ Tasks are ordered by dependency and prototype value.
 
 **Risks and manual Unity work:** Runtime builds cannot use `AssetDatabase` to discover ScriptableObjects, so available factions must be explicitly serialized or supplied through another build-safe content mechanism. Scene creation, Canvas layout, button references, Build Settings ordering, faction catalog contents, multi-resolution inspection, and Play Mode/player-build verification require Unity Editor validation.
 
-**Progress:** Coordinated and accepted in `DEC-012` and extended by `DEC-014`. The user verified the title, faction selection, Tiny Swords animated presentation, difficulty selection, distinct opponent faction, and transition into battle in Play Mode on 2026-07-17. Difficulty choices launch battle directly from a parchment-contained Tiny Swords menu. The title-background builder now includes at least one runner for every selectable mythic: all 16 qualifying Enemy Pack creatures and all five colour monks. Their count and placement are independent of the standard melee/archer mix; regenerating and visually reviewing the scene remains required. Player-build verification remains pending, so the parent task remains partially implemented.
+**Progress:** Coordinated and accepted in `DEC-012` and extended by `DEC-014`. The user verified the title, faction selection, Tiny Swords animated presentation, difficulty selection, distinct opponent faction, and transition into battle in Play Mode on 2026-07-17, and later accepted the implemented front-end menus as readable across the tested aspect ratios. Difficulty choices launch battle directly from a parchment-contained Tiny Swords menu. The title background includes all 21 selectable mythic actors. Player-build verification remains pending, so the parent task remains partially implemented.
 
 **Status:** Partially implemented
+
+### 6. Diagnose and retune combat economy
+
+**Outcome:** Upgrades, standard roles, and mythics support meaningful composition choices without one near-deterministic purchase path.
+
+**Acceptance criteria:**
+
+- [ ] Reproduce the reported three-star melee strategy across difficulties while recording faction, purchase order, upgrade timing, composition, duration, outcome, and remaining base health.
+- [ ] Separate upgrade-curve strength from AI-policy weakness.
+- [ ] Compare equal-gold and equal-time throughput for melee tiers, counter roles, siege, and representative light/heavy/ranged/support mythics.
+- [ ] Validate base pressure, counter effectiveness, ranged safety, monk stacking, and mythic opportunity cost before changing values.
+- [ ] After tuning, one three-star melee track is no longer near-deterministic across all difficulties and representative mythics offer a credible purchase reason.
+- [ ] Approved numeric changes amend or supersede `DEC-015`.
+
+**Progress:** The user reports that three-star melee wins roughly 99% across Easy, Medium, and Hard and that mythics are too weak relative to their cost. No replacement values are approved yet.
+
+**Status:** Not started
+
+### 7. Add a minimal in-game menu
+
+**Outcome:** A player can interrupt and leave an active solo match without closing the application or waiting for the result screen.
+
+**Acceptance criteria:**
+
+- [ ] Confirm the final action set and pause semantics.
+- [ ] Provide a battle-HUD button and keyboard access to an overlay that blocks underlying HUD input.
+- [ ] Implement the approved navigation actions; the recommended initial set is Resume, Restart Match, and Main Menu.
+- [ ] Repeated open/close is idempotent, result presentation takes precedence, and scene transitions do not duplicate persistent services or listeners.
+- [ ] Verify compilation, representative resolutions, mouse/keyboard behavior, and Play Mode behavior.
+- [ ] Keep settings, volume controls, save/load, and controller navigation outside this task unless separately approved.
+
+**Dependencies:** Accepted scope in `DEC-017`; final UX contract requires confirmation before implementation.
+
+**Progress:** The user's visual approval covers the implemented title, faction-selection, difficulty-selection, and mythic-choice interfaces. It does not verify this accepted but unimplemented active-match menu.
+
+**Status:** Not started
 
 ---
 
 ## P2 — Important after the critical loop
 
-- [ ] Playtest and refine the first roster-wide combat balance pass. Source and assets now implement the 1.2x melee > cavalry > archer > melee counter triangle, differentiated siege/building damage, a creature-identity-driven 140-300 gold mythic roster with 8-16 second cadences, mechanically identical monk colours, a 1,000-health stronghold, and a reduced 1x/1.25x/1.5x tier curve (1x/1.5625x/2.25x effective DPS). Validate equal-tier/equal-gold matchups, light-versus-heavy mythic throughput, ranged safety, monk stacking, Troll value, base time-to-kill, economy/cadence interaction, and tier value before treating the values as final.
 - Add basic onboarding for workers, production, upgrades, timeout rules, and restart.
 - [x] Black, blue, purple, red, and yellow melee/archer variants show their matching idle, run, and attack animations in Play Mode; the user verified every colour on 2026-07-17 after loop and transition settings were matched to black.
 - [ ] Verify the shared cavalry, siege, and mythic units still spawn correctly with each team-colour faction. Confirm that switching both team factions does not produce missing references, controller warnings, or unintended mechanical differences.
@@ -209,12 +245,12 @@ Tasks are ordered by dependency and prototype value.
 - [x] One shared Base prefab owns the castle, hand-in child, worker economy component, and presentation bindings; loose scene hand-in objects and per-instance sprite/tint overrides are removed.
 - [x] Missing presentation data retains authored fallback sprites and produces actionable diagnostics instead of a null exception.
 - [x] Unity imports the prefab, scene, and new component with no missing scripts or broken serialized references.
-- [ ] In Play Mode, every colour is verified on both Left and Right; Castle, House3, HUD icon, and spawned colour-specific units agree with the selected faction.
-- [ ] Both teams' workers still spawn, mine, return to the inward hand-in point, and increase gold; base damage shake, targeting, destruction, and restart remain correct.
+- [x] In Play Mode, every colour is verified on both Left and Right; Castle, House3, HUD icon, and spawned colour-specific units agree with the selected faction.
+- [x] Both teams' workers still spawn, mine, return to the inward hand-in point, and increase gold; base damage shake, targeting, destruction, and restart remain correct.
 
-**Progress:** Source, faction assets, five worker prefabs, worker controllers/clips, shared-prefab structure, scene migration, HUD bindings, and the HUD regeneration tool are implemented. Runtime and Editor assemblies compile externally with zero warnings and errors, and the worker prefab/controller/faction reference graph passes static validation. The user confirmed the faction worker variants import and work correctly in Play Mode on 2026-07-17. Full both-side faction presentation, worker economy, base-damage, and restart coverage remains pending.
+**Progress:** Source, faction assets, five worker prefabs, worker controllers/clips, shared-prefab structure, scene migration, HUD bindings, and the HUD regeneration tool are implemented. Runtime and Editor assemblies compile externally with zero warnings and errors, and the worker prefab/controller/faction reference graph passes static validation. The user confirmed the faction worker variants on 2026-07-17, verified both-team presentation/economy and restart behavior during the runtime extraction pass, and later exhaustively verified the faction-colour visual combinations on both sides. The stronghold health fills are fixed team-side presentation rather than faction-colour variants.
 
-**Status:** Partially implemented
+**Status:** Complete
 
 ---
 
@@ -231,16 +267,15 @@ _No items currently blocked by external state._
 ---
 
 ## Discovered follow-up work
-
 - [x] After Unity imported the legacy meme-faction deletions, the user confirmed on 2026-07-28 that the Unity run looked correct, closing the Console and title → faction → difficulty → battle smoke follow-up. No broader gameplay verification is inferred.
-- [ ] Play Mode review and tune the initial SFX mix across title/faction/difficulty UI, successful and rejected purchases, worker deposits, all five unit roles, monk healing, crowded combat, stronghold destruction, timeout results, and restart. Confirm cooldowns/voice limiting keep large battles readable, verify the persistent service does not duplicate across scene loads, and record any clip swaps separately. Source, 16-cue prefab generation, Unity import, and zero-warning runtime/Editor compilation are complete; music and player-facing volume controls remain deferred to the representative-audio milestone.
+- [x] Accept the initial SFX layer as a prototype first pass after several complete user-played matches. Sound-level and cue-selection refinement remains a later audio pass; persistent-service uniqueness should be retained as a scene-transition regression check.
 - [x] Normalize the battle-scene UI hierarchy by removing the isolated `Canvas/Canvas/VictoryText` legacy branch and restoring the active `Battle UI` RectTransform scale to one. The user verified the migrated hierarchy and presentation on 2026-07-18.
 - [x] Convert the mirrored gold nodes to `Assets/Prefabs/Resources/GoldVein.prefab`, retaining side-specific root transforms, internal `MinePoint` references, and both `WorkerManager` bindings. The user verified the migrated scene and worker loops on 2026-07-18.
 - [x] Replace runtime production-card name lookups with serialized `ProductionCardView` bindings and update the HUD builder to author them. The user verified all five migrated cards on 2026-07-18.
 - [ ] Convert the five now-self-contained production-card views to a shared prefab with role-specific serialized overrides, keeping the HUD builder deterministic and verifying all card interactions afterward.
 - [x] Complete and verify the final behavior-preserving runtime refactor batch. Spawn selection/capacity/prefab resolution now lives in `UnitSpawnController`; battle readouts and listener lifecycle live in `BattleHudReadoutPresenter`; faction-option generation has a focused presenter; and enemy AI receives initialized manager/economy dependencies with a legacy fallback. External runtime and Editor compilation passed with zero warnings, and the user verified the batch in Play Mode on 2026-07-18.
 - Inventory project-owned modifications inside third-party Tiny Swords folders. Treat vendor content as read-mostly and migrate future project-owned Animator Controllers or overrides into a project-owned animation folder when safe; do not move `Resources/MythicUnitRoster.asset` while `GameManager` relies on its fallback `Resources.Load` contract.
-- Revisit the editor-generated stronghold health-bar frame in `ClashBattleUIBuilder.CreateHealthBarFrame`. Determine the correct use of the Tiny Swords bar assets or replace the frame treatment; the final frame must fully contain the health fill without distortion or overflow for both teams at QHD 2560×1440 and representative narrower/wider aspect ratios. The current stretched middle segment is intentionally commented out until this is addressed.
+- Revisit the editor-generated stronghold health-bar frame in `ClashBattleUIBuilder.CreateHealthBarFrame`. The health fills are currently fixed by team side (blue player/left and red enemy/right), not selected faction; decide during the later UI pass whether that convention should remain. Determine the correct use of the Tiny Swords bar assets or replace the frame treatment; the final frame must fully contain the health fill without distortion or overflow. The current stretched middle segment is intentionally commented out until this is addressed.
 - Tune initial purchase costs, recurring production cadences, role matchups, and stat values through representative playtests.
 - Resolve projectile targeting semantics before changing combat behavior: current projectiles aim at the launch position and may miss moving targets; choose deliberate misses, target leading, or live-target tracking, then document and verify the approved rule.
 - [x] Add profiler markers for target acquisition, friendly separation, monk searches, and production capacity scans, then assess representative battle performance before changing architecture. The user judged current performance sufficient for the prototype on 2026-07-18; retain `OverlapCircleAll` and scene-wide capacity scans unless later measured performance regresses.
