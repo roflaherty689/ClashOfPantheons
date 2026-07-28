@@ -33,6 +33,8 @@ Do not record trivial implementation details.
 | DEC-012 | Initial title and faction-selection flow | Accepted | 2026-07-17 |
 | DEC-013 | Selectable test roster for mythic production | Accepted | 2026-07-17 |
 | DEC-014 | Same-rule enemy AI and three difficulties | Accepted | 2026-07-17 |
+| DEC-015 | First-pass combat scale and role counters | Accepted | 2026-07-17 |
+| DEC-016 | Remove legacy meme factions | Accepted | 2026-07-28 |
 
 ---
 
@@ -219,7 +221,7 @@ Tiny Swords assets already define the current battlefield and provide an appropr
 
 - Final art production remains deferred.
 - Faction identity should remain readable and mythological without requiring historical simulation.
-- Existing humorous placeholder factions do not by themselves define final faction content.
+- The former humorous placeholder factions were historical prototype content, did not define final faction content, and were removed under `DEC-016`.
 
 ### Alternatives considered
 
@@ -371,7 +373,7 @@ Presentation sprites are authored faction configuration, while base health, coll
 - A focused Base presentation component consumes faction art; `WorkerManager` remains responsible for economy and uses the prefab-owned hand-in transform.
 - The shared Base prefab owns its castle and hand-in children, while scene instances retain only team, placement, spawn-point, and gold-vein differences.
 - `GameManager` applies presentation at match startup and updates the corresponding HUD icons.
-- The legacy Default and meme faction assets may omit these sprites; authored prefab fallbacks remain visible and configuration diagnostics are emitted.
+- Only the legacy `Default`/generic incomplete faction assets may omit these sprites; authored prefab fallbacks remain visible and configuration diagnostics are emitted. The former meme factions were removed under `DEC-016`.
 - "Selected faction" currently means the serialized left/right `GameManager` references before a match; live mid-match faction switching is not introduced.
 
 ### Alternatives considered
@@ -601,6 +603,48 @@ The 1.2x triangle creates readable counterplay without making an unfavourable pu
 - `TODO.md` â€” first roster-wide combat balance pass
 - `Assets/Scripts/Units/UnitData.cs`
 - `Assets/Scripts/Units/BaseUnit.cs`
+
+---
+
+## DEC-016 — Remove legacy meme factions
+
+**Date:** 2026-07-28
+**Status:** Accepted
+
+### Decision
+
+Remove the legacy `MemeTeam1` and `MemeTeam2` faction data assets and their complete unit-prefab, projectile, and portrait-image trees. Keep the five supported colour factions—Black, Blue, Purple, Red, and Yellow—and retain the legacy `NonMenu/Default` faction asset.
+
+### Context
+
+The two meme factions had already been excluded from the title-menu catalog under `Assets/ScriptableObjects/Factions/NonMenu`, but their bespoke unit and image content remained in the repository. The user directly approved complete removal. A pre-deletion static GUID audit identified a self-contained 62-file set with no references from scenes, prefabs, assets, or source files outside that set.
+
+### Rationale
+
+Deleting the unused faction data and all internally linked content removes obsolete project-owned assets and avoids maintaining unsupported faction variants. The zero-external-reference audit makes complete deletion lower risk than retaining hidden content or removing only part of each internally connected tree.
+
+### Consequences
+
+- The supported faction-selection set remains exactly Black, Blue, Purple, Red, and Yellow.
+- `Assets/ScriptableObjects/Factions/NonMenu/Default.asset` remains available as the legacy generic fallback.
+- The `MemeTeam1` and `MemeTeam2` faction data, unit/projectile prefabs, portrait images, directories, and associated metadata are removed.
+- No runtime-code change is required based on the static GUID audit; on 2026-07-28, the user confirmed that the post-import Unity run looked correct. No broader gameplay verification is inferred.
+- Normal Git deletion does not erase the removed assets from repository history.
+
+### Alternatives considered
+
+- Keep both factions hidden under `NonMenu`: rejected because unsupported legacy content would continue to add maintenance and repository noise.
+- Delete only the faction data or only selected content: rejected because the prefab, projectile, and portrait assets contain internal cross-links and should be removed as one self-contained set.
+- Rewrite Git history to purge the assets: out of scope; normal deletion preserves project history and is sufficient.
+
+### Related items
+
+- `Assets/ScriptableObjects/Factions/NonMenu/MemeTeam1.asset`
+- `Assets/ScriptableObjects/Factions/NonMenu/MemeTeam2.asset`
+- `Assets/Prefabs/Units/Factions/MemeTeam1`
+- `Assets/Prefabs/Units/Factions/MemeTeam2`
+- `TODO.md` — removal evidence and Unity smoke verification
+- `CHANGELOG.md` — Unreleased / Removed
 
 ---
 

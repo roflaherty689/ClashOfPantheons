@@ -68,7 +68,6 @@ Git history remains the exact implementation record.
 - Normalized the new Enemy Pack mythic Animator Controllers around Idle, Run/Walk, and one-shot Attack states; Troll uses its Attack clip while Boat, guard, windup, recovery, and breaking-club animations remain excluded.
 - Added optional projectile trajectory rotation so animated projectiles such as the shaman orb can retain their authored orientation without changing existing projectile defaults.
 - Restyled the title and faction-selection screens with supplied Tiny Swords wood-table, paper, banner, slot-panel, and blue-button UI sprites.
-- Moved the Default and two meme-team faction assets into `Factions/NonMenu`; title-menu catalog generation now exposes only factions stored directly in the main Factions folder.
 - The selected-role details now follow the last production card hovered over or interacted with, remain pinned after the pointer leaves, show that role's unit artwork at twice the previous icon size instead of a generic sword icon, and omit the redundant production/independent row.
 - Redesigned the editor-generated battle HUD around Tiny Swords panels, bars, buttons, icons, workers, strongholds, and human/enemy avatar portraits; replaced conflicting multi-currency and shared-queue mockups with binding-ready gold, worker, five-role independent-production, match-status, and result presentation.
 - Reconciled `GAME_DESIGN.md` with the current Unity repository and the user-approved single-player autobattler direction.
@@ -116,6 +115,7 @@ Git history remains the exact implementation record.
 
 ### Removed
 
+- Removed the legacy `MemeTeam1` and `MemeTeam2` faction assets and their complete unit/projectile prefab and portrait-image trees; the user confirmed the post-import Unity run looked correct.
 - Removed the wholly commented, unreferenced `ProductionSlot` script and its metadata.
 - Removed duplicate world-space health bars from bases and their obsolete serialized prefab/scene configuration; unit health bars and their shared assets remain in use.
 

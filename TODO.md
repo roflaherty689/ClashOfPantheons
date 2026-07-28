@@ -232,6 +232,7 @@ _No items currently blocked by external state._
 
 ## Discovered follow-up work
 
+- [x] After Unity imported the legacy meme-faction deletions, the user confirmed on 2026-07-28 that the Unity run looked correct, closing the Console and title → faction → difficulty → battle smoke follow-up. No broader gameplay verification is inferred.
 - [ ] Play Mode review and tune the initial SFX mix across title/faction/difficulty UI, successful and rejected purchases, worker deposits, all five unit roles, monk healing, crowded combat, stronghold destruction, timeout results, and restart. Confirm cooldowns/voice limiting keep large battles readable, verify the persistent service does not duplicate across scene loads, and record any clip swaps separately. Source, 16-cue prefab generation, Unity import, and zero-warning runtime/Editor compilation are complete; music and player-facing volume controls remain deferred to the representative-audio milestone.
 - [x] Normalize the battle-scene UI hierarchy by removing the isolated `Canvas/Canvas/VictoryText` legacy branch and restoring the active `Battle UI` RectTransform scale to one. The user verified the migrated hierarchy and presentation on 2026-07-18.
 - [x] Convert the mirrored gold nodes to `Assets/Prefabs/Resources/GoldVein.prefab`, retaining side-specific root transforms, internal `MinePoint` references, and both `WorkerManager` bindings. The user verified the migrated scene and worker loops on 2026-07-18.
@@ -247,6 +248,12 @@ _No items currently blocked by external state._
 ---
 
 ## Completed
+
+### Remove the legacy meme faction assets
+
+**Completed:** 2026-07-28
+
+**Evidence:** A pre-deletion static GUID audit identified the `MemeTeam1` and `MemeTeam2` faction data, unit/projectile prefabs, portrait images, directories, and metadata as one self-contained 62-file set with zero references from outside the set. The complete set was removed; normal Git history retains the deleted content. On 2026-07-28, the user confirmed that the post-deletion Unity run looked correct; no broader gameplay verification is inferred.
 
 ### Resolve the independent production contract
 
