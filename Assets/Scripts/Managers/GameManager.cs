@@ -13,15 +13,6 @@ public class GameManager : MonoBehaviour
 {
     public const int MaximumProductionTier = ProductionTierRules.MaximumTier;
 
-    private static readonly UnitRole[] SpawnRoles =
-    {
-        UnitRole.Melee,
-        UnitRole.Archer,
-        UnitRole.Cavalry,
-        UnitRole.Siege,
-        UnitRole.Mythic
-    };
-
     [Header("Team Factions")]
     [SerializeField] private FactionData leftFactionData;
     [SerializeField] private FactionData rightFactionData;
@@ -111,8 +102,8 @@ public class GameManager : MonoBehaviour
 
         if (spawnPattern == SpawnPattern.PerUnitInterval)
         {
-            UpdatePerUnitSpawns(Team.Left, leftFactionData);
-            UpdatePerUnitSpawns(Team.Right, rightFactionData);
+            UpdatePerUnitSpawns(Team.Left);
+            UpdatePerUnitSpawns(Team.Right);
             return;
         }
 
@@ -148,14 +139,14 @@ public class GameManager : MonoBehaviour
         return matchState.GetTotalUnitLossValue(team);
     }
 
-    public int GetProductionTier(Team team, UnitRole role)
+    public int GetProductionTier(Team team, ProductionSlotId slotId)
     {
-        return productionState.GetTier(team, role);
+        return productionState.GetTier(team, slotId);
     }
 
-    public bool TryGetProductionData(Team team, UnitRole role, out UnitData data)
+    public bool TryGetProductionData(Team team, ProductionSlotId slotId, out UnitData data)
     {
-        if (role == UnitRole.Mythic)
+        if (slotId == ProductionSlotId.Mythic)
         {
             BaseUnit selectedMythic = GetSelectedMythicUnit(team);
             if (selectedMythic != null && selectedMythic.UnitData != null)
@@ -166,7 +157,7 @@ public class GameManager : MonoBehaviour
         }
 
         FactionData factionData = GetFactionData(team);
-        if (factionData != null && factionData.TryGetUnitData(role, out data))
+        if (factionData != null && factionData.TryGetUnitData(slotId, out data))
         {
             return true;
         }
@@ -175,30 +166,76 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
-    public bool TryPurchaseProduction(Team team, UnitRole role, WorkerManager economy)
+    public bool TryGetProductionPrefab(
+        Team team,
+        ProductionSlotId slotId,
+        out BaseUnit prefab)
+    {
+        if (slotId == ProductionSlotId.Mythic)
+        {
+            prefab = GetSelectedMythicUnit(team);
+            return prefab != null;
+        }
+
+        FactionData factionData = GetFactionData(team);
+        if (factionData != null && factionData.TryGetUnitPrefab(slotId, out prefab))
+        {
+            return true;
+        }
+
+        prefab = null;
+        return false;
+    }
+
+    public bool TryGetProductionRole(
+        Team team,
+        ProductionSlotId slotId,
+        out UnitRole role)
+    {
+        if (slotId == ProductionSlotId.Mythic)
+        {
+            role = UnitRole.Mythic;
+            return true;
+        }
+
+        FactionData factionData = GetFactionData(team);
+        if (factionData != null &&
+            factionData.TryGetProductionEntry(slotId, out FactionUnitEntry entry))
+        {
+            role = entry.Role;
+            return true;
+        }
+
+        role = default;
+        return false;
+    }
+
+    public bool TryPurchaseProduction(
+        Team team,
+        ProductionSlotId slotId,
+        WorkerManager economy)
     {
         if (matchState.IsGameOver || economy == null || economy.Team != team) return false;
 
-        int roleIndex = GetRoleIndex(role);
-        if (roleIndex < 0) return false;
+        if (ProductionStateController.GetSlotIndex(slotId) < 0) return false;
 
         if (!ProductionTierRules.TryAdvance(
-                productionState.GetTier(team, role),
-                role == UnitRole.Mythic,
+                productionState.GetTier(team, slotId),
+                slotId == ProductionSlotId.Mythic,
                 out int nextTier))
         {
             return false;
         }
 
-        if (!TryGetProductionData(team, role, out UnitData data)) return false;
+        if (!TryGetProductionData(team, slotId, out UnitData data)) return false;
         if (!economy.TrySpendGold(data.Cost)) return false;
 
-        productionState.SetTier(team, role, nextTier);
+        productionState.SetTier(team, slotId, nextTier);
         if (team == Team.Left) SoundManager.Play(SoundCue.Purchase);
 
         if (nextTier == 1)
         {
-            productionState.ResetTimer(team, role);
+            productionState.ResetTimer(team, slotId);
         }
 
         return true;
@@ -212,7 +249,7 @@ public class GameManager : MonoBehaviour
     public bool HasMythicChoices(Team team)
     {
         if (matchState.IsGameOver || mythicUnitRoster == null ||
-            GetProductionTier(team, UnitRole.Mythic) != 0)
+            GetProductionTier(team, ProductionSlotId.Mythic) != 0)
         {
             return false;
         }
@@ -236,10 +273,8 @@ public class GameManager : MonoBehaviour
             return false;
         }
 
-        int roleIndex = GetRoleIndex(UnitRole.Mythic);
-        if (roleIndex < 0 ||
-            !ProductionTierRules.TryUnlockSelectedOption(
-                productionState.GetTier(team, UnitRole.Mythic),
+        if (!ProductionTierRules.TryUnlockSelectedOption(
+                productionState.GetTier(team, ProductionSlotId.Mythic),
                 out int nextTier) ||
             prefab.UnitData == null ||
             !economy.TrySpendGold(prefab.UnitData.Cost))
@@ -248,8 +283,8 @@ public class GameManager : MonoBehaviour
         }
 
         productionState.SetSelectedMythic(team, prefab);
-        productionState.SetTier(team, UnitRole.Mythic, nextTier);
-        productionState.ResetTimer(team, UnitRole.Mythic);
+        productionState.SetTier(team, ProductionSlotId.Mythic, nextTier);
+        productionState.ResetTimer(team, ProductionSlotId.Mythic);
         if (team == Team.Left) SoundManager.Play(SoundCue.Purchase);
         return true;
     }
@@ -308,14 +343,9 @@ public class GameManager : MonoBehaviour
         rightBase = factionTeamInitializer.RightBase;
     }
 
-    private static int GetRoleIndex(UnitRole role)
+    private void UpdatePerUnitSpawns(Team team)
     {
-        return ProductionStateController.GetRoleIndex(role);
-    }
-
-    private void UpdatePerUnitSpawns(Team team, FactionData factionData)
-    {
-        if (factionData == null) return;
+        if (GetFactionData(team) == null) return;
 
         productionState.UpdateSpawns(team, Time.deltaTime, unitSpawnController);
     }
@@ -343,14 +373,13 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        foreach (UnitRole role in SpawnRoles)
+        if (!factionData.TryValidateProductionUnits(out string validationError))
         {
-            if (!factionData.TryGetUnitData(role, out _))
-            {
-                Debug.LogError(
-                    $"{name}: Faction '{factionData.FactionName}' has no valid {role} unit configuration.",
-                    factionData);
-            }
+            Debug.LogError(
+                $"{name}: Faction '{factionData.FactionName}' production configuration is invalid: " +
+                validationError + ".",
+                factionData);
+            return;
         }
     }
 }

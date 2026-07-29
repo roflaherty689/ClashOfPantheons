@@ -7,24 +7,28 @@ using UnityEngine.UI;
 
 public sealed class ProductionCardPresenter
 {
-    private static readonly UnitRole[] Roles =
+    private static readonly ProductionSlotId[] Slots =
     {
-        UnitRole.Melee,
-        UnitRole.Archer,
-        UnitRole.Cavalry,
-        UnitRole.Siege,
-        UnitRole.Mythic
+        ProductionSlotId.Standard0,
+        ProductionSlotId.Standard1,
+        ProductionSlotId.Standard2,
+        ProductionSlotId.Standard3,
+        ProductionSlotId.Mythic
     };
 
     private sealed class CardBinding
     {
-        public UnitRole Role;
+        public ProductionSlotId SlotId;
         public ProductionCardView View;
         public Button Button;
         public Image Art;
+        public TextMeshProUGUI TitleText;
         public TextMeshProUGUI StatusText;
         public TextMeshProUGUI TierText;
         public TextMeshProUGUI ActionText;
+        public BaseUnit PresentedPrefab;
+        public UnitRole PresentedRole;
+        public bool HasPresentedRole;
         public Color UnlockedColour;
         public UnityAction PurchaseAction;
         public EventTrigger InteractionTrigger;
@@ -34,28 +38,28 @@ public sealed class ProductionCardPresenter
 
     private readonly Transform root;
     private readonly Team playerTeam;
-    private readonly Action<UnitRole> purchaseRequested;
-    private readonly Action<UnitRole> roleSelected;
-    private readonly CardBinding[] bindings = new CardBinding[Roles.Length];
+    private readonly Action<ProductionSlotId> purchaseRequested;
+    private readonly Action<ProductionSlotId> slotSelected;
+    private readonly CardBinding[] bindings = new CardBinding[Slots.Length];
 
     public ProductionCardPresenter(
         Transform root,
         Team playerTeam,
-        Action<UnitRole> purchaseRequested,
-        Action<UnitRole> roleSelected)
+        Action<ProductionSlotId> purchaseRequested,
+        Action<ProductionSlotId> slotSelected)
     {
         this.root = root;
         this.playerTeam = playerTeam;
         this.purchaseRequested = purchaseRequested;
-        this.roleSelected = roleSelected;
+        this.slotSelected = slotSelected;
 
         ResolveBindings();
         BindInteractions();
     }
 
-    public Image GetArt(UnitRole role)
+    public Image GetArt(ProductionSlotId slotId)
     {
-        CardBinding binding = GetBinding(role);
+        CardBinding binding = GetBinding(slotId);
         return binding?.Art;
     }
 
@@ -67,16 +71,25 @@ public sealed class ProductionCardPresenter
         {
             if (binding == null) continue;
 
-            int tier = gameManager.GetProductionTier(playerTeam, binding.Role);
-            bool hasData = gameManager.TryGetProductionData(playerTeam, binding.Role, out UnitData data);
+            int tier = gameManager.GetProductionTier(playerTeam, binding.SlotId);
+            bool hasData = gameManager.TryGetProductionData(playerTeam, binding.SlotId, out UnitData data);
             int cost = hasData ? data.Cost : 0;
-            bool needsMythicChoice = binding.Role == UnitRole.Mythic && tier == 0;
+            bool needsMythicChoice = binding.SlotId == ProductionSlotId.Mythic && tier == 0;
             bool canPurchase = needsMythicChoice
                 ? gameManager.HasMythicChoices(playerTeam)
                 : hasData && tier < GameManager.MaximumProductionTier &&
                     workerManager.CurrentGold >= cost && !gameManager.IsGameOver;
 
             RefreshArt(binding, tier, gameManager);
+
+            if (binding.TitleText != null &&
+                gameManager.TryGetProductionRole(playerTeam, binding.SlotId, out UnitRole role) &&
+                (!binding.HasPresentedRole || binding.PresentedRole != role))
+            {
+                binding.PresentedRole = role;
+                binding.HasPresentedRole = true;
+                binding.TitleText.text = role.ToString().ToUpperInvariant();
+            }
 
             if (binding.StatusText != null)
             {
@@ -135,15 +148,16 @@ public sealed class ProductionCardPresenter
         ProductionCardView[] views = root.GetComponentsInChildren<ProductionCardView>(true);
         foreach (ProductionCardView view in views)
         {
-            int index = Array.IndexOf(Roles, view.Role);
+            int index = Array.IndexOf(Slots, view.SlotId);
             if (index < 0 || bindings[index] != null || !view.HasCompleteBindings) continue;
             Image art = view.Artwork;
             bindings[index] = new CardBinding
             {
-                Role = view.Role,
+                SlotId = view.SlotId,
                 View = view,
                 Button = view.PurchaseButton,
                 Art = art,
+                TitleText = view.TitleText,
                 StatusText = view.StatusText,
                 TierText = view.TierText,
                 ActionText = view.ActionText,
@@ -166,8 +180,8 @@ public sealed class ProductionCardPresenter
                 binding.Button.targetGraphic.raycastTarget = true;
             }
 
-            UnitRole role = binding.Role;
-            binding.PurchaseAction = () => purchaseRequested?.Invoke(role);
+            ProductionSlotId slotId = binding.SlotId;
+            binding.PurchaseAction = () => purchaseRequested?.Invoke(slotId);
             binding.Button.onClick.AddListener(binding.PurchaseAction);
             SoundManager.SuppressGenericClick(binding.Button);
         }
@@ -185,13 +199,13 @@ public sealed class ProductionCardPresenter
             binding.InteractionTrigger = binding.View.gameObject.AddComponent<EventTrigger>();
         }
 
-        UnitRole role = binding.Role;
+        ProductionSlotId slotId = binding.SlotId;
         binding.HoverEntry = CreateInteractionEntry(
             EventTriggerType.PointerEnter,
-            _ => roleSelected?.Invoke(role));
+            _ => slotSelected?.Invoke(slotId));
         binding.PointerDownEntry = CreateInteractionEntry(
             EventTriggerType.PointerDown,
-            _ => roleSelected?.Invoke(role));
+            _ => slotSelected?.Invoke(slotId));
         binding.InteractionTrigger.triggers.Add(binding.HoverEntry);
         binding.InteractionTrigger.triggers.Add(binding.PointerDownEntry);
     }
@@ -200,7 +214,7 @@ public sealed class ProductionCardPresenter
     {
         if (binding.Art == null) return;
 
-        if (binding.Role == UnitRole.Mythic && gameManager.MythicUnitRoster != null)
+        if (binding.SlotId == ProductionSlotId.Mythic && gameManager.MythicUnitRoster != null)
         {
             MythicArtworkPresenter.Update(
                 binding.Art,
@@ -208,8 +222,23 @@ public sealed class ProductionCardPresenter
                 gameManager.MythicUnitRoster,
                 GetMythicParchmentSprite());
         }
+        else if (gameManager.TryGetProductionPrefab(
+                     playerTeam,
+                     binding.SlotId,
+                     out BaseUnit prefab) &&
+                 binding.PresentedPrefab != prefab)
+        {
+            binding.PresentedPrefab = prefab;
+            MythicArtworkPresenter.HideCrossedSwords(binding.Art);
+            Sprite sprite = MythicArtworkPresenter.GetUnitSprite(prefab);
+            if (sprite != null)
+            {
+                binding.Art.sprite = sprite;
+                binding.Art.preserveAspect = true;
+            }
+        }
 
-        bool lockedMythic = binding.Role == UnitRole.Mythic && tier == 0;
+        bool lockedMythic = binding.SlotId == ProductionSlotId.Mythic && tier == 0;
         binding.Art.color = lockedMythic
             ? Color.clear
             : tier == 0
@@ -223,7 +252,7 @@ public sealed class ProductionCardPresenter
 
     private Sprite GetMythicParchmentSprite()
     {
-        CardBinding mythic = GetBinding(UnitRole.Mythic);
+        CardBinding mythic = GetBinding(ProductionSlotId.Mythic);
         return mythic?.View != null ? mythic.View.PortraitPaperSprite : null;
     }
 
@@ -236,11 +265,11 @@ public sealed class ProductionCardPresenter
         return entry;
     }
 
-    private CardBinding GetBinding(UnitRole role)
+    private CardBinding GetBinding(ProductionSlotId slotId)
     {
         foreach (CardBinding binding in bindings)
         {
-            if (binding != null && binding.Role == role)
+            if (binding != null && binding.SlotId == slotId)
             {
                 return binding;
             }

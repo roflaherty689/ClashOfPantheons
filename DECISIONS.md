@@ -25,7 +25,7 @@ Do not record trivial implementation details.
 | DEC-004 | Prototype economy, roles, and upgrades | Accepted | 2026-07-16 |
 | DEC-005 | Prototype scope boundary | Accepted | 2026-07-16 |
 | DEC-006 | Prototype visual direction | Accepted | 2026-07-16 |
-| DEC-007 | Unit purchase and recurring-production contract | Accepted | 2026-07-16 |
+| DEC-007 | Unit purchase and recurring-production contract | Superseded | 2026-07-16 |
 | DEC-008 | Prototype platform priority | Accepted | 2026-07-16 |
 | DEC-009 | Prototype team-colour faction variants | Accepted | 2026-07-17 |
 | DEC-010 | Faction-owned building presentation with shared gameplay prefabs | Accepted | 2026-07-17 |
@@ -36,6 +36,7 @@ Do not record trivial implementation details.
 | DEC-015 | First-pass combat scale and role counters | Accepted | 2026-07-17 |
 | DEC-016 | Remove legacy meme factions | Accepted | 2026-07-28 |
 | DEC-017 | In-game menu enters Prototype scope | Accepted | 2026-07-28 |
+| DEC-018 | Four ordered standard-production slots | Accepted | 2026-07-28 |
 
 ---
 
@@ -148,7 +149,7 @@ The repository already contains a one-lane, two-stronghold battle. Adding a boun
 
 ### Decision
 
-Gold is the only prototype currency. It supports workers, military production, and upgrades. Military production is independent for melee, archer, cavalry, siege, and mythic roles rather than using one shared FIFO queue. Every role has one-, two-, and three-star in-match upgrade tiers. A favourable matchup applies a 1.2× damage multiplier. Star tiers multiply all configured unit stats except purchase cost by 1×, 1.5×, and 2×.
+Gold is the only prototype currency. It supports workers, military production, and upgrades. Military production uses four ordered independent standard slots plus a separate mythic track rather than one shared FIFO queue. Every track has one-, two-, and three-star in-match upgrade tiers. `UnitRole` remains the combat classification used for favourable matchups. A favourable matchup applies a 1.2× damage multiplier. The current star-tier curve is governed by `DEC-015`.
 
 ### Context and rationale
 
@@ -158,8 +159,9 @@ The repository already has gold workers, five role mappings, costs, and automate
 
 - Favour and essence in the rough HUD are not prototype systems.
 - The shared queue shown in the rough HUD must not define runtime behavior.
-- Each role's purchase cost and recurring production cadence are owned by its `UnitData` asset. Exact values and remaining matchup details require tuning.
-- The purchase-to-recurring-production contract is accepted in `DEC-007`.
+- Each standard slot resolves purchase cost and recurring production cadence from its configured prefab's `UnitData`; the selected mythic's `UnitData` governs the separate mythic track. Exact values and remaining matchup details require tuning.
+- The recurring three-purchase lifecycle originated in `DEC-007` and is carried forward per slot by `DEC-018`.
+- `DEC-018` supersedes the assumption that standard production has one unique track per combat role. Gold, independent recurring production, and three star tiers remain active, but standard production is now identified by four ordered faction slots and mythic remains separate.
 
 ### Alternatives considered
 
@@ -238,7 +240,7 @@ Tiny Swords assets already define the current battlefield and provide an appropr
 ## DEC-007 — Unit purchase and recurring-production contract
 
 **Date:** 2026-07-16
-**Status:** Accepted
+**Status:** Superseded by `DEC-018`
 
 ### Decision
 
@@ -262,6 +264,7 @@ One recurring track per role is easy to read, fits short matches, preserves comp
 - `UnitData` stores both cost and per-role production cadence.
 - `GameManager` may retain the legacy global interval as a selectable prototype/debug pattern, but independent `UnitData` timers remain the intended production behavior.
 - The independent-timer mode gates every role by its purchased tier and does not accumulate production time while locked. The legacy global pattern may continue free spawning only as an explicit prototype/debug mode.
+- `DEC-018` preserves the recurring three-purchase lifecycle but supersedes this record's use of `UnitRole` as the identity and uniqueness key for standard production tracks.
 
 ### Alternatives considered
 
@@ -682,6 +685,56 @@ A player must be able to interrupt or leave an active solo match without relying
 - `GAME_DESIGN.md` — UI and feedback; Prototype scope
 - `ROADMAP.md` — Prototype planned outcomes
 - `TODO.md` — Add a minimal in-game menu
+
+---
+
+## DEC-018 — Four ordered standard-production slots
+
+**Date:** 2026-07-28
+**Status:** Accepted
+
+### Decision
+
+Each faction owns exactly four ordered standard-production slots. A slot selects a unit prefab and its `UnitData`; multiple slots may use the same `UnitRole`, including compositions such as two melee plus two archer slots. Each standard slot independently owns its unlock state, tier, production timer, purchase routing, cost, and cadence. `UnitRole` remains a combat classification for behavior, targeting, counters, and loss reporting, not a roster identity or uniqueness constraint.
+
+Mythic production remains a separate fifth picker-backed track outside faction standard-roster composition. The Black, Blue, Purple, Red, Yellow, and legacy `Default` factions preserve their existing ordered melee, archer, cavalry, and siege standard slots during migration.
+
+### Context
+
+The previous faction and production model used one entry and one runtime track for each combat role. That prevented factions from expressing duplicate-role compositions and coupled combat classification to roster identity. The user directly approved an ordered four-slot standard roster while retaining the existing independent recurring-production lifecycle and separate selectable mythic system.
+
+### Rationale
+
+Ordered slot identity supports faction-specific composition without expanding the number of HUD controls or changing combat-role semantics. Independent slot state prevents duplicate roles from unintentionally sharing purchases, upgrades, timers, costs, or cadence. Keeping mythic separate preserves the existing picker contract and avoids making a broad test roster part of every faction's authored standard composition.
+
+### Consequences
+
+- Standard production APIs, state, spawning, AI decisions, HUD bindings, and debug/global spawning must address slots rather than assuming one unique track per `UnitRole`.
+- Each slot resolves its prefab, cost, cadence, artwork, and display identity from its own configuration; duplicate-role slots must remain independently purchasable and upgradeable.
+- The three-purchase lifecycle from `DEC-007` continues per slot: unlock one-star recurring production, then upgrade future spawns to two and three stars. Existing fielded units remain unchanged.
+- The mythic card, selection, tier, timer, and chosen `UnitData` remain a separate fifth track governed by `DEC-013`.
+- Existing supported faction compositions are preserved by migration rather than redesigned.
+- Manual Play Mode regression must cover duplicate-role independence, player UI, AI, restart, and the legacy global debug pattern before the migration is treated as complete.
+
+### Alternatives considered
+
+- Keep one unique standard track per combat role: rejected because it prevents duplicate-role faction compositions.
+- Expand factions to five authored slots including mythic: rejected because it would conflict with the accepted picker-backed mythic contract.
+- Encode duplicate compositions by adding new combat-role enum values: rejected because roster identity and combat classification are different concerns.
+- Use unordered role counts: rejected because ordered slots map directly to stable HUD controls, independent state, and authored faction intent.
+
+### Related items
+
+- `GAME_DESIGN.md` — Unit roles and counterplay; Economy and production
+- `ROADMAP.md` — Prototype
+- `TODO.md` — Independent slot production and manual Play Mode verification
+- `DEC-004` — Prototype economy, roles, and upgrades
+- `DEC-007` — Superseded role-keyed production identity
+- `DEC-013` — Selectable test roster for mythic production
+- `Assets/Scripts/Factions/FactionData.cs`
+- `Assets/Scripts/Managers/ProductionStateController.cs`
+- `Assets/Scripts/Managers/UnitSpawnController.cs`
+- `Assets/Scripts/UI/ProductionCardPresenter.cs`
 
 ---
 

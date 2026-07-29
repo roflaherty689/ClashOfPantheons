@@ -17,14 +17,14 @@ Checked entry conditions are based on repository inspection, not a new Unity lau
 
 ### Exit criteria
 
-- [x] A player can use gold to buy workers, establish independent unit-type production, and buy one-, two-, and three-star upgrades.
+- [ ] A player can use gold to buy workers, establish four independent ordered standard-production slots plus the separate mythic track, and buy one-, two-, and three-star upgrades on each track. The earlier role-keyed flow was verified; the ordered-slot migration remains to be verified.
 - [x] An AI opponent makes economy, production, composition, and upgrade decisions under the same match rules.
 - [x] Units autonomously resolve combat on one shared lane and can destroy either stronghold.
 - [x] An approximately five-minute timer resolves matches by stronghold health, then lower total value of units lost when health is equal.
 - [x] The result is clearly presented and a new match can start without Editor intervention.
 - [x] The functional HUD accurately communicates gold, workers, production, upgrades, time, stronghold health, and result state in representative matches.
 - [x] Exact equality after both timeout comparisons produces a draw with no winner or loser.
-- [x] The project compiles without known blocking errors and the complete critical path is verified in Play Mode.
+- [ ] The project compiles without known blocking errors and the complete slot-keyed critical path is verified in Play Mode. The earlier role-keyed path was verified; the ordered-slot migration is pending validation.
 - [ ] Critical economy, production, and result rules have proportionate automated coverage or documented manual verification where automation is impractical.
 - [ ] Material assumptions and the next milestone's entry conditions are documented.
 
@@ -34,7 +34,7 @@ _No confirmed implementation blocker._
 
 ### Current risks and coverage gaps
 
-- The existing 38 Core Edit Mode cases cover timeout resolution, result/countdown presentation rules, and tier transitions/scaling, but economy transactions, production scheduling, match integration, and scene flow need proportionate coverage.
+- The existing 38 Core Edit Mode cases cover timeout resolution, result/countdown presentation rules, and tier transitions/scaling, but slot-keyed economy transactions, duplicate-role production scheduling, match integration, and scene flow need proportionate coverage.
 - Several complete Play Mode matches and representative aspect ratios are user-verified, but a packaged player build and targeted edge-case matrix remain.
 - Three-star melee is a reported near-deterministic strategy across all difficulties, while mythics appear too weak for their cost.
 
@@ -48,7 +48,7 @@ _No confirmed implementation blocker._
 
 - [x] Autonomous horizontal movement, target acquisition, melee/ranged combat, projectiles, health, and unit death are represented in source.
 - [x] Two strongholds and base-destruction victory handling are represented in source and the battle scene.
-- [x] Melee, archer, cavalry, siege, and mythic role mappings and prototype assets exist.
+- [x] Melee, archer, cavalry, siege, and mythic combat classifications and prototype assets exist; the supported factions currently map their four standard entries in melee/archer/cavalry/siege order and use the separate mythic roster.
 - [x] Workers can mine and deposit gold; the player HUD displays live worker economy state and can buy workers up to capacity.
 - [x] Faction data can map roles to faction-specific prefabs.
 - [x] Black, blue, purple, red, and yellow prototype faction assets map colour-specific animated worker, melee, and archer prefabs while sharing cavalry, siege, and mythic.
@@ -59,12 +59,12 @@ These checks confirm repository presence only. Their integrated runtime behavior
 
 ### Planned outcomes
 
-- [x] Accept `DEC-007`: first purchase unlocks continuous role production; the next two purchases upgrade future spawns to two and three stars.
-- [x] Complete representative Play Mode verification of the source-integrated player gold, worker, and independent production paths; exhaustive all-role and edge-case coverage remains tracked separately.
+- [x] Accept the recurring three-purchase lifecycle originally recorded in `DEC-007` and carried forward per standard slot and separate mythic track by `DEC-018`.
+- [ ] Complete representative Play Mode verification of the source-integrated player gold, worker, four ordered standard-slot, duplicate-role, and separate mythic production paths. The earlier unique-role path is verified, but the accepted slot-keyed migration remains.
 - [x] Implement an AI decision layer that participates in the same economy and production game, with three Play Mode-verified difficulties, same-rule purchasing, and random mythic/opponent selection.
 - [x] Complete targeted verification of the implemented five-minute timer, stronghold-health comparison, unit-loss-value tiebreaker, result states, and restart/reset flow.
 - [ ] Correct the dominant three-star melee strategy and establish credible mythic value through controlled balance diagnosis and tuning.
-- [x] Move recurring production cadence ownership from the global spawn interval into each role's `UnitData`; retain per-role cost ownership there. Initial values and selectable spawn patterns were user-verified in Play Mode on 2026-07-16.
+- [ ] Preserve cost and recurring cadence ownership in each configured unit's `UnitData` while moving runtime unlock, tier, timer, and purchase identity from combat role to ordered standard slot. The earlier role-keyed values and spawn patterns were user-verified on 2026-07-16; duplicate-role slots and the global debug pattern require regression.
 - [x] Validate the functional HUD at representative resolutions and across the complete critical path in Play Mode.
 - [ ] Add a minimal in-game menu with confirmed pause and navigation behavior.
 - [x] Add a player-facing title -> faction selection -> difficulty selection -> battle flow, verified in Play Mode; player-build coverage remains tracked separately.
@@ -77,7 +77,8 @@ These checks confirm repository presence only. Their integrated runtime behavior
 ### Dependencies
 
 - Accepted design constraints in `DEC-002` through `DEC-006`.
-- Accepted production semantics in `DEC-007`.
+- Recurring three-purchase semantics inherited from superseded `DEC-007`.
+- Accepted ordered standard-roster semantics in `DEC-018`, which supersede `DEC-007` where production identity was keyed by combat role.
 - Existing `GameManager`, `WorkerManager`, `WorkerUnit`, `GoldVein`, `FactionData`, `UnitData`, `BaseUnit`, and `Base` foundations.
 - Functional UI bindings and scene wiring after the underlying rules are defined.
 

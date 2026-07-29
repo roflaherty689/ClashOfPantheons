@@ -25,8 +25,11 @@ public static class ClashProductionCardBindingMigration
         Transform production = battleUi != null ? battleUi.transform.Find(ProductionPath) : null;
         if (production == null) throw new MissingReferenceException("The battle production-card hierarchy was not found.");
 
-        foreach (UnitRole role in Enum.GetValues(typeof(UnitRole)))
-            BindCard(production, role);
+        BindCard(production, ProductionSlotId.Standard0, "MELEE");
+        BindCard(production, ProductionSlotId.Standard1, "ARCHER");
+        BindCard(production, ProductionSlotId.Standard2, "CAVALRY");
+        BindCard(production, ProductionSlotId.Standard3, "SIEGE");
+        BindCard(production, ProductionSlotId.Mythic, "MYTHIC");
 
         ProductionCardView[] views = production.GetComponentsInChildren<ProductionCardView>(true);
         if (views.Length != 5) throw new InvalidOperationException($"Expected five bound production cards, found {views.Length}.");
@@ -37,9 +40,11 @@ public static class ClashProductionCardBindingMigration
         Debug.Log("Bound all five production cards through serialized ProductionCardView references.");
     }
 
-    private static void BindCard(Transform production, UnitRole role)
+    private static void BindCard(
+        Transform production,
+        ProductionSlotId slotId,
+        string roleName)
     {
-        string roleName = role.ToString().ToUpperInvariant();
         Transform card = production.Find(roleName + " Production");
         if (card == null) throw new MissingReferenceException($"Missing {roleName} production card.");
 
@@ -48,14 +53,25 @@ public static class ClashProductionCardBindingMigration
         Image portraitPaper = Require<Image>(card, "Portrait Paper");
         Button button = Require<Button>(card, "Unlock " + roleName);
         TextMeshProUGUI actionText = button.GetComponentInChildren<TextMeshProUGUI>(true);
+        TextMeshProUGUI titleText = FindDirectText(card, roleName);
         TextMeshProUGUI statusText = FindDirectText(card, "LOCKED");
         TextMeshProUGUI tierText = FindDirectText(card, "STARS");
-        if (interactionGraphic == null || actionText == null || statusText == null || tierText == null)
+        if (interactionGraphic == null || actionText == null || titleText == null ||
+            statusText == null || tierText == null)
             throw new MissingReferenceException($"{roleName} production card has incomplete presentation children.");
 
         ProductionCardView view = card.GetComponent<ProductionCardView>();
         if (view == null) view = card.gameObject.AddComponent<ProductionCardView>();
-        view.Configure(role, interactionGraphic, button, art, portraitPaper, statusText, tierText, actionText);
+        view.Configure(
+            slotId,
+            interactionGraphic,
+            button,
+            art,
+            portraitPaper,
+            titleText,
+            statusText,
+            tierText,
+            actionText);
         EditorUtility.SetDirty(view);
     }
 

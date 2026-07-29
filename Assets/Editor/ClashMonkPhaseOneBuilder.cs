@@ -18,7 +18,6 @@ public static class ClashMonkPhaseOneBuilder
         public string UnitFolder;
         public string AnimationFolder;
         public string ControllerName;
-        public string FactionPath;
     }
 
     private static readonly MonkVariant[] Variants =
@@ -42,8 +41,7 @@ public static class ClashMonkPhaseOneBuilder
         foreach (MonkVariant variant in Variants)
         {
             ConfigureControllerAndClips(variant);
-            MonkUnit prefab = CreateMonkPrefab(variant, unitData, healEffectPrefab);
-            AssignFactionMythic(variant.FactionPath, prefab);
+            CreateMonkPrefab(variant, unitData, healEffectPrefab);
         }
 
         AssetDatabase.SaveAssets();
@@ -62,8 +60,7 @@ public static class ClashMonkPhaseOneBuilder
             Colour = colour,
             UnitFolder = unitFolder,
             AnimationFolder = animationFolder,
-            ControllerName = controllerName,
-            FactionPath = $"Assets/ScriptableObjects/Factions/{colour}Faction.asset"
+            ControllerName = controllerName
         };
     }
 
@@ -268,35 +265,6 @@ public static class ClashMonkPhaseOneBuilder
         {
             UnityEngine.Object.DestroyImmediate(root);
         }
-    }
-
-    private static void AssignFactionMythic(string factionPath, MonkUnit prefab)
-    {
-        FactionData faction = RequireAsset<FactionData>(factionPath);
-        SerializedObject serializedFaction = new SerializedObject(faction);
-        SerializedProperty units = serializedFaction.FindProperty("units");
-
-        for (int index = 0; index < units.arraySize; index++)
-        {
-            SerializedProperty entry = units.GetArrayElementAtIndex(index);
-            if (entry.FindPropertyRelative("role").enumValueIndex != (int)UnitRole.Mythic)
-            {
-                continue;
-            }
-
-            entry.FindPropertyRelative("prefab").objectReferenceValue = prefab;
-            serializedFaction.ApplyModifiedPropertiesWithoutUndo();
-            EditorUtility.SetDirty(faction);
-            return;
-        }
-
-        int newIndex = units.arraySize;
-        units.InsertArrayElementAtIndex(newIndex);
-        SerializedProperty newEntry = units.GetArrayElementAtIndex(newIndex);
-        newEntry.FindPropertyRelative("role").enumValueIndex = (int)UnitRole.Mythic;
-        newEntry.FindPropertyRelative("prefab").objectReferenceValue = prefab;
-        serializedFaction.ApplyModifiedPropertiesWithoutUndo();
-        EditorUtility.SetDirty(faction);
     }
 
     private static Sprite GetFirstSprite(AnimationClip clip)

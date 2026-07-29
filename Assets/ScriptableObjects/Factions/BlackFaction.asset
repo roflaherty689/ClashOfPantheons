@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BlackFaction
   m_EditorClassIdentifier: Assembly-CSharp::FactionData
   factionName: Black
-  units:
+  productionUnits:
   - role: 0
     prefab: {fileID: 7886269566354373400, guid: 53f2b4457387d4540bc2552b51586d62, type: 3}
   - role: 1
@@ -22,8 +22,6 @@ MonoBehaviour:
     prefab: {fileID: 5211855096962333619, guid: 5ccd9e0bc4262db44b2f19b311425303, type: 3}
   - role: 3
     prefab: {fileID: 521288771715210349, guid: bc038acb326e54b4b9757ac5cf73e186, type: 3}
-  - role: 4
-    prefab: {fileID: 5412262610288804233, guid: ccc2ce1c6bf9dc347b9a3da1cb4f449c, type: 3}
   workerPrefab: {fileID: 8120276743538827778, guid: 76e22820f8d16bc47861a806bb1ae4c6, type: 3}
   castleSprite: {fileID: 21300000, guid: d0349d8d3a04044f7a4810157b116b14, type: 3}
   handInSprite: {fileID: 21300000, guid: c94d66993de80409fb65b3577475c483, type: 3}

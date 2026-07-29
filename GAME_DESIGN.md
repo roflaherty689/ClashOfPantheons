@@ -33,7 +33,7 @@ There is no direct unit control. The prototype is primarily single-player agains
    - Excludes passive income with no meaningful tradeoffs.
 
 2. **Army composition and counterplay**
-   - Five readable roles have distinct purposes, costs, strengths, and weaknesses.
+   - Four ordered standard-production slots define a faction's composition, may repeat combat roles, and are supplemented by one separate mythic track. The five combat roles remain readable classifications with distinct strengths and weaknesses.
    - Excludes one dominant composition or cosmetic-only role differences.
 
 3. **Mythological faction identity**
@@ -50,21 +50,21 @@ There is no direct unit control. The prototype is primarily single-player agains
 
 1. Workers gather gold.
 2. The player chooses between improving income, establishing unit production, and buying upgrades.
-3. Each purchased unit type produces independently; spawned units march and fight autonomously.
+3. Each purchased standard-production slot, plus the separate mythic track, produces independently; spawned units march and fight autonomously.
 4. The player reads the battle and adapts investment, composition, and upgrades.
 5. A stronghold is destroyed or the approximately five-minute timer expires.
 6. The result is shown and the player can restart.
 
 ### Current prototype loop — implemented, not Play Mode verified in this pass
 
-1. Both sides begin with every production role locked. The player and AI spend their own gold to unlock independent per-role `UnitData` cadences. A legacy free-spawn pattern remains available only for prototype/debug testing.
+1. Both sides begin with every production track locked. The player and AI spend their own gold to unlock independent cadences. The previously verified implementation keyed standard tracks by `UnitRole`; migration to the accepted ordered-slot roster is in progress and has not yet received complete Play Mode verification. A legacy free-spawn pattern remains available only for prototype/debug testing.
 2. Units march, acquire targets, and fight automatically.
 3. Workers independently mine and deposit gold.
 4. Destroying a base or reaching the time limit ends the match and displays the result.
 
-The player HUD presents live economy and stronghold state, a five-minute countdown, timeout results, restart, and production purchasing. Both teams start with locked roles and spend their own gold to unlock or upgrade independent tracks. The user completed several clean end-to-end Play Mode matches through result and restart by 2026-07-28. Earlier focused verification also covered AI purchasing, production scheduling, timeout branches, match stopping, and reset behavior. Targeted regression automation and a packaged player build remain incomplete.
+The player HUD presents live economy and stronghold state, a five-minute countdown, timeout results, restart, and production purchasing. Both teams start with locked tracks and spend their own gold to unlock or upgrade them. The user completed several clean end-to-end Play Mode matches through result and restart by 2026-07-28 under the earlier role-keyed standard roster. Earlier focused verification also covered AI purchasing, production scheduling, timeout branches, match stopping, and reset behavior. The ordered-slot migration, targeted regression automation, and a packaged player build remain incomplete.
 
-**Short-loop rhythm:** Worker trips and independent recurring production cadences. Buying a locked role unlocks its continuous production; later purchases advance that role to two and three stars.
+**Short-loop rhythm:** Worker trips and independent recurring production cadences. Buying a locked standard slot or the mythic track unlocks its continuous production; later purchases advance that same track to two and three stars.
 
 **Session:** One approximately five-minute match on one shared horizontal lane.
 
@@ -73,11 +73,11 @@ The player HUD presents live economy and stronghold state, a five-minute countdo
 ## Player actions
 
 - **Buy a worker:** Spend gold to increase future income, limited by cost and worker capacity.
-- **Establish or improve production:** Spend gold on melee, archer, cavalry, siege, or mythic production. Each type operates independently rather than through one shared FIFO queue.
-- **Upgrade a role:** Spend gold to advance that role through one-, two-, and three-star tiers.
+- **Establish or improve production:** Spend gold on one of four ordered standard-production slots or the separate mythic track. Each track operates independently rather than through one shared FIFO queue.
+- **Upgrade a production track:** Spend gold to advance that standard slot or mythic track through one-, two-, and three-star tiers.
 - **Read and adapt:** Observe gold, production, upgrades, time, base health, composition, and momentum.
 
-The first purchase unlocks one continuously producing track for that role. The second and third purchases advance future spawns to two and three stars respectively. Purchases do not enter a shared queue and upgrades do not alter units already on the field. Direct movement and combat commands are not player actions.
+The first purchase unlocks one continuously producing track. The second and third purchases advance future spawns from that same track to two and three stars respectively. Purchases do not enter a shared queue and upgrades do not alter units already on the field. Direct movement and combat commands are not player actions.
 
 ## Game rules
 
@@ -87,7 +87,9 @@ The first purchase unlocks one continuously producing track for that role. The s
 
 ### Unit roles and counterplay
 
-The five accepted roles are melee, archer, cavalry, siege, and mythic. All five role mappings and prototype prefabs exist. The implemented first-pass counter triangle applies 1.2× damage for melee against cavalry, archers against melee, and cavalry against archers. Siege remains a structure specialist; mythics use melee, ranged, and support baselines without a role-wide counter bonus. Exact values remain subject to representative Play Mode tuning.
+The five accepted combat classifications are melee, archer, cavalry, siege, and mythic. `UnitRole` classifies combat behavior and counter relationships; it is not the identity or uniqueness key for a faction's standard-production roster. A faction instead owns four ordered standard slots, and multiple slots may use the same combat role (for example, two melee plus two archer slots). Each slot selects its own prefab and `UnitData` and retains independent unlock tier, timer, purchase cost, and production cadence. Mythic remains a separate fifth picker-backed production track outside standard faction-roster composition.
+
+The five supported colour factions and the legacy `Default` faction preserve their existing standard order—melee, archer, cavalry, siege—during migration, so the approved model does not itself change their current composition. The implemented first-pass counter triangle applies 1.2× damage for melee against cavalry, archers against melee, and cavalry against archers. Siege remains a structure specialist; mythics use melee, ranged, and support baselines without a role-wide counter bonus. Exact values remain subject to representative Play Mode tuning.
 
 | Role | Intended identity | Implementation status |
 |---|---|---|
@@ -115,13 +117,13 @@ The result overlay identifies victory, defeat, or draw and its resolution condit
 
 **Implemented:** Workers repeatedly travel to a gold vein, mine, return, and deposit gold. Starting and maximum worker counts, worker cost, base gold per trip, and a future-facing income-upgrade multiplier are configurable on `WorkerManager`. The player starts with one worker in the active scene, and the live HUD can buy workers up to the five-worker capacity while displaying current gold, worker count, and aggregate income per trip.
 
-**Implemented and representatively Play Mode verified:** Gold is the only prototype currency. It funds workers, five independent unit-production types, and three star tiers of in-match upgrades for both the player and AI. Favour, essence, and shared-queue presentation are excluded from the functional battle HUD. Deterministic transaction tests, exhaustive all-role coverage, and targeted edge cases remain incomplete.
+**Implemented under the earlier role-keyed roster and now being migrated:** Gold is the only prototype currency. It funds workers, four independent standard-production slots, the separate mythic track, and three star tiers of in-match upgrades for both the player and AI. Favour, essence, and shared-queue presentation are excluded from the functional battle HUD. Ordered duplicate-role slot verification, deterministic transaction tests, exhaustive track coverage, and targeted edge cases remain incomplete.
 
 ### Progression and persistence
 
-Each role begins locked. Its first purchase unlocks continuous one-star production; its next two purchases upgrade future spawns to two and three stars. Star tiers multiply all configured unit stats except purchase cost by 1×, 1.25×, and 1.5×. Existing fielded units do not change when a role is upgraded.
+Each standard slot and the mythic track begins locked. Its first purchase unlocks continuous one-star production; its next two purchases upgrade future spawns to two and three stars. Star tiers multiply all configured unit stats except purchase cost by 1×, 1.25×, and 1.5×. Existing fielded units do not change when a track is upgraded.
 
-Each role's purchase cost and recurring production cadence are configured in its `UnitData` asset. `GameManager` can run either the legacy global spawn pattern or independent per-role timers for prototype testing. Purchase-slot activation gates the intended per-role mode, and a newly unlocked track begins a fresh cadence rather than inheriting locked time. Initial values remain balance tuning rather than an unresolved ownership decision.
+Each standard slot resolves purchase cost and recurring cadence from its configured unit's `UnitData`; duplicate-role slots therefore remain economically and temporally independent. The mythic selection's `UnitData` remains authoritative for its separate track. `GameManager` can retain a legacy global spawn pattern for prototype/debug testing, but it must enumerate configured standard slots rather than collapse duplicates by role. A newly unlocked track begins a fresh cadence rather than inheriting locked time. Initial values remain balance tuning rather than an unresolved ownership decision.
 
 Campaign and persistent progression are deferred beyond the core prototype. No save system is required for the core loop.
 
@@ -136,13 +138,13 @@ Campaign and persistent progression are deferred beyond the core prototype. No s
 
 ## AI and difficulty
 
-The AI uses the same worker, gold-spending, production, tier, mythic-selection, spawn, and match rules as the player. Easy makes slower, partly idle/random decisions and receives no starting bonus. Medium establishes production before each early worker investment, then balances workers with varied production at a moderate cadence, and receives +50 starting gold. Hard makes faster decisions, requires a broader military opening before expanding its economy, and receives +150 starting gold. The bonus applies once to the enemy only. The AI randomly chooses a valid mythic and a configured faction other than the player's faction. This system is representatively Play Mode verified, but the three-star melee dominance report shows that difficulty and purchasing policy require balance diagnosis. Online matchmaking remains deferred.
+The AI uses the same worker, gold-spending, four standard-slot production, tier, separate mythic-selection, spawn, and match rules as the player. It must address standard production by slot so duplicate combat roles remain independently purchasable and upgradeable. Easy makes slower, partly idle/random decisions and receives no starting bonus. Medium establishes production before each early worker investment, then balances workers with varied production at a moderate cadence, and receives +50 starting gold. Hard makes faster decisions, requires a broader military opening before expanding its economy, and receives +150 starting gold. The bonus applies once to the enemy only. The AI randomly chooses a valid mythic and a configured faction other than the player's faction. The earlier role-keyed system was representatively Play Mode verified; the ordered-slot migration still requires verification. The three-star melee dominance report also shows that difficulty and purchasing policy require balance diagnosis. Online matchmaking remains deferred.
 
 ## UI and feedback
 
 **Implemented:** Units display world-space damage health bars. Stronghold health is shown as live current/maximum text and proportional bars in the battle HUD, without duplicate world-space bars above the bases. Base hits shake the base visual; animated attacks and projectile arcs provide combat feedback; victory text identifies the winning team.
 
-**Implemented and representatively Play Mode verified:** The redesigned scene HUD presents the accepted single-gold economy and independent role cards. Its player gold, aggregate worker income, worker count, buy-worker button, five production purchase controls, locked/producing and tier states, affordability, greyed locked art, both stronghold-health displays, match timer, result overlay, resolution reason, and restart button are live. Focused presenter verification and several complete matches cover the representative flow; the user confirmed readability at the tested aspect ratios. Targeted edge-case regression remains.
+**Implemented and representatively Play Mode verified before the ordered-slot migration:** The redesigned scene HUD presents the accepted single-gold economy and five production cards. Its player gold, aggregate worker income, worker count, buy-worker button, production controls, locked/producing and tier states, affordability, greyed locked art, both stronghold-health displays, match timer, result overlay, resolution reason, and restart button are live. Under the accepted roster model, the first four cards represent ordered standard slots and the fifth remains the separate mythic track; card labels and interactions must derive from slot configuration rather than assuming unique roles. Focused presenter verification and several complete matches cover the earlier representative flow; duplicate-role presentation and interaction still require Play Mode regression.
 
 The functional prototype HUD must communicate gold, worker purchase state, independent production, star tiers, remaining time, base health, and the final result. A results/restart flow is required. The accepted initial front-end flow is a title screen with Play and Exit, then a faction-selection screen whose clickable options are generated from configured `FactionData` assets. The chosen player faction must drive the existing faction-owned battle presentation and unit mappings. An in-game menu is now accepted scope; its exact actions and pause semantics remain to be finalized before implementation. Basic onboarding and most feedback remain unimplemented.
 
@@ -174,7 +176,7 @@ The title screen should eventually use the same colourful Tiny Swords presentati
 
 - One complete economy → production → autonomous combat → result → restart loop against AI.
 - One shared horizontal lane and two strongholds.
-- Gold-funded workers, five independent unit-production types, and three star tiers.
+- Gold-funded workers, four ordered independent standard-production slots, one separate mythic track, and three star tiers per track.
 - Meaningful economy-versus-pressure and composition decisions.
 - Approximately five-minute matches with base-destruction and timeout results.
 - Minimal functional HUD and clear feedback.
@@ -191,7 +193,7 @@ The title screen should eventually use the same colourful Tiny Swords presentati
 
 - Additional factions or maps.
 - Battle-speed controls for solo play or testing.
-- Additional unit options if the five-role model proves insufficient.
+- Additional unit options if the four-standard-slot plus separate-mythic model proves insufficient.
 
 ### Accepted mythic-roster test expansion
 
@@ -214,7 +216,7 @@ All five monk colours reference the same `MonkUnitData` and are mechanically ide
 
 - A player can understand and complete the full loop against AI.
 - At least one economy-versus-military decision materially changes the battle.
-- Independent production and three star tiers create readable strategic choices.
+- Independent standard-slot and mythic production with three star tiers creates readable strategic choices.
 - The HUD accurately communicates all decision-critical state.
 - Base destruction and both timeout comparisons produce the correct result.
 - The battle can restart without Editor intervention.
@@ -224,7 +226,7 @@ These criteria define the target; they do not claim the current build satisfies 
 
 ## Open design questions
 
-No material design questions from this reconciliation remain open. Exact per-role values and matchups require implementation and playtest tuning.
+No material design questions from this reconciliation remain open. Exact per-unit-profile values, slot compositions, and matchups require implementation and playtest tuning.
 
 ## Related documents
 

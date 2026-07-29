@@ -4,13 +4,13 @@ using Unity.Profiling;
 public sealed class UnitSpawnController : IProductionSpawnContext
 {
     private static readonly ProfilerMarker CapacityScanMarker = new("Clash.Production.CapacityScan");
-    private static readonly UnitRole[] Roles =
+    private static readonly ProductionSlotId[] Slots =
     {
-        UnitRole.Melee,
-        UnitRole.Archer,
-        UnitRole.Cavalry,
-        UnitRole.Siege,
-        UnitRole.Mythic
+        ProductionSlotId.Standard0,
+        ProductionSlotId.Standard1,
+        ProductionSlotId.Standard2,
+        ProductionSlotId.Standard3,
+        ProductionSlotId.Mythic
     };
 
     private readonly FactionData leftFaction;
@@ -75,10 +75,9 @@ public sealed class UnitSpawnController : IProductionSpawnContext
         return Mathf.Max(0, maxUnitsPerTeam - teamUnitCount);
     }
 
-    public bool TryGetSpawnInterval(Team team, UnitRole role, out float interval)
+    public bool TryGetSpawnInterval(Team team, ProductionSlotId slotId, out float interval)
     {
-        FactionData faction = GetFaction(team);
-        if (faction != null && faction.TryGetUnitData(role, out UnitData data))
+        if (TryGetProductionData(team, slotId, out UnitData data))
         {
             interval = data.SpawnInterval;
             return true;
@@ -88,7 +87,7 @@ public sealed class UnitSpawnController : IProductionSpawnContext
         return false;
     }
 
-    public bool TrySpawnUnit(Team team, UnitRole role, int productionTier)
+    public bool TrySpawnUnit(Team team, ProductionSlotId slotId, int productionTier)
     {
         FactionData faction = GetFaction(team);
         Transform spawnPoint = team == Team.Left ? leftSpawnPoint : rightSpawnPoint;
@@ -98,10 +97,24 @@ public sealed class UnitSpawnController : IProductionSpawnContext
             return false;
         }
 
-        BaseUnit prefab = role == UnitRole.Mythic
-            ? productionState.GetSelectedMythic(team)
-            : null;
-        if (prefab == null && !faction.TryGetUnitPrefab(role, out prefab))
+        BaseUnit prefab;
+        UnitRole role;
+        if (slotId == ProductionSlotId.Mythic)
+        {
+            prefab = productionState.GetSelectedMythic(team);
+            role = UnitRole.Mythic;
+        }
+        else if (faction.TryGetProductionEntry(slotId, out FactionUnitEntry entry))
+        {
+            prefab = entry.Prefab;
+            role = entry.Role;
+        }
+        else
+        {
+            return false;
+        }
+
+        if (prefab == null || prefab.UnitData == null)
         {
             return false;
         }
@@ -118,24 +131,24 @@ public sealed class UnitSpawnController : IProductionSpawnContext
 
         if (randomiseSpawns)
         {
-            if (TrySelectWeightedRole(team, out UnitRole selectedRole))
+            if (TrySelectWeightedSlot(team, out ProductionSlotId selectedSlot))
             {
-                TrySpawnUnit(team, selectedRole, 1);
+                TrySpawnUnit(team, selectedSlot, 1);
             }
 
             return;
         }
 
         int scanStartIndex = team == Team.Left ? leftSpawnIndex : rightSpawnIndex;
-        for (int offset = 0; offset < Roles.Length; offset++)
+        for (int offset = 0; offset < Slots.Length; offset++)
         {
-            int roleIndex = (scanStartIndex + offset) % Roles.Length;
-            if (!TrySpawnUnit(team, Roles[roleIndex], 1))
+            int slotIndex = (scanStartIndex + offset) % Slots.Length;
+            if (!TrySpawnUnit(team, Slots[slotIndex], 1))
             {
                 continue;
             }
 
-            int nextIndex = (roleIndex + 1) % Roles.Length;
+            int nextIndex = (slotIndex + 1) % Slots.Length;
             if (team == Team.Left)
             {
                 leftSpawnIndex = nextIndex;
@@ -149,13 +162,12 @@ public sealed class UnitSpawnController : IProductionSpawnContext
         }
     }
 
-    private bool TrySelectWeightedRole(Team team, out UnitRole selectedRole)
+    private bool TrySelectWeightedSlot(Team team, out ProductionSlotId selectedSlot)
     {
-        FactionData faction = GetFaction(team);
         float totalWeight = 0f;
-        foreach (UnitRole role in Roles)
+        foreach (ProductionSlotId slotId in Slots)
         {
-            if (faction != null && faction.TryGetUnitData(role, out UnitData data))
+            if (TryGetProductionData(team, slotId, out UnitData data))
             {
                 totalWeight += GetSpawnWeight(data);
             }
@@ -163,17 +175,17 @@ public sealed class UnitSpawnController : IProductionSpawnContext
 
         if (totalWeight <= 0f)
         {
-            selectedRole = default;
+            selectedSlot = default;
             return false;
         }
 
-        selectedRole = default;
+        selectedSlot = default;
         float roll = Random.Range(0f, totalWeight);
-        foreach (UnitRole role in Roles)
+        foreach (ProductionSlotId slotId in Slots)
         {
-            if (faction == null || !faction.TryGetUnitData(role, out UnitData data)) continue;
+            if (!TryGetProductionData(team, slotId, out UnitData data)) continue;
 
-            selectedRole = role;
+            selectedSlot = slotId;
             roll -= GetSpawnWeight(data);
             if (roll <= 0f) return true;
         }
@@ -184,6 +196,34 @@ public sealed class UnitSpawnController : IProductionSpawnContext
     private FactionData GetFaction(Team team)
     {
         return team == Team.Left ? leftFaction : rightFaction;
+    }
+
+    private bool TryGetProductionData(
+        Team team,
+        ProductionSlotId slotId,
+        out UnitData data)
+    {
+        if (slotId == ProductionSlotId.Mythic)
+        {
+            BaseUnit selectedMythic = productionState.GetSelectedMythic(team);
+            if (selectedMythic != null && selectedMythic.UnitData != null)
+            {
+                data = selectedMythic.UnitData;
+                return true;
+            }
+
+            data = null;
+            return false;
+        }
+
+        FactionData faction = GetFaction(team);
+        if (faction == null)
+        {
+            data = null;
+            return false;
+        }
+
+        return faction.TryGetUnitData(slotId, out data);
     }
 
     private static float GetSpawnWeight(UnitData data)

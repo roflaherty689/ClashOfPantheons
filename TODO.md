@@ -38,29 +38,29 @@ Tasks are ordered by dependency and prototype value.
 
 **Status:** Partially implemented
 
-### 1. Integrate player gold, workers, and independent unit production
+### 1. Integrate player gold, workers, and independent slot production
 
 **Outcome:** The player can make the prototype's core economy-versus-pressure decision with gold.
 
 **Acceptance criteria:**
 
-- [x] Player gold is the authoritative currency for worker purchases, all five production types, and upgrades.
+- [ ] Player gold is the authoritative currency for worker purchases, all four ordered standard-production slots, the separate mythic track, and their upgrades. The earlier role-keyed path is verified; the slot-keyed migration remains.
 - [x] Buying a worker uses the existing worker limit and updates visible gold/worker state.
-- [x] Every unit type follows the approved independent recurring-production contract without a shared FIFO queue in source; all-role Play Mode verification remains tracked below.
-- [x] A role begins locked; its first purchase unlocks continuous one-star production and its next two purchases upgrade only future spawns to two and three stars in source.
+- [ ] Every standard slot follows the approved independent recurring-production contract without a shared FIFO queue; duplicate combat roles do not share unlock, tier, timer, cost, cadence, or purchase state.
+- [ ] Each standard slot begins locked; its first purchase unlocks continuous one-star production and its next two purchases upgrade only future spawns from that slot to two and three stars. Mythic follows the same tier lifecycle on a separate picker-backed track.
 - [x] Favourable matchups apply a 1.2× damage multiplier.
 - [x] Star tiers multiply every configured unit stat except purchase cost by 1×/1.25×/1.5× and affect future spawns only.
-- [x] Each `UnitData` asset owns that role's purchase cost and recurring production cadence; the global spawn interval no longer defines all roles.
+- [ ] Each configured unit's `UnitData` remains authoritative for its slot's purchase cost and recurring production cadence; the global spawn interval does not collapse duplicate-role slots.
 - [x] Production stops correctly when the match ends and resets correctly for a new match in representative Play Mode verification.
 - [x] Costs, failed purchases, and production state are visibly communicated in representative Play Mode verification.
 - [ ] Deterministic economy and production rules have focused automated tests where practical.
-- [x] Compilation and representative Play Mode paths are verified.
+- [ ] The slot-keyed implementation compiles and representative duplicate-role Play Mode paths are verified. Earlier role-keyed compilation and paths passed.
 
-**Relevant systems:** `WorkerManager`, `GameManager`, `UnitData`, faction data, battle UI, scene wiring
+**Relevant systems:** `WorkerManager`, `GameManager`, `ProductionStateController`, `UnitSpawnController`, `UnitData`, faction data, AI, battle UI, scene wiring
 
-**Dependencies:** `DEC-004` and `DEC-007`; initial values require balance tuning during implementation
+**Dependencies:** `DEC-004` and `DEC-018`; initial values require balance tuning during implementation
 
-**Progress:** `UnitData` owns each role's cost and cadence. Player production purchasing uses atomic spending, fresh unlock timers, future-spawn tier snapshots, and a three-purchase cap. The production cards and selected-role panel communicate live state and affordability. Verification commits record cadence, simultaneous readiness, cap resume, failures, match-end stopping, and restart behavior; the user has also completed several clean end-to-end matches. Existing Core tests cover tier transitions/scaling, but focused economy transactions and production scheduling tests remain. Balance is not accepted: the user reports three-star melee wins roughly 99% across all difficulties and mythics are too weak for their cost.
+**Progress:** The earlier role-keyed implementation uses `UnitData` cost/cadence, atomic spending, fresh unlock timers, future-spawn tier snapshots, and a three-purchase cap. Its production cards, selected-role panel, cadence, simultaneous readiness, cap resume, failures, match-end stopping, restart, and complete matches received representative verification. Migration to four ordered slot identities with duplicate-role support is in progress and is not covered by those earlier checks. Existing Core tests cover tier transitions/scaling, but focused slot-keyed economy transactions and production scheduling tests remain. Balance is not accepted: the user reports three-star melee wins roughly 99% across all difficulties and mythics are too weak for their cost.
 
 **Status:** Partially implemented
 
@@ -71,19 +71,19 @@ Tasks are ordered by dependency and prototype value.
 **Acceptance criteria:**
 
 - [x] AI purchases consume its gold and respect the same costs, limits, and production rules.
-- [x] AI can buy workers, use all required roles, and buy star upgrades.
+- [ ] AI can buy workers, purchase and upgrade all four standard slots independently even when roles repeat, and use the separate mythic track.
 - [x] A simple documented strategy creates credible pressure within a five-minute match.
 - [x] AI stops on match end and resets on restart.
 - [x] AI decisions are observable enough to debug and tune.
-- [x] Compilation and representative Play Mode matches are verified.
+- [ ] Slot-keyed compilation and representative duplicate-role Play Mode matches are verified. Earlier role-keyed AI matches passed.
 
 **Relevant systems:** future AI policy, economy/production interfaces, match state
 
 **Dependencies:** Task 1
 
-**Progress:** Complete. `EnemyAIController` uses the shared worker, production, tier, and atomic mythic-purchase APIs. Easy/Medium/Hard change cadence and policy quality; enemy-only bonuses produce 200/250/350 initial totals. Medium and Hard gate early workers behind military production to resist rushes. The user verified the integrated AI and difficulty flow in Play Mode on 2026-07-17 and accepted current balance for later fine-tuning.
+**Progress:** The earlier role-keyed `EnemyAIController` uses the shared worker, production, tier, and atomic mythic-purchase APIs. Easy/Medium/Hard change cadence and policy quality; enemy-only bonuses produce 200/250/350 initial totals. Medium and Hard gate early workers behind military production to resist rushes. The user verified that integrated flow in Play Mode on 2026-07-17. Slot-keyed duplicate-role purchasing and upgrades still require migration and regression.
 
-**Status:** Complete
+**Status:** Partially implemented
 
 ### 3. Complete match timing, result resolution, and restart
 
@@ -116,7 +116,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Acceptance criteria:**
 
-- [x] HUD shows live gold, workers, five independent production states, star tiers, timer, both stronghold health values, and results in source; complete-loop and multi-resolution verification remain below.
+- [ ] HUD shows live gold, workers, four ordered standard-slot states plus a separate mythic state, per-track star tiers, timer, both stronghold health values, and results. The earlier five-role presentation is verified; slot-derived duplicate-role presentation remains.
 - [x] Favour, essence, and shared FIFO queue presentation are removed or clearly excluded from the functional prototype UI.
 - [ ] Player purchase and upgrade controls provide success, failure, affordability, and cooldown/cadence feedback.
 - [x] Critical state does not rely on red/blue colour alone and text is readable at the chosen prototype resolutions.
@@ -127,7 +127,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** Tasks 1–3
 
-**Progress:** The editor-authored Tiny Swords battle HUD binds gold, workers, both strongholds, timer, results, restart, and all five independent production cards. Focused verification covers its presenters and interactions, and the user has completed several clean end-to-end Play Mode matches. The user confirmed the existing menus and HUD are readable at the tested aspect ratios and that the game provides meaningful strategic choices. The attempted three-part stronghold health-bar frame remains deferred pending a later UI pass.
+**Progress:** The editor-authored Tiny Swords battle HUD binds gold, workers, both strongholds, timer, results, restart, and five production cards. Focused verification covers the earlier unique-role presenters and interactions, and the user has completed several clean end-to-end Play Mode matches. The accepted model reinterprets the first four cards as ordered standard slots and keeps mythic as the separate fifth track; duplicate-role labels, art, purchase routing, and independent states remain to be verified. The attempted three-part stronghold health-bar frame remains deferred pending a later UI pass.
 
 **Status:** Partially implemented
 
@@ -226,7 +226,7 @@ Tasks are ordered by dependency and prototype value.
 - [x] Order the mythic picker by ascending gold cost, then alphabetically when costs match.
 - [x] Validate compilation/import, serialized-data migration, both teams/facings, animator references, restart reset, transaction behavior, representative resolutions, and Play Mode.
 
-**Dependencies/risks:** Existing faction and production data assume one prefab/data pair per role. Healing requires friendly targeting and current/max-health access without costly broad scans. This test expansion must not displace the incomplete AI/core-loop work.
+**Dependencies/risks:** Mythic remains deliberately separate from the four-slot faction roster and continues to use its picker-backed per-match selection. Healing requires friendly targeting and current/max-health access without costly broad scans. This test expansion must not displace the incomplete AI/core-loop work.
 
 **Progress:** Phases 1-3 are complete. Runtime source provides ally-combat-state tracking, clamped healing, lowest-health ally selection, fixed-cadence tier-scaled monk healing, movement suppression, recipient-owned heal VFX, moving/healing friendly separation, enemy-proximity stopping, and a target-point stopping distance equal to heal range. The Editor builder normalized all five controllers and clip-loop settings, generated the shared `MonkUnitData`, one-shot heal-effect prefab, and five colour monk prefabs, and assigned each colour faction's mythic entry to its matching monk. Phase 2 provides 15 independent Enemy Pack mythic prefabs and `UnitData` assets, normalized Idle/Run-or-Walk/Attack controllers, and dedicated bone, harpoon, and shaman projectiles for the three ranged units. Phase 3 adds a build-safe 21-unit roster and a scrollable right-side picker whose selection and initial gold spend are atomic; the selected prefab's data controls upgrades and spawning for the remainder of the match, while cancellation and unaffordable options spend nothing. Combat mythics now have accepted creature-identity-driven health, damage, speed, cost, and cadence profiles; all monk colours share one profile, Troll is uniquely strongest and highest-cost, and picker options sort by ascending gold cost with alphabetical ties. Presentation maps all 16 Enemy Pack choices to their configured Enemy Avatars and all five monks to their colour-specific Human Avatars, shows portraits beside picker labels, switches the mythic slot and details portrait after selection, starts with greyed crossed swords on parchment, removes redundant picker chrome, and gives all standard faction archers the Tiny Swords arrow projectile. Static serialized-reference checks and both C# assembly builds pass; the user accepted the combined Phase 2-3 Play Mode review and the subsequent balance and sorting pass on 2026-07-17.
 
@@ -234,7 +234,7 @@ Tasks are ordered by dependency and prototype value.
 
 ### Faction-driven prototype presentation
 
-**Outcome:** The faction selected for either team is the single source of truth for its world Castle, House3 worker hand-in, HUD stronghold icon, and animated worker prefab without duplicating economy or building gameplay configuration.
+**Outcome:** The faction selected for either team is the single source of truth for its ordered standard-unit roster, world Castle, House3 worker hand-in, HUD stronghold icon, and animated worker prefab without duplicating economy or building gameplay configuration.
 
 **Acceptance criteria:**
 
@@ -267,6 +267,7 @@ _No items currently blocked by external state._
 ---
 
 ## Discovered follow-up work
+- [ ] Manually verify the ordered-roster migration in Unity Play Mode with a test faction configured as two melee plus two archer standard slots: confirm each card's label/art/data, independent unlock/tier/timer/cost/cadence and spawning, slot-aware AI purchasing/upgrading, match restart reset, and the legacy global debug pattern. Also smoke the five colour factions and legacy `Default` to confirm their preserved melee/archer/cavalry/siege slot order and confirm mythic remains the independent fifth picker-backed track.
 - [x] After Unity imported the legacy meme-faction deletions, the user confirmed on 2026-07-28 that the Unity run looked correct, closing the Console and title → faction → difficulty → battle smoke follow-up. No broader gameplay verification is inferred.
 - [x] Accept the initial SFX layer as a prototype first pass after several complete user-played matches. Sound-level and cue-selection refinement remains a later audio pass; persistent-service uniqueness should be retained as a scene-transition regression check.
 - [x] Normalize the battle-scene UI hierarchy by removing the isolated `Canvas/Canvas/VictoryText` legacy branch and restoring the active `Battle UI` RectTransform scale to one. The user verified the migrated hierarchy and presentation on 2026-07-18.
@@ -294,7 +295,7 @@ _No items currently blocked by external state._
 
 **Completed:** 2026-07-16
 
-**Evidence:** User-approved answers are recorded in accepted `DEC-007`: first purchase unlocks one continuously producing role track; later purchases advance future spawns to two and three stars; fielded units are unchanged. `DEC-003`, `DEC-004`, and `DEC-008` also record the resolved timeout valuation, initial multipliers, and PC-first priority.
+**Evidence:** User-approved answers were originally recorded in `DEC-007`: first purchase unlocks one continuously producing track; later purchases advance future spawns to two and three stars; fielded units are unchanged. `DEC-018` carries that lifecycle forward per ordered standard slot while superseding role-keyed production identity. `DEC-003`, `DEC-004`, and `DEC-008` also record the resolved timeout valuation, initial multipliers, and PC-first priority.
 
 This completed the design dependency only. Production and upgrades were not implemented when this decision task closed; their current implementation and remaining verification are tracked in P1 Task 1.
 

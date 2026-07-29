@@ -224,17 +224,38 @@ public static class ClashBattleUIBuilder
         for (int i = 0; i < roles.Length; i++)
         {
             float x = -568 + i * 284;
-            CreateRoleCard(production, roles[i], costs[i], artPaths[i], artSprites[i], new Vector2(x, -5));
+            CreateRoleCard(
+                production,
+                (ProductionSlotId)i,
+                roles[i],
+                costs[i],
+                artPaths[i],
+                artSprites[i],
+                new Vector2(x, -5));
         }
     }
 
-    private static void CreateRoleCard(RectTransform parent, string role, string cost, string artPath, string artSprite, Vector2 pos)
+    private static void CreateRoleCard(
+        RectTransform parent,
+        ProductionSlotId slotId,
+        string role,
+        string cost,
+        string artPath,
+        string artSprite,
+        Vector2 pos)
     {
         RectTransform card = CreateRect(role + " Production", parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), pos, new Vector2(258, 274));
         Image cardImage = AddPanel(card.gameObject, Panel);
         AddBorder(card, new Color32(126, 109, 75, 255), 3);
 
-        AddText(card, role, 23, TextAlignmentOptions.Center, new Vector2(0, 111), new Vector2(220, 34), Color.white);
+        TextMeshProUGUI titleText = AddText(
+            card,
+            role,
+            23,
+            TextAlignmentOptions.Center,
+            new Vector2(0, 111),
+            new Vector2(220, 34),
+            Color.white);
         RectTransform portraitPaper = CreateRect("Portrait Paper", card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 32), new Vector2(154, 142));
         Image portraitPaperImage = AddSpriteOrPanel(portraitPaper.gameObject, UiRoot + "/Papers/RegularPaper.png", "RegularPaper_4", new Color32(212, 196, 151, 255), false);
         RectTransform art = CreateRect(role + " Art", card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 32), new Vector2(132, 132));
@@ -253,8 +274,16 @@ public static class ClashBattleUIBuilder
         TextMeshProUGUI actionText = AddText(button, cost, 22, TextAlignmentOptions.Left, new Vector2(31, 0), new Vector2(90, 32), Color.white);
 
         ProductionCardView view = card.gameObject.AddComponent<ProductionCardView>();
-        view.Configure((UnitRole)System.Enum.Parse(typeof(UnitRole), role, true), cardImage, selectable,
-            artImage, portraitPaperImage, statusText, tierText, actionText);
+        view.Configure(
+            slotId,
+            cardImage,
+            selectable,
+            artImage,
+            portraitPaperImage,
+            titleText,
+            statusText,
+            tierText,
+            actionText);
     }
 
     private static void CreateRoleDetailPanel(RectTransform parent)

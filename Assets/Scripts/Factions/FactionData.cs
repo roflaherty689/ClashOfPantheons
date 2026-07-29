@@ -1,13 +1,19 @@
+using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "New Faction", menuName = "Clash of Pantheons/Faction")]
 public class FactionData : ScriptableObject
 {
+    public const int StandardProductionSlotCount = 4;
+
     [Header("Faction Info")]
     [SerializeField] private string factionName;
 
-    [Header("Units")]
-    [SerializeField] private FactionUnitEntry[] units;
+    [Header("Ordered Standard Production Slots")]
+    [FormerlySerializedAs("units")]
+    [SerializeField] private FactionUnitEntry[] productionUnits;
 
     [Header("Worker")]
     [SerializeField] private WorkerUnit workerPrefab;
@@ -21,39 +27,37 @@ public class FactionData : ScriptableObject
     public Sprite CastleSprite => castleSprite;
     public Sprite HandInSprite => handInSprite;
     public bool HasBuildingPresentation => castleSprite != null && handInSprite != null;
+    public IReadOnlyList<FactionUnitEntry> ProductionUnits =>
+        productionUnits ?? System.Array.Empty<FactionUnitEntry>();
 
-    public BaseUnit GetUnitPrefab(UnitRole role)
+    public bool TryGetProductionEntry(ProductionSlotId slotId, out FactionUnitEntry entry)
     {
-        if (TryGetUnitPrefab(role, out BaseUnit prefab))
+        int index = GetStandardSlotIndex(slotId);
+        if (index >= 0 && productionUnits != null && index < productionUnits.Length)
         {
-            return prefab;
+            entry = productionUnits[index];
+            return entry != null;
         }
 
-        Debug.LogError($"No unit prefab found for role {role} in faction {factionName}");
-        return null;
+        entry = null;
+        return false;
     }
 
-    public bool TryGetUnitPrefab(UnitRole role, out BaseUnit prefab)
+    public bool TryGetUnitPrefab(ProductionSlotId slotId, out BaseUnit prefab)
     {
-        if (units != null)
+        if (TryGetProductionEntry(slotId, out FactionUnitEntry entry) && entry.Prefab != null)
         {
-            foreach (FactionUnitEntry entry in units)
-            {
-                if (entry != null && entry.Role == role && entry.Prefab != null)
-                {
-                    prefab = entry.Prefab;
-                    return true;
-                }
-            }
+            prefab = entry.Prefab;
+            return true;
         }
 
         prefab = null;
         return false;
     }
 
-    public bool TryGetUnitData(UnitRole role, out UnitData unitData)
+    public bool TryGetUnitData(ProductionSlotId slotId, out UnitData unitData)
     {
-        if (TryGetUnitPrefab(role, out BaseUnit prefab) && prefab.UnitData != null)
+        if (TryGetUnitPrefab(slotId, out BaseUnit prefab) && prefab.UnitData != null)
         {
             unitData = prefab.UnitData;
             return true;
@@ -61,5 +65,62 @@ public class FactionData : ScriptableObject
 
         unitData = null;
         return false;
+    }
+
+    public bool TryValidateProductionUnits(out string error)
+    {
+        StringBuilder issues = new StringBuilder();
+        if (productionUnits == null || productionUnits.Length != StandardProductionSlotCount)
+        {
+            int configuredCount = productionUnits?.Length ?? 0;
+            issues.Append(
+                $"expected exactly {StandardProductionSlotCount} ordered standard production entries, found {configuredCount}");
+        }
+
+        int countToValidate = productionUnits == null
+            ? 0
+            : Mathf.Min(productionUnits.Length, StandardProductionSlotCount);
+        for (int index = 0; index < countToValidate; index++)
+        {
+            FactionUnitEntry entry = productionUnits[index];
+            if (entry == null)
+            {
+                AppendIssue(issues, $"standard slot {index} has no entry");
+                continue;
+            }
+
+            if (!System.Enum.IsDefined(typeof(UnitRole), entry.Role) || entry.Role == UnitRole.Mythic)
+            {
+                AppendIssue(issues, $"standard slot {index} has invalid role {entry.Role}");
+            }
+
+            if (entry.Prefab == null)
+            {
+                AppendIssue(issues, $"standard slot {index} has no prefab");
+            }
+            else if (entry.Prefab.UnitData == null)
+            {
+                AppendIssue(issues, $"standard slot {index} prefab '{entry.Prefab.name}' has no UnitData");
+            }
+        }
+
+        error = issues.ToString();
+        return error.Length == 0;
+    }
+
+    private static int GetStandardSlotIndex(ProductionSlotId slotId)
+    {
+        int index = (int)slotId;
+        return index >= 0 && index < StandardProductionSlotCount ? index : -1;
+    }
+
+    private static void AppendIssue(StringBuilder issues, string issue)
+    {
+        if (issues.Length > 0)
+        {
+            issues.Append("; ");
+        }
+
+        issues.Append(issue);
     }
 }

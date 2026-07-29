@@ -9,7 +9,7 @@ public sealed class SelectedRolePresenter
 
     private readonly Team playerTeam;
     private readonly ProductionCardPresenter cardPresenter;
-    private readonly Action<UnitRole> purchaseRequested;
+    private readonly Action<ProductionSlotId> purchaseRequested;
     private readonly Image roleIcon;
     private readonly TextMeshProUGUI titleText;
     private readonly TextMeshProUGUI statusText;
@@ -18,13 +18,13 @@ public sealed class SelectedRolePresenter
     private readonly TextMeshProUGUI actionText;
     private readonly Button actionButton;
 
-    private UnitRole selectedRole = UnitRole.Melee;
+    private ProductionSlotId selectedSlot = ProductionSlotId.Standard0;
 
     public SelectedRolePresenter(
         Transform root,
         Team playerTeam,
         ProductionCardPresenter cardPresenter,
-        Action<UnitRole> purchaseRequested)
+        Action<ProductionSlotId> purchaseRequested)
     {
         this.playerTeam = playerTeam;
         this.cardPresenter = cardPresenter;
@@ -60,11 +60,14 @@ public sealed class SelectedRolePresenter
 
     public RectTransform Panel { get; }
     public TMP_FontAsset Font => titleText != null ? titleText.font : null;
-    public UnitRole SelectedRole => selectedRole;
+    public ProductionSlotId SelectedSlot => selectedSlot;
 
-    public void Select(UnitRole role, GameManager gameManager, WorkerManager workerManager)
+    public void Select(
+        ProductionSlotId slotId,
+        GameManager gameManager,
+        WorkerManager workerManager)
     {
-        selectedRole = role;
+        selectedSlot = slotId;
         Refresh(gameManager, workerManager);
     }
 
@@ -72,15 +75,16 @@ public sealed class SelectedRolePresenter
     {
         if (gameManager == null || workerManager == null) return;
 
-        int tier = gameManager.GetProductionTier(playerTeam, selectedRole);
-        bool hasData = gameManager.TryGetProductionData(playerTeam, selectedRole, out UnitData data);
+        int tier = gameManager.GetProductionTier(playerTeam, selectedSlot);
+        bool hasData = gameManager.TryGetProductionData(playerTeam, selectedSlot, out UnitData data);
         int cost = hasData ? data.Cost : 0;
-        BaseUnit selectedMythic = selectedRole == UnitRole.Mythic
+        BaseUnit selectedMythic = selectedSlot == ProductionSlotId.Mythic
             ? gameManager.GetSelectedMythicUnit(playerTeam)
             : null;
+        gameManager.TryGetProductionRole(playerTeam, selectedSlot, out UnitRole role);
         string roleName = selectedMythic != null
             ? MythicArtworkPresenter.GetDisplayName(selectedMythic).ToUpperInvariant()
-            : selectedRole.ToString().ToUpperInvariant();
+            : role.ToString().ToUpperInvariant();
 
         RefreshIcon(gameManager, selectedMythic);
 
@@ -101,7 +105,7 @@ public sealed class SelectedRolePresenter
 
         if (descriptionText != null)
         {
-            descriptionText.text = selectedRole == UnitRole.Mythic && tier == 0
+            descriptionText.text = selectedSlot == ProductionSlotId.Mythic && tier == 0
                 ? "Choose a mythic unit before spending gold. Its own cost and production cadence will apply for this match."
                 : tier == 0
                 ? $"Unlock to begin recurring {roleName.ToLowerInvariant()} production. Upgrades affect future spawns only."
@@ -114,13 +118,13 @@ public sealed class SelectedRolePresenter
         {
             actionText.text = tier >= GameManager.MaximumProductionTier
                 ? "MAXIMUM TIER"
-                : selectedRole == UnitRole.Mythic && tier == 0 ? "SELECT UNIT"
+                : selectedSlot == ProductionSlotId.Mythic && tier == 0 ? "SELECT UNIT"
                 : tier == 0 ? $"UNLOCK   {cost} GOLD" : $"UPGRADE   {cost} GOLD";
         }
 
         if (actionButton != null)
         {
-            actionButton.interactable = selectedRole == UnitRole.Mythic && tier == 0
+            actionButton.interactable = selectedSlot == ProductionSlotId.Mythic && tier == 0
                 ? gameManager.HasMythicChoices(playerTeam)
                 : hasData && tier < GameManager.MaximumProductionTier &&
                     workerManager.CurrentGold >= cost && !gameManager.IsGameOver;
@@ -137,14 +141,14 @@ public sealed class SelectedRolePresenter
 
     private void PurchaseSelectedRole()
     {
-        purchaseRequested?.Invoke(selectedRole);
+        purchaseRequested?.Invoke(selectedSlot);
     }
 
     private void RefreshIcon(GameManager gameManager, BaseUnit selectedMythic)
     {
         if (roleIcon == null) return;
 
-        if (selectedRole == UnitRole.Mythic)
+        if (selectedSlot == ProductionSlotId.Mythic)
         {
             MythicArtworkPresenter.Update(
                 roleIcon,
@@ -159,7 +163,7 @@ public sealed class SelectedRolePresenter
         }
 
         MythicArtworkPresenter.HideCrossedSwords(roleIcon);
-        Image selectedArt = cardPresenter?.GetArt(selectedRole);
+        Image selectedArt = cardPresenter?.GetArt(selectedSlot);
         if (selectedArt == null) return;
 
         roleIcon.sprite = selectedArt.sprite;
@@ -169,7 +173,7 @@ public sealed class SelectedRolePresenter
 
     private Sprite GetMythicParchmentSprite()
     {
-        Image mythicArt = cardPresenter?.GetArt(UnitRole.Mythic);
+        Image mythicArt = cardPresenter?.GetArt(ProductionSlotId.Mythic);
         Transform authoredParchment = mythicArt != null && mythicArt.transform.parent != null
             ? mythicArt.transform.parent.Find("Portrait Paper")
             : null;

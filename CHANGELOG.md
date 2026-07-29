@@ -45,6 +45,7 @@ Git history remains the exact implementation record.
 
 ### Changed
 
+- Standard faction production is now addressed as four ordered slots that may repeat combat roles, while mythic remains a separate fifth picker-backed track.
 - Reconciled project tracking with the source-integrated critical loop, AI, selectable mythic roster, HUD, timer/results, and restart implementation while preserving outstanding verification work.
 - Audited scene and prefab structure and recorded focused follow-up work for the duplicate Canvas hierarchy, reusable production-card/panel prefabs, mirrored gold-vein presentation, and third-party asset boundaries.
 
@@ -121,6 +122,7 @@ Git history remains the exact implementation record.
 
 ### Technical
 
+- Introduced slot-keyed faction lookup, production state, spawning, AI purchasing, HUD binding, and ordered migration of the five colour factions plus legacy `Default` through `ProductionSlotId`; `UnitRole` remains the spawned unit's combat classification. Unity import and duplicate-role Play Mode regression remain tracked.
 - User verified several complete end-to-end Play Mode matches through result and restart.
 - User accepted the current SFX layer as a prototype first pass; sound-level and cue-selection refinement remains later work.
 - User confirmed meaningful strategic choices, readable existing menus/HUD across the tested aspect ratios, and exhaustive faction-colour visual combinations on both team sides.

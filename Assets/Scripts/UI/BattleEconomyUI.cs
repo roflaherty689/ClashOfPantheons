@@ -25,7 +25,7 @@ public class BattleEconomyUI : MonoBehaviour
             transform,
             playerTeam,
             PurchaseProduction,
-            SelectProductionRole);
+            SelectProductionSlot);
         selectedRolePresenter = new SelectedRolePresenter(
             transform,
             playerTeam,
@@ -99,27 +99,28 @@ public class BattleEconomyUI : MonoBehaviour
         Refresh();
     }
 
-    private void PurchaseProduction(UnitRole role)
+    private void PurchaseProduction(ProductionSlotId slotId)
     {
-        SelectProductionRole(role);
-        if (role == UnitRole.Mythic && gameManager != null &&
-            gameManager.GetProductionTier(playerTeam, UnitRole.Mythic) == 0)
+        SelectProductionSlot(slotId);
+        if (slotId == ProductionSlotId.Mythic && gameManager != null &&
+            gameManager.GetProductionTier(playerTeam, ProductionSlotId.Mythic) == 0)
         {
             mythicPickerController?.Open(gameManager, workerManager);
             return;
         }
 
-        if (gameManager == null || !gameManager.TryPurchaseProduction(playerTeam, role, workerManager))
+        if (gameManager == null ||
+            !gameManager.TryPurchaseProduction(playerTeam, slotId, workerManager))
         {
             SoundManager.Play(SoundCue.UiReject);
         }
         Refresh();
     }
 
-    private void SelectProductionRole(UnitRole role)
+    private void SelectProductionSlot(ProductionSlotId slotId)
     {
-        if (role != UnitRole.Mythic) mythicPickerController?.Close();
-        selectedRolePresenter?.Select(role, gameManager, workerManager);
+        if (slotId != ProductionSlotId.Mythic) mythicPickerController?.Close();
+        selectedRolePresenter?.Select(slotId, gameManager, workerManager);
     }
 
     private void RestartMatch() => gameManager?.RestartMatch();

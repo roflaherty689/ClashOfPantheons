@@ -2,7 +2,9 @@ using System;
 
 public sealed class MatchStateController
 {
-    private readonly int[,] unitLossCounts = new int[2, ProductionStateController.RoleCount];
+    private const int TrackedUnitRoleCount = 5;
+
+    private readonly int[,] unitLossCounts = new int[2, TrackedUnitRoleCount];
     private readonly int[] totalUnitLossValues = new int[2];
 
     private bool isGameOver;
@@ -34,7 +36,7 @@ public sealed class MatchStateController
     {
         if (isGameOver) return;
 
-        int roleIndex = ProductionStateController.GetRoleIndex(role);
+        int roleIndex = GetUnitRoleIndex(role);
         if (roleIndex < 0) return;
 
         int teamIndex = GetTeamIndex(team);
@@ -44,7 +46,7 @@ public sealed class MatchStateController
 
     public int GetUnitLossCount(Team team, UnitRole role)
     {
-        int roleIndex = ProductionStateController.GetRoleIndex(role);
+        int roleIndex = GetUnitRoleIndex(role);
         return roleIndex < 0 ? 0 : unitLossCounts[GetTeamIndex(team), roleIndex];
     }
 
@@ -75,5 +77,11 @@ public sealed class MatchStateController
     private static int GetTeamIndex(Team team)
     {
         return team == Team.Left ? 0 : 1;
+    }
+
+    private static int GetUnitRoleIndex(UnitRole role)
+    {
+        int index = (int)role;
+        return index >= 0 && index < TrackedUnitRoleCount ? index : -1;
     }
 }

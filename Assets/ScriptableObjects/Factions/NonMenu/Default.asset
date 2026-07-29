@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Default
   m_EditorClassIdentifier: Assembly-CSharp::FactionData
   factionName: Default
-  units:
+  productionUnits:
   - role: 0
     prefab: {fileID: 7886269566354373400, guid: eacd60b078804db4cbb48dc99e84f61e, type: 3}
   - role: 1
@@ -22,5 +22,3 @@ MonoBehaviour:
     prefab: {fileID: 5211855096962333619, guid: 5ccd9e0bc4262db44b2f19b311425303, type: 3}
   - role: 3
     prefab: {fileID: 521288771715210349, guid: bc038acb326e54b4b9757ac5cf73e186, type: 3}
-  - role: 4
-    prefab: {fileID: 7886269566354373400, guid: 71cc01203f6a98b478fb15dfa6d21837, type: 3}

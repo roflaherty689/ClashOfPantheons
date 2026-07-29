@@ -4,9 +4,13 @@ using UnityEngine;
 
 public sealed class EnemyAIController : MonoBehaviour
 {
-    private static readonly UnitRole[] Roles =
+    private static readonly ProductionSlotId[] ProductionSlots =
     {
-        UnitRole.Melee, UnitRole.Archer, UnitRole.Cavalry, UnitRole.Siege, UnitRole.Mythic
+        ProductionSlotId.Standard0,
+        ProductionSlotId.Standard1,
+        ProductionSlotId.Standard2,
+        ProductionSlotId.Standard3,
+        ProductionSlotId.Mythic
     };
 
     [SerializeField] private Team team = Team.Right;
@@ -92,14 +96,14 @@ public sealed class EnemyAIController : MonoBehaviour
 
         List<int> choices = new List<int>();
         if (economy.HasWorkerCapacity && economy.CurrentGold >= economy.WorkerCost) choices.Add(-1);
-        for (int i = 0; i < Roles.Length; i++)
+        for (int i = 0; i < ProductionSlots.Length; i++)
         {
-            if (CanAffordRole(Roles[i])) choices.Add(i);
+            if (CanAffordSlot(ProductionSlots[i])) choices.Add(i);
         }
 
         if (choices.Count == 0) return false;
         int choice = choices[Random.Range(0, choices.Count)];
-        return choice < 0 ? BuyWorker() : BuyRole(Roles[choice]);
+        return choice < 0 ? BuyWorker() : BuySlot(ProductionSlots[choice]);
     }
 
     private bool MakeStrategicDecision(int workerTarget, bool prioritizeVariety)
@@ -116,49 +120,51 @@ public sealed class EnemyAIController : MonoBehaviour
             return BuyWorker();
         }
 
-        UnitRole bestRole = UnitRole.Melee;
+        ProductionSlotId bestSlot = ProductionSlotId.Standard0;
         int bestScore = int.MinValue;
-        foreach (UnitRole role in Roles)
+        foreach (ProductionSlotId slotId in ProductionSlots)
         {
-            if (!CanAffordRole(role)) continue;
-            int tier = gameManager.GetProductionTier(team, role);
+            if (!CanAffordSlot(slotId)) continue;
+            int tier = gameManager.GetProductionTier(team, slotId);
             int score = prioritizeVariety && tier == 0 ? 100 : 30 - tier * 10;
             score += Random.Range(0, difficulty == GameDifficulty.Hard ? 8 : 25);
             if (score > bestScore)
             {
                 bestScore = score;
-                bestRole = role;
+                bestSlot = slotId;
             }
         }
 
-        return bestScore != int.MinValue && BuyRole(bestRole);
+        return bestScore != int.MinValue && BuySlot(bestSlot);
     }
 
     private int GetUnlockedProductionCount()
     {
         int count = 0;
-        foreach (UnitRole role in Roles)
+        foreach (ProductionSlotId slotId in ProductionSlots)
         {
-            if (gameManager.GetProductionTier(team, role) > 0) count++;
+            if (gameManager.GetProductionTier(team, slotId) > 0) count++;
         }
         return count;
     }
 
-    private bool CanAffordRole(UnitRole role)
+    private bool CanAffordSlot(ProductionSlotId slotId)
     {
-        if (gameManager.GetProductionTier(team, role) >= GameManager.MaximumProductionTier) return false;
-        if (role == UnitRole.Mythic && gameManager.GetProductionTier(team, role) == 0)
+        if (gameManager.GetProductionTier(team, slotId) >= GameManager.MaximumProductionTier) return false;
+        if (slotId == ProductionSlotId.Mythic &&
+            gameManager.GetProductionTier(team, slotId) == 0)
         {
             return TryGetAffordableMythics(null) > 0;
         }
-        return gameManager.TryGetProductionData(team, role, out UnitData data) &&
+        return gameManager.TryGetProductionData(team, slotId, out UnitData data) &&
                data != null && economy.CurrentGold >= data.Cost;
     }
 
-    private bool BuyRole(UnitRole role)
+    private bool BuySlot(ProductionSlotId slotId)
     {
         bool success;
-        if (role == UnitRole.Mythic && gameManager.GetProductionTier(team, role) == 0)
+        if (slotId == ProductionSlotId.Mythic &&
+            gameManager.GetProductionTier(team, slotId) == 0)
         {
             List<BaseUnit> choices = new List<BaseUnit>();
             TryGetAffordableMythics(choices);
@@ -167,10 +173,23 @@ public sealed class EnemyAIController : MonoBehaviour
         }
         else
         {
-            success = gameManager.TryPurchaseProduction(team, role, economy);
+            success = gameManager.TryPurchaseProduction(team, slotId, economy);
         }
 
-        if (success) SetDecision($"Purchased {role} tier {gameManager.GetProductionTier(team, role)}");
+        if (success)
+        {
+            string label = slotId.ToString();
+            if (gameManager.TryGetProductionRole(team, slotId, out UnitRole role))
+            {
+                label = slotId == ProductionSlotId.Mythic
+                    ? role.ToString()
+                    : $"{slotId} ({role})";
+            }
+
+            SetDecision(
+                $"Purchased {label} tier {gameManager.GetProductionTier(team, slotId)}");
+        }
+
         return success;
     }
 
