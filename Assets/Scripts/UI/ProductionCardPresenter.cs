@@ -74,6 +74,14 @@ public sealed class ProductionCardPresenter
 
             int tier = gameManager.GetProductionTier(playerTeam, binding.SlotId);
             bool hasData = gameManager.TryGetProductionData(playerTeam, binding.SlotId, out UnitData data);
+            bool isAvailable = binding.SlotId == ProductionSlotId.Mythic || hasData;
+            if (binding.View != null)
+            {
+                binding.View.gameObject.SetActive(isAvailable);
+            }
+
+            if (!isAvailable) continue;
+
             int cost = hasData ? data.Cost : 0;
             bool needsMythicChoice = binding.SlotId == ProductionSlotId.Mythic && tier == 0;
             bool canPurchase = needsMythicChoice
@@ -97,7 +105,14 @@ public sealed class ProductionCardPresenter
             {
                 binding.PresentedRole = role;
                 binding.HasPresentedRole = true;
-                binding.TitleText.text = role.ToString().ToUpperInvariant();
+                binding.TitleText.text =
+                    role == UnitRole.Mythic &&
+                    gameManager.TryGetProductionPrefab(
+                        playerTeam,
+                        binding.SlotId,
+                        out BaseUnit standardMythic)
+                        ? MythicArtworkPresenter.GetDisplayName(standardMythic).ToUpperInvariant()
+                        : role.ToString().ToUpperInvariant();
             }
 
             if (binding.StatusText != null)

@@ -82,10 +82,18 @@ public sealed class SelectedRolePresenter
             ? gameManager.GetSelectedMythicUnit(playerTeam)
             : null;
         gameManager.TryGetProductionRole(playerTeam, selectedSlot, out UnitRole role);
+        BaseUnit standardPrefab = null;
+        if (selectedSlot != ProductionSlotId.Mythic)
+        {
+            gameManager.TryGetProductionPrefab(playerTeam, selectedSlot, out standardPrefab);
+        }
+
         string roleName = selectedMythic != null
             ? MythicArtworkPresenter.GetDisplayName(selectedMythic).ToUpperInvariant()
             : selectedSlot == ProductionSlotId.Standard4
                 ? "MONK"
+                : role == UnitRole.Mythic && standardPrefab != null
+                    ? MythicArtworkPresenter.GetDisplayName(standardPrefab).ToUpperInvariant()
                 : role.ToString().ToUpperInvariant();
 
         RefreshIcon(gameManager, selectedMythic);

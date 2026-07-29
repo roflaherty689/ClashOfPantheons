@@ -38,6 +38,7 @@ Do not record trivial implementation details.
 | DEC-017 | In-game menu enters Prototype scope | Accepted | 2026-07-28 |
 | DEC-018 | Four ordered standard-production slots | Accepted | 2026-07-28 |
 | DEC-019 | Faction-owned monk slot and creature-only mythic picker | Accepted | 2026-07-29 |
+| DEC-020 | Variable-length faction rosters and Fishman/Goblin factions | Accepted | 2026-07-29 |
 
 ---
 
@@ -150,7 +151,7 @@ The repository already contains a one-lane, two-stronghold battle. Adding a boun
 
 ### Decision
 
-Gold is the only prototype currency. It supports workers, military production, and upgrades. Military production uses five ordered independent standard slots plus a separate mythic track rather than one shared FIFO queue. Every track has one-, two-, and three-star in-match upgrade tiers. `UnitRole` remains the combat classification used for favourable matchups. A favourable matchup applies a 1.2× damage multiplier. The current star-tier curve is governed by `DEC-015`.
+Gold is the only prototype currency. It supports workers, military production, and upgrades. Military production uses a faction-authored, non-empty ordered roster of up to five independent standard slots plus a separate mythic track rather than one shared FIFO queue. Every available track has one-, two-, and three-star in-match upgrade tiers. `UnitRole` remains the combat classification used for favourable matchups. A favourable matchup applies a 1.2× damage multiplier. The current star-tier curve is governed by `DEC-015`.
 
 ### Context and rationale
 
@@ -161,8 +162,8 @@ The repository already has gold workers, five role mappings, costs, and automate
 - Favour and essence in the rough HUD are not prototype systems.
 - The shared queue shown in the rough HUD must not define runtime behavior.
 - Each standard slot resolves purchase cost and recurring production cadence from its configured prefab's `UnitData`; the selected mythic's `UnitData` governs the separate mythic track. Exact values and remaining matchup details require tuning.
-- The recurring three-purchase lifecycle originated in `DEC-007` and is carried forward per slot by `DEC-018` and `DEC-019`.
-- `DEC-018` supersedes the assumption that standard production has one unique track per combat role. `DEC-019` expands its exact count from four to five faction slots. Gold, independent recurring production, and three star tiers remain active, and the picker-backed mythic track remains separate.
+- The recurring three-purchase lifecycle originated in `DEC-007` and is carried forward per available slot by `DEC-018`, `DEC-019`, and `DEC-020`.
+- `DEC-018` supersedes the assumption that standard production has one unique track per combat role. `DEC-019` historically expanded its exact count from four to five faction slots; `DEC-020` supersedes that exact-five constraint with a non-empty variable roster capped by the five defined `Standard0` through `Standard4` identities. Gold, independent recurring production, and three star tiers remain active, and the picker-backed mythic track remains separate.
 
 ### Alternatives considered
 
@@ -698,7 +699,7 @@ A player must be able to interrupt or leave an active solo match without relying
 **Date:** 2026-07-28
 **Status:** Accepted
 
-**Partially superseded by:** `DEC-019` expands the exact standard-slot count from four to five while preserving ordered slot identity, independent state, and the separate picker-backed mythic track.
+**Partially superseded by:** `DEC-019` historically expanded the exact standard-slot count from four to five, and `DEC-020` later replaced the exact-count constraint with a non-empty variable roster of up to five slots. Ordered slot identity, independent state, and the separate picker-backed mythic track remain active.
 
 ### Decision
 
@@ -750,13 +751,15 @@ Ordered slot identity supports faction-specific composition without expanding th
 **Date:** 2026-07-29
 **Status:** Accepted
 
+**Partially superseded by:** `DEC-020` replaces the exact-five standard-roster requirement with a non-empty variable roster capped at five slots. The colour-faction monk assignments and creature-only picker contract remain active.
+
 ### Decision
 
 Each faction owns five ordered standard-production slots plus one separate picker-backed mythic track, for six independent production tracks/cards in total. For Black, Blue, Purple, Red, and Yellow, `Standard4` is the faction's matching colour monk. The monk remains classified as `UnitRole.Mythic` for combat behavior, targeting, counters, healing, and reporting, but it is purchased, upgraded, timed, and spawned through the normal standard-slot lifecycle.
 
 The global mythic picker roster contains the 16 qualifying Enemy Pack creatures, including Minotaur, and excludes all five monks. Its atomic pre-purchase selection, per-match lock-in, data-owned cost/cadence, upgrade lifecycle, and presentation mechanics remain unchanged.
 
-This decision supersedes only the exact-four-slot clause of `DEC-018` and the monk-inclusive picker clause of `DEC-013`. Their ordered slot-identity and picker-mechanics decisions remain active.
+This decision historically superseded the exact-four-slot clause of `DEC-018` and the monk-inclusive picker clause of `DEC-013`. `DEC-020` later supersedes this decision's exact-five clause while preserving its ordered slot identity, colour-monk ownership, and picker mechanics.
 
 ### Context
 
@@ -793,6 +796,64 @@ Assigning each colour monk to its matching faction strengthens faction presentat
 - `Assets/Scripts/Factions/FactionData.cs`
 - `Assets/Scripts/Managers/ProductionStateController.cs`
 - `Assets/Scripts/Managers/UnitSpawnController.cs`
+- `Assets/Scripts/UI/ProductionCardPresenter.cs`
+
+---
+
+## DEC-020 — Variable-length faction rosters and Fishman/Goblin factions
+
+**Date:** 2026-07-29
+**Status:** Accepted
+
+### Decision
+
+Each faction owns a non-empty ordered standard-production roster whose length may vary by faction. The current runtime identity space remains capped at five contiguous slots, `Standard0` through `Standard4`; this is a maximum, not a required roster size. Production UI hides standard cards that the selected faction does not configure. The separate picker-backed mythic track remains available to every faction and is not counted as a standard slot.
+
+Two new selectable factions are approved:
+
+- Fishman has exactly three ordered standard slots: `Standard0` Harpoon Fish, `Standard1` Paddle Fish, and `Standard2` Lizard. It temporarily reuses Black's worker, Castle, House3 hand-in, and related faction presentation.
+- Goblin has exactly three ordered standard slots: `Standard0` Skull, `Standard1` Lancer, and `Standard2` Shaman. It temporarily reuses Red's worker, Castle, House3 hand-in, and related faction presentation.
+
+Black, Blue, Purple, Red, Yellow, and the legacy `Default` faction retain their existing five standard entries. Harpoon Fish, Paddle Fish, Lizard, Skull, Lancer, and Shaman also remain available in the global 16-creature mythic picker; this decision does not remove or transfer picker membership.
+
+This decision supersedes only the exact-five standard-roster clause of `DEC-019` and the earlier exact-four clause of `DEC-018`. Their ordered slot identity, independent production state, colour-faction monk ownership, and separate picker-backed mythic contract remain active.
+
+### Context
+
+The user directly requested two small themed factions assembled from existing Enemy Pack mythic prefabs. Requiring every faction to fill all five standard identities would add unrelated units to those themes and weaken faction composition as an authored design choice. The five slot identities already define a sufficient prototype maximum, while a three-unit faction is enough to validate variable roster length, repeated mythic combat classifications, hidden production cards, and temporary presentation reuse without adding another production framework.
+
+### Rationale
+
+Variable-length rosters allow faction identity to come from deliberate availability as well as unit stats. Reusing existing prefabs and presentation keeps this experiment proportional to the Prototype milestone. Keeping the mythic picker separate preserves the accepted per-match choice system and makes this change reversible: individual creatures can be removed from the picker later only through a separate explicit balance or scope decision.
+
+### Consequences
+
+- Faction validation must require at least one standard entry, reject more than five entries, and preserve contiguous ordered mapping through the existing `Standard0` through `Standard4` identities.
+- Production state, spawning, AI, purchasing, debug enumeration, and loss valuation must iterate only the selected faction's configured standard slots.
+- The HUD retains capacity for five standard cards but hides unavailable standard-card objects; the separate mythic card remains visible and functional.
+- The faction-selection catalog must expose Fishman and Goblin as selectable options without removing existing factions.
+- All six reused Enemy Pack unit prefabs retain `UnitRole.Mythic`; their standard-slot identity, state, cost, cadence, and purchasing come from the containing faction roster rather than their combat classification.
+- Black/Red presentation reuse is explicitly temporary and does not establish final Fishman/Goblin art direction or mechanical inheritance.
+- Unity import and Play Mode verification remain required before the new factions are treated as runtime-verified. Verification must cover menu selection, distinct-opponent selection, both battle sides, exact ordered units, hidden fourth/fifth standard cards, visible picker-backed mythic production, player and AI purchasing/spawning/upgrading, match end, and restart.
+
+### Alternatives considered
+
+- Pad Fishman and Goblin to five standard entries: rejected because filler units would dilute the approved three-unit themes and avoid validating variable roster support.
+- Add new slot identities beyond `Standard4`: rejected because neither approved faction needs more than the existing five-slot maximum.
+- Remove faction-owned creatures from the global mythic picker: not requested and rejected for this change because it would materially alter the accepted picker roster and balance surface.
+- Create new worker, Castle, House3, or presentation assets now: deferred; temporary Black/Red reuse validates gameplay composition first.
+- Replace the picker with faction-authored mythic production: rejected because it conflicts with `DEC-013`, `DEC-018`, and the preserved portion of `DEC-019`.
+
+### Related items
+
+- `GAME_DESIGN.md` — Unit roles and counterplay; Economy and production; UI and feedback
+- `ROADMAP.md` — Prototype planned outcomes and verification
+- `TODO.md` — Independent slot production; faction selection; functional HUD; faction-driven presentation
+- `DEC-004` — Prototype economy, roles, and upgrades
+- `DEC-013` — Selectable test roster for mythic production
+- `DEC-018` — Ordered standard-production slots
+- `DEC-019` — Faction-owned monk slot and creature-only mythic picker
+- `Assets/Scripts/Factions/FactionData.cs`
 - `Assets/Scripts/UI/ProductionCardPresenter.cs`
 
 ---

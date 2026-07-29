@@ -8,6 +8,8 @@ Git history remains the exact implementation record.
 
 ### Added
 
+- Selectable Fishman and Goblin faction assets assembled from existing Enemy Pack units. Fishman uses Harpoon Fish, Paddle Fish, and Lizard in order with temporary Black presentation; Goblin uses Skull, Lancer, and Shaman with temporary Red presentation.
+- Build-safe faction-catalog entries for Fishman and Goblin; all six reused creatures remain in the separate 16-option mythic picker.
 - An initial 16-cue SFX layer sourced from the imported 400 Sounds Pack, covering UI input and rejection, purchases, worker deposits, spawning, role-aware combat, deaths, healing, stronghold feedback, and victory/defeat/draw results.
 - A persistent, scene-independent sound service with limited voices, per-cue cooldowns, spatial blending, pitch variation, and an Editor builder that retains direct references to the source pack without duplicating clips.
 - A guarded Unity Editor migration for removing the isolated legacy battle `Canvas/Canvas/VictoryText` hierarchy and normalizing the active HUD root scale.
@@ -45,10 +47,10 @@ Git history remains the exact implementation record.
 
 ### Changed
 
-- Expanded each faction from four to five ordered standard-production slots and assigned Black, Blue, Purple, Red, and Yellow `Standard4` to the matching colour monk; these monks retain `UnitRole.Mythic` combat classification while using normal standard-slot purchasing, tiers, timers, and spawning.
-- Expanded the production HUD contract from five to six independent cards/tracks: five faction-owned standard slots plus one separate picker-backed mythic track.
+- Expanded each established faction from four to five ordered standard-production slots and assigned Black, Blue, Purple, Red, and Yellow `Standard4` to the matching colour monk; these monks retain `UnitRole.Mythic` combat classification while using normal standard-slot purchasing, tiers, timers, and spawning.
+- Replaced the exact-five faction-roster constraint with non-empty variable standard rosters capped at `Standard4`. The production HUD retains a six-card maximum, hides unavailable standard cards for shorter rosters, and keeps the separate picker-backed mythic card available.
 - Reduced the active mythic picker roster to the 16 Enemy Pack creatures while preserving its atomic selection/purchase, upgrade, cadence, and presentation mechanics.
-- Established ordered faction-owned standard-slot identity that may repeat combat roles while keeping picker-backed mythic production separate; `DEC-019` later expanded the standard roster to five slots.
+- Established ordered faction-owned standard-slot identity that may repeat combat roles while keeping picker-backed mythic production separate; `DEC-019` historically expanded the standard roster to five slots and `DEC-020` made that a one-to-five range.
 - Reconciled project tracking with the source-integrated critical loop, AI, selectable mythic roster, HUD, timer/results, and restart implementation while preserving outstanding verification work.
 - Audited scene and prefab structure and recorded focused follow-up work for the duplicate Canvas hierarchy, reusable production-card/panel prefabs, mirrored gold-vein presentation, and third-party asset boundaries.
 
@@ -126,7 +128,8 @@ Git history remains the exact implementation record.
 
 ### Technical
 
-- Extended slot-keyed production, spawning, AI, faction migration, and production-card tooling to five standard slots plus the separate mythic track. Static checks exist; after Unity compiles, `SampleScene` still requires **Tools > Clash of Pantheons > Bind Production Card Views** and complete six-card Play Mode regression.
+- Extended faction validation and slot-derived production presentation to support one through five standard entries. Existing purchase, spawn, and AI paths reject unconfigured slots; standard-slot mythics now use prefab-derived display names. External Core, Core.Tests, runtime, and Editor solution compilation passes with zero warnings or errors; Unity import and variable-roster Play Mode regression remain.
+- Extended slot-keyed production, spawning, AI, faction migration, and production-card tooling to a maximum of five standard slots plus the separate mythic track. Static checks exist; after Unity compiles, `SampleScene` still requires **Tools > Clash of Pantheons > Bind Production Card Views** and complete maximum- and shorter-roster Play Mode regression.
 - Introduced slot-keyed faction lookup, production state, spawning, AI purchasing, HUD binding, and ordered migration of the five colour factions plus legacy `Default` through `ProductionSlotId`; `UnitRole` remains the spawned unit's combat classification. Unity import and duplicate-role Play Mode regression remain tracked.
 - User verified several complete end-to-end Play Mode matches through result and restart.
 - User accepted the current SFX layer as a prototype first pass; sound-level and cue-selection refinement remains later work.
@@ -179,6 +182,7 @@ Git history remains the exact implementation record.
 
 ### Known Issues
 
+- Fishman/Goblin source assets and variable-roster UI handling are statically inspected but not yet imported or verified through faction selection and battle Play Mode; shorter rosters must hide `Standard3`/`Standard4` while retaining mythic production.
 - Three-star melee is reported to win roughly 99% of matches across Easy, Medium, and Hard; upgrades are too strong and mythics are too weak relative to their cost. Controlled diagnosis and retuning are required.
 - The representative full loop and tested aspect ratios are user-verified, but a packaged player build and proportional automated coverage for economy, production scheduling, and match integration remain.
 - Targeted projectile/worker edge cases and stale serialized fields on the non-animated archer prefab remain to be verified or cleaned.

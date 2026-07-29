@@ -70,11 +70,13 @@ public class FactionData : ScriptableObject
     public bool TryValidateProductionUnits(out string error)
     {
         StringBuilder issues = new StringBuilder();
-        if (productionUnits == null || productionUnits.Length != StandardProductionSlotCount)
+        if (productionUnits == null ||
+            productionUnits.Length == 0 ||
+            productionUnits.Length > StandardProductionSlotCount)
         {
             int configuredCount = productionUnits?.Length ?? 0;
             issues.Append(
-                $"expected exactly {StandardProductionSlotCount} ordered standard production entries, found {configuredCount}");
+                $"expected between 1 and {StandardProductionSlotCount} ordered standard production entries, found {configuredCount}");
         }
 
         int countToValidate = productionUnits == null

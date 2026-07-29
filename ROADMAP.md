@@ -17,14 +17,14 @@ Checked entry conditions are based on repository inspection, not a new Unity lau
 
 ### Exit criteria
 
-- [ ] A player can use gold to buy workers, establish five independent ordered standard-production slots plus the separate mythic track, and buy one-, two-, and three-star upgrades on each track. The six-track implementation exists in source, but scene rebinding and Play Mode verification remain.
+- [ ] A player can use gold to buy workers, establish every slot in the selected faction's non-empty ordered standard roster of up to five entries plus the separate mythic track, and buy one-, two-, and three-star upgrades on each available track. Variable-roster source/assets exist, but Unity import, scene rebinding, and Play Mode verification remain.
 - [x] An AI opponent makes economy, production, composition, and upgrade decisions under the same match rules.
 - [x] Units autonomously resolve combat on one shared lane and can destroy either stronghold.
 - [x] An approximately five-minute timer resolves matches by stronghold health, then lower total value of units lost when health is equal.
 - [x] The result is clearly presented and a new match can start without Editor intervention.
 - [x] The functional HUD accurately communicates gold, workers, production, upgrades, time, stronghold health, and result state in representative matches.
 - [x] Exact equality after both timeout comparisons produces a draw with no winner or loser.
-- [ ] The project compiles without known blocking errors and the complete slot-keyed critical path is verified in Play Mode. Static checks exist for the six-track implementation; `SampleScene` still needs production-card rebinding and Play Mode validation.
+- [ ] The project compiles without known blocking errors and the complete slot-keyed critical path is verified in Play Mode. External solution compilation passes across Core, Core.Tests, runtime, and Editor projects with zero warnings or errors; `SampleScene` still needs Unity import, production-card rebinding, shorter-roster card-hiding verification, and Play Mode validation.
 - [ ] Critical economy, production, and result rules have proportionate automated coverage or documented manual verification where automation is impractical.
 - [ ] Material assumptions and the next milestone's entry conditions are documented.
 
@@ -48,23 +48,24 @@ _No confirmed implementation blocker._
 
 - [x] Autonomous horizontal movement, target acquisition, melee/ranged combat, projectiles, health, and unit death are represented in source.
 - [x] Two strongholds and base-destruction victory handling are represented in source and the battle scene.
-- [x] Melee, archer, cavalry, siege, and mythic combat classifications and prototype assets exist; the supported factions map five standard entries in melee/archer/cavalry/siege/matching-colour-monk order and use the separate 16-creature mythic roster.
+- [x] Melee, archer, cavalry, siege, and mythic combat classifications and prototype assets exist; the established colour factions map five standard entries in melee/archer/cavalry/siege/matching-colour-monk order and use the separate 16-creature mythic roster.
 - [x] Workers can mine and deposit gold; the player HUD displays live worker economy state and can buy workers up to capacity.
 - [x] Faction data can map roles to faction-specific prefabs.
 - [x] Black, blue, purple, red, and yellow prototype faction assets map colour-specific animated worker, melee, and archer prefabs while sharing cavalry, siege, and mythic.
 - [x] The five prototype colour factions own matching Castle and House3 presentation references consumed by one shared Base prefab and the stronghold HUD; the user exhaustively verified the faction-colour visual combinations in Play Mode.
+- [x] Fishman and Goblin faction assets exist with their exact approved three-entry orders, temporary Black/Red worker/building presentation references, and build-safe faction-catalog registration; this check is repository evidence only.
 - [x] Prototype health, hit, animation, projectile, and victory feedback exists.
 
 These checks confirm repository presence only. Their integrated runtime behavior remains subject to compilation and Play Mode verification.
 
 ### Planned outcomes
 
-- [x] Accept the recurring three-purchase lifecycle originally recorded in `DEC-007` and carried forward per standard slot and separate mythic track by `DEC-018`.
-- [ ] Complete representative Play Mode verification of the source-integrated player gold, worker, five ordered standard-slot, duplicate-role, and separate mythic production paths. The earlier unique-role path is verified; the six-card scene must be rebound before testing the revised flow.
+- [x] Accept the recurring three-purchase lifecycle originally recorded in `DEC-007` and carried forward per available standard slot and separate mythic track by `DEC-018` through `DEC-020`.
+- [ ] Complete representative Play Mode verification of the source-integrated player gold, worker, variable one-to-five ordered standard-slot, duplicate-role, and separate mythic production paths. The earlier unique-role path is verified; the scene must be rebound before testing both the maximum six-card flow and shorter rosters with unavailable standard cards hidden.
 - [x] Implement an AI decision layer that participates in the same economy and production game, with three Play Mode-verified difficulties, same-rule purchasing, and random mythic/opponent selection.
 - [x] Complete targeted verification of the implemented five-minute timer, stronghold-health comparison, unit-loss-value tiebreaker, result states, and restart/reset flow.
 - [ ] Correct the dominant three-star melee strategy and establish credible mythic value through controlled balance diagnosis and tuning.
-- [ ] Preserve cost and recurring cadence ownership in each configured unit's `UnitData` while moving runtime unlock, tier, timer, and purchase identity from combat role to ordered standard slot. Five faction-owned slots plus the separate picker track are implemented in source; duplicate-role slots, the standard-slot monk, and the global debug pattern require regression.
+- [ ] Preserve cost and recurring cadence ownership in each configured unit's `UnitData` while moving runtime unlock, tier, timer, and purchase identity from combat role to ordered standard slot. Up to five faction-owned slots plus the separate picker track are accepted; duplicate-role slots, unavailable-slot exclusion, the standard-slot monk/creature cases, and the global debug pattern require regression.
 - [x] Validate the functional HUD at representative resolutions and across the complete critical path in Play Mode.
 - [ ] Add a minimal in-game menu with confirmed pause and navigation behavior.
 - [x] Add a player-facing title -> faction selection -> difficulty selection -> battle flow, verified in Play Mode; player-build coverage remains tracked separately.
@@ -73,12 +74,13 @@ These checks confirm repository presence only. Their integrated runtime behavior
 - [ ] Add focused tests for deterministic economy, production, and result rules; representative Play Mode critical-path verification is complete.
 - [x] Deliver the accepted selectable mythic test roster in sequence: five colour monk healers, reusable animated Enemy Pack melee/ranged prefabs, then a pre-purchase details-pane picker with per-match selection and data-owned balance.
 - [x] Reduce the broad initial picker from 21 options to the 16 Enemy Pack creatures and move each colour monk into its matching faction's fifth standard slot.
+- [ ] Import and verify the source-integrated selectable Fishman and Goblin prototype factions with the exact approved three-slot orders, temporary Black/Red presentation reuse, hidden fourth/fifth standard cards, and an unchanged separate 16-creature mythic picker.
 
 ### Dependencies
 
 - Accepted design constraints in `DEC-002` through `DEC-006`.
 - Recurring three-purchase semantics inherited from superseded `DEC-007`.
-- Accepted ordered standard-roster semantics in `DEC-018`, which supersede `DEC-007` where production identity was keyed by combat role.
+- Accepted ordered standard-roster semantics in `DEC-018`, refined by `DEC-019` and `DEC-020`: production identity is slot-keyed, rosters are non-empty and variable up to `Standard4`, and the picker-backed mythic track remains separate.
 - Existing `GameManager`, `WorkerManager`, `WorkerUnit`, `GoldVein`, `FactionData`, `UnitData`, `BaseUnit`, and `Base` foundations.
 - Functional UI bindings and scene wiring after the underlying rules are defined.
 
@@ -88,7 +90,7 @@ These checks confirm repository presence only. Their integrated runtime behavior
 - Campaign and persistent progression.
 - Multiple currencies beyond gold.
 - Controller support and broad platform certification.
-- Final art, final audio, and broad designed-faction or map production beyond the five mechanically identical prototype team-colour variants.
+- Final art, final audio, and broad designed-faction or map production beyond the five mechanically identical prototype team-colour variants and accepted Fishman/Goblin composition tests.
 - Heroes, bosses, neutral objectives, buildings, and powers unless separately approved.
 - Production-ready saving and deep optimization without measured need.
 
@@ -243,3 +245,4 @@ Use this section only for major sequencing or scope changes.
 - 2026-07-16: Reconciled the Prototype milestone with the implemented foundations and accepted design direction. Replaced generic outcomes with the game-specific critical path and deferred non-prototype scope.
 - 2026-07-17: Accepted a test-oriented selectable mythic roster. Sequence monk healing and reusable animated prefabs before the HUD picker; AI and the complete match loop remain the milestone's primary blockers.
 - 2026-07-29: Expanded faction-owned standard production from four to five ordered slots, assigned each colour monk to its matching faction's fifth slot, and reduced the separate picker to 16 Enemy Pack creatures. Six-card scene binding and Play Mode regression remain required.
+- 2026-07-29: Replaced the exact-five roster constraint with non-empty variable standard rosters capped at five slots. Source/assets now include three-slot Fishman (Harpoon Fish, Paddle Fish, Lizard) and Goblin (Skull, Lancer, Shaman) factions with temporary Black/Red presentation reuse and unavailable-card hiding; Unity import plus menu and battle Play Mode verification remain required.

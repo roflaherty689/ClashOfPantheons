@@ -44,9 +44,10 @@ Tasks are ordered by dependency and prototype value.
 
 **Acceptance criteria:**
 
-- [ ] Player gold is the authoritative currency for worker purchases, all five ordered standard-production slots, the separate mythic track, and their upgrades. The earlier role-keyed path is verified; the six-track migration still needs scene and Play Mode verification.
+- [ ] Player gold is the authoritative currency for worker purchases, every configured slot in a non-empty variable standard roster of up to five entries, the separate mythic track, and their upgrades. The earlier role-keyed path is verified; the maximum-slot and shorter-roster paths still need scene and Play Mode verification.
 - [x] Buying a worker uses the existing worker limit and updates visible gold/worker state.
 - [ ] Every standard slot follows the approved independent recurring-production contract without a shared FIFO queue; duplicate combat roles do not share unlock, tier, timer, cost, cadence, or purchase state.
+- [ ] Unconfigured standard identities do not create production state, consume AI choices, spawn units, or remain visible as interactive HUD cards; the separate mythic track remains available.
 - [ ] Each standard slot begins locked; its first purchase unlocks continuous one-star production and its next two purchases upgrade only future spawns from that slot to two and three stars. Mythic follows the same tier lifecycle on a separate picker-backed track.
 - [x] Favourable matchups apply a 1.2× damage multiplier.
 - [x] Star tiers multiply every configured unit stat except purchase cost by 1×/1.25×/1.5× and affect future spawns only.
@@ -54,13 +55,13 @@ Tasks are ordered by dependency and prototype value.
 - [x] Production stops correctly when the match ends and resets correctly for a new match in representative Play Mode verification.
 - [x] Costs, failed purchases, and production state are visibly communicated in representative Play Mode verification.
 - [ ] Deterministic economy and production rules have focused automated tests where practical.
-- [ ] The slot-keyed implementation compiles and representative duplicate-role Play Mode paths are verified. Earlier role-keyed compilation and paths passed.
+- [ ] The slot-keyed variable-roster implementation compiles and representative duplicate-role, five-slot, and three-slot Play Mode paths are verified. Earlier role-keyed compilation and paths passed.
 
 **Relevant systems:** `WorkerManager`, `GameManager`, `ProductionStateController`, `UnitSpawnController`, `UnitData`, faction data, AI, battle UI, scene wiring
 
-**Dependencies:** `DEC-004`, `DEC-018`, and `DEC-019`; initial values require balance tuning during implementation
+**Dependencies:** `DEC-004`, `DEC-018`, `DEC-019`, and `DEC-020`; initial values require balance tuning during implementation
 
-**Progress:** The earlier role-keyed implementation uses `UnitData` cost/cadence, atomic spending, fresh unlock timers, future-spawn tier snapshots, and a three-purchase cap. Its production cards, selected-role panel, cadence, simultaneous readiness, cap resume, failures, match-end stopping, restart, and complete matches received representative verification. Five ordered faction-owned standard slots plus a separate picker-backed mythic track are now implemented in source; each colour faction's `Standard4` is its matching monk, still classified `UnitRole.Mythic` but purchased as standard production. Static checks exist, but `SampleScene` must be rebound through **Tools > Clash of Pantheons > Bind Production Card Views** after Unity compiles, then the six-card flow requires Play Mode regression. Existing Core tests cover tier transitions/scaling, but focused slot-keyed economy transactions and production scheduling tests remain. Balance is not accepted: the user reports three-star melee wins roughly 99% across all difficulties and mythics are too weak for their cost.
+**Progress:** The earlier role-keyed implementation uses `UnitData` cost/cadence, atomic spending, fresh unlock timers, future-spawn tier snapshots, and a three-purchase cap. Its production cards, selected-role panel, cadence, simultaneous readiness, cap resume, failures, match-end stopping, restart, and complete matches received representative verification. Five ordered faction-owned standard slots plus a separate picker-backed mythic track are implemented in source for the established factions; each colour faction's `Standard4` is its matching monk, still classified `UnitRole.Mythic` but purchased as standard production. `DEC-020` accepts one-to-five standard slots and the exact three-slot Fishman/Goblin compositions. Source now validates one to five entries, hides unavailable standard-card objects while retaining mythic, resolves standard-slot mythic display names from their prefabs, and includes the exact new faction assets in the catalog. Existing purchase, spawn, and AI eligibility paths reject slots without configured data. Static asset inspection confirms the exact unit order and Black/Red presentation reuse. External solution compilation passes for Core, Core.Tests, Assembly-CSharp, and Assembly-CSharp-Editor with zero warnings or errors. `SampleScene` must still be rebound through **Tools > Clash of Pantheons > Bind Production Card Views** after Unity imports the changes, then both the six-card and shorter-roster flows require Play Mode regression. Existing Core tests cover tier transitions/scaling, but focused slot-keyed economy transactions and production scheduling tests remain. Balance is not accepted: the user reports three-star melee wins roughly 99% across all difficulties and mythics are too weak for their cost.
 
 **Status:** Partially implemented
 
@@ -71,17 +72,17 @@ Tasks are ordered by dependency and prototype value.
 **Acceptance criteria:**
 
 - [x] AI purchases consume its gold and respect the same costs, limits, and production rules.
-- [ ] AI can buy workers, purchase and upgrade all five standard slots independently even when roles repeat, and use the separate mythic track.
+- [ ] AI can buy workers, purchase and upgrade every configured standard slot independently even when roles repeat, ignore unavailable standard identities on shorter rosters, and use the separate mythic track.
 - [x] A simple documented strategy creates credible pressure within a five-minute match.
 - [x] AI stops on match end and resets on restart.
 - [x] AI decisions are observable enough to debug and tune.
-- [ ] Slot-keyed compilation and representative duplicate-role Play Mode matches are verified. Earlier role-keyed AI matches passed.
+- [ ] Slot-keyed compilation and representative duplicate-role, five-slot, and three-slot Play Mode matches are verified. Earlier role-keyed AI matches passed.
 
 **Relevant systems:** future AI policy, economy/production interfaces, match state
 
 **Dependencies:** Task 1
 
-**Progress:** The earlier role-keyed `EnemyAIController` uses the shared worker, production, tier, and atomic mythic-purchase APIs. Easy/Medium/Hard change cadence and policy quality; enemy-only bonuses produce 200/250/350 initial totals. Medium and Hard gate early workers behind military production to resist rushes. The user verified that integrated flow in Play Mode on 2026-07-17. Five standard slots and the separate 16-creature picker are implemented in source, but the standard-slot monk and complete six-track AI purchasing path still require Play Mode regression.
+**Progress:** The earlier role-keyed `EnemyAIController` uses the shared worker, production, tier, and atomic mythic-purchase APIs. Easy/Medium/Hard change cadence and policy quality; enemy-only bonuses produce 200/250/350 initial totals. Medium and Hard gate early workers behind military production to resist rushes. The user verified that integrated flow in Play Mode on 2026-07-17. Five standard slots and the separate 16-creature picker are implemented in source for the established factions. Static inspection confirms AI affordability filters through `TryGetProductionData`, so unconfigured Fishman/Goblin slots are not eligible choices, and external solution compilation passes with zero warnings or errors; the standard-slot monk/creature cases and complete variable-roster AI purchasing still require Unity import and Play Mode regression.
 
 **Status:** Partially implemented
 
@@ -116,7 +117,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Acceptance criteria:**
 
-- [ ] HUD shows live gold, workers, five ordered standard-slot states plus a separate mythic state, per-track star tiers, timer, both stronghold health values, and results. The earlier five-card presentation is verified; the revised six-card scene binding and slot-derived presentation remain.
+- [ ] HUD shows live gold, workers, every configured ordered standard-slot state plus a separate mythic state, per-track star tiers, timer, both stronghold health values, and results. It supports at most five standard cards, hides unavailable standard cards for shorter rosters, and keeps the mythic card visible. The earlier five-card presentation is verified; revised scene binding and slot-derived presentation remain.
 - [x] Favour, essence, and shared FIFO queue presentation are removed or clearly excluded from the functional prototype UI.
 - [ ] Player purchase and upgrade controls provide success, failure, affordability, and cooldown/cadence feedback.
 - [x] Critical state does not rely on red/blue colour alone and text is readable at the chosen prototype resolutions.
@@ -127,7 +128,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** Tasks 1–3
 
-**Progress:** The editor-authored Tiny Swords battle HUD supports gold, workers, both strongholds, timer, results, restart, five ordered standard cards, and one separate mythic card. Focused verification covers the earlier five-card presenters and interactions, and the user has completed several clean end-to-end Play Mode matches under that earlier layout. The revised model uses six cards: the first five are faction-owned standard slots and the sixth is the picker-backed mythic track. `SampleScene` still requires **Tools > Clash of Pantheons > Bind Production Card Views** after Unity compiles; standard-monk labels/art, purchase routing, independent state, picker exclusion, and the complete six-card layout then require Play Mode verification. The attempted three-part stronghold health-bar frame remains deferred pending a later UI pass.
+**Progress:** The editor-authored Tiny Swords battle HUD supports gold, workers, both strongholds, timer, results, restart, five ordered standard cards, and one separate mythic card. Focused verification covers the earlier five-card presenters and interactions, and the user has completed several clean end-to-end Play Mode matches under that earlier layout. The current maximum model uses six cards: up to five faction-owned standard slots and the picker-backed mythic track. Source now hides unavailable standard-card objects for Fishman/Goblin while retaining mythic and derives standard-slot mythic labels from the configured prefab. `SampleScene` still requires **Tools > Clash of Pantheons > Bind Production Card Views** after Unity compiles; standard monk/creature labels and art, purchase routing, independent state, picker separation, and both maximum- and three-slot layouts then require Play Mode verification. The attempted three-part stronghold health-bar frame remains deferred pending a later UI pass.
 
 **Status:** Partially implemented
 
@@ -144,6 +145,7 @@ Tasks are ordered by dependency and prototype value.
 - [x] Each option displays at least `FactionData.FactionName`, rejects or clearly diagnoses null/invalid entries, and has an unambiguous selected/clickable state.
 - [x] Choosing a faction carries that exact asset into the battle scene and applies it to the player team before faction presentation, workers, or units initialize.
 - [x] Match setup selects a different configured opponent faction so the two teams cannot conflict in colour.
+- [ ] Fishman and Goblin appear as selectable catalog entries with exactly their approved three-slot orders; choosing either reaches battle with its exact `FactionData`, and opponent selection still chooses a different configured asset.
 - [x] Returning to or restarting a battle does not leave stale duplicate menu/session objects.
 - [x] **Phase 3 — Animated background:** The title screen includes decorative Tiny Swords-style buildings and non-interactive units moving across the background without invoking combat, economy, or match systems.
 - [x] Background animation is layered behind interactive UI, does not intercept button input, and remains readable and performant at the prototype's representative PC resolutions.
@@ -156,7 +158,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Risks and manual Unity work:** Runtime builds cannot use `AssetDatabase` to discover ScriptableObjects, so available factions must be explicitly serialized or supplied through another build-safe content mechanism. Scene creation, Canvas layout, button references, Build Settings ordering, faction catalog contents, multi-resolution inspection, and Play Mode/player-build verification require Unity Editor validation.
 
-**Progress:** Coordinated and accepted in `DEC-012` and extended by `DEC-014`. The user verified the title, faction selection, Tiny Swords animated presentation, difficulty selection, distinct opponent faction, and transition into battle in Play Mode on 2026-07-17, and later accepted the implemented front-end menus as readable across the tested aspect ratios. Difficulty choices launch battle directly from a parchment-contained Tiny Swords menu. The title background retains all 16 Enemy Pack creatures and five colour monks as decorative actors, independently of the current 16-option picker. Player-build verification remains pending, so the parent task remains partially implemented.
+**Progress:** Coordinated and accepted in `DEC-012` and extended by `DEC-014`. The user verified the title, faction selection, Tiny Swords animated presentation, difficulty selection, distinct opponent faction, and transition into battle in Play Mode on 2026-07-17, and later accepted the implemented front-end menus as readable across the tested aspect ratios. Difficulty choices launch battle directly from a parchment-contained Tiny Swords menu. The title background retains all 16 Enemy Pack creatures and five colour monks as decorative actors, independently of the current 16-option picker. `DEC-020` adds Fishman and Goblin; both `FactionData` assets and their build-safe catalog entries are present in the repository. Unity import and menu-to-battle Play Mode verification remain. Player-build verification also remains pending, so the parent task remains partially implemented.
 
 **Status:** Partially implemented
 
@@ -225,13 +227,13 @@ Tasks are ordered by dependency and prototype value.
 - [x] Differentiate combat mythics by creature identity, with cheaper/weaker options generally producing faster, Troll uniquely strongest and highest-cost, and all monk colours mechanically identical.
 - [x] Order the mythic picker by ascending gold cost, then alphabetically when costs match.
 - [x] Validate compilation/import, serialized-data migration, both teams/facings, animator references, restart reset, transaction behavior, representative resolutions, and Play Mode.
-- [ ] After the five-standard-slot migration, bind the six production-card views in `SampleScene` and verify monk standard purchasing, the 16-option picker, both teams, AI behavior, restart, and representative resolutions in Play Mode.
+- [ ] After the variable-roster migration, bind the maximum six production-card views in `SampleScene` and verify five-slot monk standard purchasing, three-slot Fishman/Goblin creature purchasing, unavailable-card hiding, the unchanged 16-option picker, both teams, AI behavior, restart, and representative resolutions in Play Mode.
 
-**Dependencies/risks:** The 16-creature mythic picker remains deliberately separate from the five-slot faction roster and continues to use its picker-backed per-match selection. Monks use the same Mythic combat classification while occupying faction-owned `Standard4`, so production code must preserve slot identity rather than routing them through the picker. Healing requires friendly targeting and current/max-health access without costly broad scans. This test expansion must not displace the incomplete AI/core-loop work.
+**Dependencies/risks:** The 16-creature mythic picker remains deliberately separate from each faction's variable standard roster and continues to use its picker-backed per-match selection. Monks and all six Fishman/Goblin creatures use the same Mythic combat classification while occupying faction-owned standard slots, so production code must preserve slot identity rather than routing them through the picker. The six creatures intentionally remain picker options as well. Healing requires friendly targeting and current/max-health access without costly broad scans. This test expansion must not displace the incomplete AI/core-loop work.
 
-**Progress:** Phases 1-3 were completed and accepted for the original 21-option test roster. Runtime source provides ally-combat-state tracking, clamped healing, lowest-health ally selection, fixed-cadence tier-scaled monk healing, movement suppression, recipient-owned heal VFX, moving/healing friendly separation, enemy-proximity stopping, and a target-point stopping distance equal to heal range. The Editor builder normalized all five controllers and clip-loop settings, generated the shared `MonkUnitData`, one-shot heal-effect prefab, and five colour monk prefabs. Phase 2 provides 15 independent Enemy Pack mythic prefabs plus Minotaur, normalized Idle/Run-or-Walk/Attack controllers, and dedicated bone, harpoon, and shaman projectiles for the three ranged units. The current build-safe picker roster is reduced to those 16 Enemy Pack creatures; each colour monk is assigned to its matching faction's `Standard4` and remains mechanically identical. Atomic picker purchase, data-owned upgrades/spawning, cost ordering, portraits, and crossed-swords presentation remain. Static implementation checks exist, but the revised six-card scene and Play Mode behavior are not yet verified.
+**Progress:** Phases 1-3 were completed and accepted for the original 21-option test roster. Runtime source provides ally-combat-state tracking, clamped healing, lowest-health ally selection, fixed-cadence tier-scaled monk healing, movement suppression, recipient-owned heal VFX, moving/healing friendly separation, enemy-proximity stopping, and a target-point stopping distance equal to heal range. The Editor builder normalized all five controllers and clip-loop settings, generated the shared `MonkUnitData`, one-shot heal-effect prefab, and five colour monk prefabs. Phase 2 provides 15 independent Enemy Pack mythic prefabs plus Minotaur, normalized Idle/Run-or-Walk/Attack controllers, and dedicated bone, harpoon, and shaman projectiles for the three ranged units. The current build-safe picker roster is reduced to those 16 Enemy Pack creatures; each colour monk is assigned to its matching faction's `Standard4` and remains mechanically identical. `DEC-020` also reuses Harpoon Fish, Paddle Fish, Lizard, Skull, Lancer, and Shaman as standard units in two accepted three-slot factions without removing them from this picker. Atomic picker purchase, data-owned upgrades/spawning, cost ordering, portraits, and crossed-swords presentation remain. External solution compilation passes with zero warnings or errors, but Unity import and revised scene/Play Mode behavior are not yet verified.
 
-**Status:** Partially re-opened for the `DEC-019` scene-binding and Play Mode regression; the underlying Phase 1-3 content and picker mechanics remain complete.
+**Status:** Partially re-opened for the `DEC-019`/`DEC-020` scene-binding, variable-roster, and Play Mode regression; the underlying Phase 1-3 content and picker mechanics remain complete.
 
 ### Faction-driven prototype presentation
 
@@ -240,6 +242,7 @@ Tasks are ordered by dependency and prototype value.
 **Acceptance criteria:**
 
 - [x] Black, blue, purple, red, and yellow `FactionData` assets reference their matching Tiny Swords Castle and House3 sprites.
+- [x] Fishman temporarily reuses Black worker/Castle/House3/presentation references and Goblin temporarily reuses Red equivalents, with no duplicated gameplay manager or Base prefab.
 - [x] Each colour faction references a matching animated worker prefab; non-black worker controllers replicate black's parameters, states, transitions, durations, and colour-specific clips, with all worker clips using black's loop settings.
 - [x] `GameManager` applies each selected faction to the corresponding world presentation and HUD icon, with Black versus Red as the active scene default.
 - [x] `GameManager` applies the selected faction worker to `WorkerManager` during `Awake`, before `WorkerManager.Start` creates initial workers.
@@ -249,9 +252,9 @@ Tasks are ordered by dependency and prototype value.
 - [x] In Play Mode, every colour is verified on both Left and Right; Castle, House3, HUD icon, and spawned colour-specific units agree with the selected faction.
 - [x] Both teams' workers still spawn, mine, return to the inward hand-in point, and increase gold; base damage shake, targeting, destruction, and restart remain correct.
 
-**Progress:** Source, faction assets, five worker prefabs, worker controllers/clips, shared-prefab structure, scene migration, HUD bindings, and the HUD regeneration tool are implemented. Runtime and Editor assemblies compile externally with zero warnings and errors, and the worker prefab/controller/faction reference graph passes static validation. The user confirmed the faction worker variants on 2026-07-17, verified both-team presentation/economy and restart behavior during the runtime extraction pass, and later exhaustively verified the faction-colour visual combinations on both sides. The stronghold health fills are fixed team-side presentation rather than faction-colour variants.
+**Progress:** Source, colour-faction assets, five worker prefabs, worker controllers/clips, shared-prefab structure, scene migration, HUD bindings, and the HUD regeneration tool are implemented. Runtime and Editor assemblies compile externally with zero warnings and errors, and the colour-faction worker prefab/controller/reference graph passed static validation. The user confirmed the faction worker variants on 2026-07-17, verified both-team presentation/economy and restart behavior during the runtime extraction pass, and later exhaustively verified the faction-colour visual combinations on both sides. Static asset inspection confirms Fishman reuses the exact Black worker/Castle/House3 references and Goblin reuses Red equivalents without new manager or Base prefabs. Unity import and both-side behavior remain unverified. The stronghold health fills are fixed team-side presentation rather than faction-colour variants.
 
-**Status:** Complete
+**Status:** Partially re-opened for Fishman/Goblin presentation integration and verification; established colour-faction presentation remains complete
 
 ---
 
@@ -268,13 +271,13 @@ _No items currently blocked by external state._
 ---
 
 ## Discovered follow-up work
-- [ ] Manually verify the ordered-roster migration in Unity Play Mode with a test faction configured as two melee plus two archer standard slots: confirm each card's label/art/data, independent unlock/tier/timer/cost/cadence and spawning, slot-aware AI purchasing/upgrading, match restart reset, and the legacy global debug pattern. Also smoke the five colour factions and legacy `Default` to confirm their preserved melee/archer/cavalry/siege slot order and confirm mythic remains the independent fifth picker-backed track.
+- [ ] Manually verify the ordered variable-roster migration in Unity Play Mode. Use Fishman and Goblin to confirm exact three-unit order, card label/art/data, hidden `Standard3`/`Standard4` cards, independent unlock/tier/timer/cost/cadence and spawning, slot-aware AI purchasing/upgrading, visible and independent mythic picker, match restart reset, and the legacy global debug pattern. Also smoke the five colour factions and legacy `Default` to confirm their preserved five-entry order and maximum six-card layout.
 - [x] After Unity imported the legacy meme-faction deletions, the user confirmed on 2026-07-28 that the Unity run looked correct, closing the Console and title → faction → difficulty → battle smoke follow-up. No broader gameplay verification is inferred.
 - [x] Accept the initial SFX layer as a prototype first pass after several complete user-played matches. Sound-level and cue-selection refinement remains a later audio pass; persistent-service uniqueness should be retained as a scene-transition regression check.
 - [x] Normalize the battle-scene UI hierarchy by removing the isolated `Canvas/Canvas/VictoryText` legacy branch and restoring the active `Battle UI` RectTransform scale to one. The user verified the migrated hierarchy and presentation on 2026-07-18.
 - [x] Convert the mirrored gold nodes to `Assets/Prefabs/Resources/GoldVein.prefab`, retaining side-specific root transforms, internal `MinePoint` references, and both `WorkerManager` bindings. The user verified the migrated scene and worker loops on 2026-07-18.
 - [x] Replace runtime production-card name lookups with serialized `ProductionCardView` bindings and update the HUD builder to author them. The user verified all five migrated cards on 2026-07-18.
-- [ ] Convert the five now-self-contained production-card views to a shared prefab with role-specific serialized overrides, keeping the HUD builder deterministic and verifying all card interactions afterward.
+- [ ] Convert the five now-self-contained standard production-card views to a shared prefab with slot-specific serialized overrides, keeping the HUD builder deterministic, preserving variable-roster hiding, and verifying all card interactions afterward.
 - [x] Complete and verify the final behavior-preserving runtime refactor batch. Spawn selection/capacity/prefab resolution now lives in `UnitSpawnController`; battle readouts and listener lifecycle live in `BattleHudReadoutPresenter`; faction-option generation has a focused presenter; and enemy AI receives initialized manager/economy dependencies with a legacy fallback. External runtime and Editor compilation passed with zero warnings, and the user verified the batch in Play Mode on 2026-07-18.
 - Inventory project-owned modifications inside third-party Tiny Swords folders. Treat vendor content as read-mostly and migrate future project-owned Animator Controllers or overrides into a project-owned animation folder when safe; do not move `Resources/MythicUnitRoster.asset` while `GameManager` relies on its fallback `Resources.Load` contract.
 - Revisit the editor-generated stronghold health-bar frame in `ClashBattleUIBuilder.CreateHealthBarFrame`. The health fills are currently fixed by team side (blue player/left and red enemy/right), not selected faction; decide during the later UI pass whether that convention should remain. Determine the correct use of the Tiny Swords bar assets or replace the frame treatment; the final frame must fully contain the health fill without distortion or overflow. The current stretched middle segment is intentionally commented out until this is addressed.

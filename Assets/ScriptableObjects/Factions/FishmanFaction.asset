@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9c96c1ab6c22d4bae4aa7f02307064, type: 3}
+  m_Name: FishmanFaction
+  m_EditorClassIdentifier: Assembly-CSharp::FactionData
+  factionName: Fishman
+  productionUnits:
+  - role: 4
+    prefab: {fileID: 7965416296193654876, guid: 152be3eb285227b499e410f0088035e9, type: 3}
+  - role: 4
+    prefab: {fileID: 7603972446525859974, guid: 868451a568241ea4b892bff61b287039, type: 3}
+  - role: 4
+    prefab: {fileID: 7121119265216047472, guid: 21648578a2f48e64f97dff52fa5515b5, type: 3}
+  workerPrefab: {fileID: 8120276743538827778, guid: 76e22820f8d16bc47861a806bb1ae4c6, type: 3}
+  castleSprite: {fileID: 21300000, guid: d0349d8d3a04044f7a4810157b116b14, type: 3}
+  handInSprite: {fileID: 21300000, guid: c94d66993de80409fb65b3577475c483, type: 3}
