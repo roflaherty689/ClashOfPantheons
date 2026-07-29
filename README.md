@@ -118,3 +118,49 @@ Future factions may include:
 - Audio and music
 
 ---
+
+## Build a shareable Windows version
+
+Requirements:
+
+- Windows
+- Unity `6000.4.11f1` with Windows Build Support installed
+- The project must be closed in the Unity Editor while the command runs
+
+From the repository root, run:
+
+```powershell
+.\Build-Windows.cmd
+```
+
+From a WSL Ubuntu terminal, the equivalent command is:
+
+```bash
+make build
+```
+
+To build the runnable folder without creating the shareable ZIP:
+
+```bash
+make build-no-archive
+```
+
+The command builds the enabled scenes in their required playable order (title menu, then battle) and creates:
+
+- `Builds\Windows\ClashOfPantheons\` — the complete runnable player folder
+- `Builds\Windows\ClashOfPantheons-Windows-x64.zip` — the archive to share
+- `Logs\Builds\Windows-x64-<timestamp>.log` — the retained Unity build log
+
+Friends should extract the ZIP and run `ClashOfPantheons.exe` without removing it from the accompanying data and runtime files.
+
+Optional arguments:
+
+```powershell
+.\Build-Windows.cmd -SkipArchive
+.\Build-Windows.cmd -OutputPath "Builds\Playtest\ClashOfPantheons"
+.\Build-Windows.cmd -UnityPath "C:\path\to\Unity.exe"
+```
+
+For safety, custom output paths must remain beneath this repository's ignored `Builds` directory. A failed rebuild preserves the last successfully promoted player folder.
+
+---

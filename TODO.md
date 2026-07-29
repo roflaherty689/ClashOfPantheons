@@ -151,6 +151,7 @@ Tasks are ordered by dependency and prototype value.
 - [x] Background animation is layered behind interactive UI, does not intercept button input, and remains readable and performant at the prototype's representative PC resolutions.
 - [x] Menu scripts compile, both scenes are present and ordered correctly in Build Settings, and the title -> selection -> battle path is verified in Play Mode.
 - [ ] The same flow, including Exit, is verified in a packaged player build.
+- [x] A repository-owned Windows x64 CLI build command validates the required title/battle scene order, preserves complete Unity player output, and creates an optional shareable ZIP.
 
 **Relevant systems:** new menu scene/UI and controller, `FactionData`, a serialized faction catalog/menu configuration, scene-loading/session-selection boundary, `GameManager`, Build Settings
 
@@ -158,7 +159,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Risks and manual Unity work:** Runtime builds cannot use `AssetDatabase` to discover ScriptableObjects, so available factions must be explicitly serialized or supplied through another build-safe content mechanism. Scene creation, Canvas layout, button references, Build Settings ordering, faction catalog contents, multi-resolution inspection, and Play Mode/player-build verification require Unity Editor validation.
 
-**Progress:** Coordinated and accepted in `DEC-012` and extended by `DEC-014`. The user verified the title, faction selection, Tiny Swords animated presentation, difficulty selection, distinct opponent faction, and transition into battle in Play Mode on 2026-07-17, and later accepted the implemented front-end menus as readable across the tested aspect ratios. Difficulty choices launch battle directly from a parchment-contained Tiny Swords menu. The title background retains all 16 Enemy Pack creatures and five colour monks as decorative actors, independently of the current 16-option picker. `DEC-020` adds Fishman and Goblin; both `FactionData` assets and their build-safe catalog entries are present in the repository. Unity import and menu-to-battle Play Mode verification remain. Player-build verification also remains pending, so the parent task remains partially implemented.
+**Progress:** Coordinated and accepted in `DEC-012` and extended by `DEC-014`. The user verified the title, faction selection, Tiny Swords animated presentation, difficulty selection, distinct opponent faction, and transition into battle in Play Mode on 2026-07-17, and later accepted the implemented front-end menus as readable across the tested aspect ratios. Difficulty choices launch battle directly from a parchment-contained Tiny Swords menu. The title background retains all 16 Enemy Pack creatures and five colour monks as decorative actors, independently of the current 16-option picker. `DEC-020` adds Fishman and Goblin; both `FactionData` assets and their build-safe catalog entries are present in the repository. `Build-Windows.cmd` / `Build-Windows.ps1` now provide a guarded, repeatable Windows x64 player build and shareable archive workflow. Unity import, menu-to-battle Play Mode verification, and execution/launch verification of the packaged player remain, so the parent task remains partially implemented.
 
 **Status:** Partially implemented
 

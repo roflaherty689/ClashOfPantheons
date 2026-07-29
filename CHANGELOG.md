@@ -8,6 +8,7 @@ Git history remains the exact implementation record.
 
 ### Added
 
+- A repeatable Windows x64 command-line build pipeline with pinned-Unity discovery, scene-order validation, complete player-folder verification, transactional output promotion, retained logs, an optional shareable ZIP archive, and `make build` convenience from WSL.
 - Selectable Fishman and Goblin faction assets assembled from existing Enemy Pack units. Fishman uses Harpoon Fish, Paddle Fish, and Lizard in order with temporary Black presentation; Goblin uses Skull, Lancer, and Shaman with temporary Red presentation.
 - Build-safe faction-catalog entries for Fishman and Goblin; all six reused creatures remain in the separate 16-option mythic picker.
 - An initial 16-cue SFX layer sourced from the imported 400 Sounds Pack, covering UI input and rejection, purchases, worker deposits, spawning, role-aware combat, deaths, healing, stronghold feedback, and victory/defeat/draw results.
