@@ -84,7 +84,9 @@ public sealed class SelectedRolePresenter
         gameManager.TryGetProductionRole(playerTeam, selectedSlot, out UnitRole role);
         string roleName = selectedMythic != null
             ? MythicArtworkPresenter.GetDisplayName(selectedMythic).ToUpperInvariant()
-            : role.ToString().ToUpperInvariant();
+            : selectedSlot == ProductionSlotId.Standard4
+                ? "MONK"
+                : role.ToString().ToUpperInvariant();
 
         RefreshIcon(gameManager, selectedMythic);
 

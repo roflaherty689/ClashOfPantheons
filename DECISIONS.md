@@ -37,6 +37,7 @@ Do not record trivial implementation details.
 | DEC-016 | Remove legacy meme factions | Accepted | 2026-07-28 |
 | DEC-017 | In-game menu enters Prototype scope | Accepted | 2026-07-28 |
 | DEC-018 | Four ordered standard-production slots | Accepted | 2026-07-28 |
+| DEC-019 | Faction-owned monk slot and creature-only mythic picker | Accepted | 2026-07-29 |
 
 ---
 
@@ -149,7 +150,7 @@ The repository already contains a one-lane, two-stronghold battle. Adding a boun
 
 ### Decision
 
-Gold is the only prototype currency. It supports workers, military production, and upgrades. Military production uses four ordered independent standard slots plus a separate mythic track rather than one shared FIFO queue. Every track has one-, two-, and three-star in-match upgrade tiers. `UnitRole` remains the combat classification used for favourable matchups. A favourable matchup applies a 1.2× damage multiplier. The current star-tier curve is governed by `DEC-015`.
+Gold is the only prototype currency. It supports workers, military production, and upgrades. Military production uses five ordered independent standard slots plus a separate mythic track rather than one shared FIFO queue. Every track has one-, two-, and three-star in-match upgrade tiers. `UnitRole` remains the combat classification used for favourable matchups. A favourable matchup applies a 1.2× damage multiplier. The current star-tier curve is governed by `DEC-015`.
 
 ### Context and rationale
 
@@ -160,8 +161,8 @@ The repository already has gold workers, five role mappings, costs, and automate
 - Favour and essence in the rough HUD are not prototype systems.
 - The shared queue shown in the rough HUD must not define runtime behavior.
 - Each standard slot resolves purchase cost and recurring production cadence from its configured prefab's `UnitData`; the selected mythic's `UnitData` governs the separate mythic track. Exact values and remaining matchup details require tuning.
-- The recurring three-purchase lifecycle originated in `DEC-007` and is carried forward per slot by `DEC-018`.
-- `DEC-018` supersedes the assumption that standard production has one unique track per combat role. Gold, independent recurring production, and three star tiers remain active, but standard production is now identified by four ordered faction slots and mythic remains separate.
+- The recurring three-purchase lifecycle originated in `DEC-007` and is carried forward per slot by `DEC-018` and `DEC-019`.
+- `DEC-018` supersedes the assumption that standard production has one unique track per combat role. `DEC-019` expands its exact count from four to five faction slots. Gold, independent recurring production, and three star tiers remain active, and the picker-backed mythic track remains separate.
 
 ### Alternatives considered
 
@@ -318,6 +319,8 @@ PC-first development matches the current Editor-driven workflow and avoids requi
 
 **Date:** 2026-07-17
 **Status:** Accepted
+
+**Partially superseded by:** `DEC-019` adds a colour-specific monk to each faction while cavalry, siege, and the separate Enemy Pack picker remain shared.
 
 ### Decision
 
@@ -487,6 +490,8 @@ Separating functional navigation and selection from animated presentation keeps 
 
 **Date:** 2026-07-17
 **Status:** Accepted
+
+**Partially superseded by:** `DEC-019` removes the five monks from the picker while preserving the picker-backed per-match selection contract for the 16 Enemy Pack creatures.
 
 ### Decision
 
@@ -693,6 +698,8 @@ A player must be able to interrupt or leave an active solo match without relying
 **Date:** 2026-07-28
 **Status:** Accepted
 
+**Partially superseded by:** `DEC-019` expands the exact standard-slot count from four to five while preserving ordered slot identity, independent state, and the separate picker-backed mythic track.
+
 ### Decision
 
 Each faction owns exactly four ordered standard-production slots. A slot selects a unit prefab and its `UnitData`; multiple slots may use the same `UnitRole`, including compositions such as two melee plus two archer slots. Each standard slot independently owns its unlock state, tier, production timer, purchase routing, cost, and cadence. `UnitRole` remains a combat classification for behavior, targeting, counters, and loss reporting, not a roster identity or uniqueness constraint.
@@ -719,7 +726,7 @@ Ordered slot identity supports faction-specific composition without expanding th
 ### Alternatives considered
 
 - Keep one unique standard track per combat role: rejected because it prevents duplicate-role faction compositions.
-- Expand factions to five authored slots including mythic: rejected because it would conflict with the accepted picker-backed mythic contract.
+- Make a fifth faction-authored slot replace the picker-backed mythic track: rejected because it would conflict with the accepted picker contract. `DEC-019` later adds a standard monk slot while retaining the picker as a separate sixth track.
 - Encode duplicate compositions by adding new combat-role enum values: rejected because roster identity and combat classification are different concerns.
 - Use unordered role counts: rejected because ordered slots map directly to stable HUD controls, independent state, and authored faction intent.
 
@@ -731,6 +738,58 @@ Ordered slot identity supports faction-specific composition without expanding th
 - `DEC-004` — Prototype economy, roles, and upgrades
 - `DEC-007` — Superseded role-keyed production identity
 - `DEC-013` — Selectable test roster for mythic production
+- `Assets/Scripts/Factions/FactionData.cs`
+- `Assets/Scripts/Managers/ProductionStateController.cs`
+- `Assets/Scripts/Managers/UnitSpawnController.cs`
+- `Assets/Scripts/UI/ProductionCardPresenter.cs`
+
+---
+
+## DEC-019 — Faction-owned monk slot and creature-only mythic picker
+
+**Date:** 2026-07-29
+**Status:** Accepted
+
+### Decision
+
+Each faction owns five ordered standard-production slots plus one separate picker-backed mythic track, for six independent production tracks/cards in total. For Black, Blue, Purple, Red, and Yellow, `Standard4` is the faction's matching colour monk. The monk remains classified as `UnitRole.Mythic` for combat behavior, targeting, counters, healing, and reporting, but it is purchased, upgraded, timed, and spawned through the normal standard-slot lifecycle.
+
+The global mythic picker roster contains the 16 qualifying Enemy Pack creatures, including Minotaur, and excludes all five monks. Its atomic pre-purchase selection, per-match lock-in, data-owned cost/cadence, upgrade lifecycle, and presentation mechanics remain unchanged.
+
+This decision supersedes only the exact-four-slot clause of `DEC-018` and the monk-inclusive picker clause of `DEC-013`. Their ordered slot-identity and picker-mechanics decisions remain active.
+
+### Context
+
+The ordered-slot migration established faction-owned production identity separately from `UnitRole`, but retained four standard slots and placed all monks in the broad 21-option mythic picker. The user directly requested one appropriate monk for each of the five supported colour factions and removal of those monks from the global mythic table. The resulting source implementation uses five standard slots plus the separate picker track.
+
+### Rationale
+
+Assigning each colour monk to its matching faction strengthens faction presentation and gives every supported faction a dedicated support unit without duplicating that unit in the global picker. Retaining `UnitRole.Mythic` avoids rewriting established monk combat and healing semantics, while slot-keyed production ensures combat classification does not accidentally route the monk through picker purchasing. Restricting the picker to Enemy Pack creatures makes its purpose clearer and reduces redundant choices.
+
+### Consequences
+
+- Production systems, AI, spawning, faction data, HUD bindings, and Editor migration tooling must support `Standard0` through `Standard4` plus the separate mythic track.
+- The production HUD requires six cards: five faction-owned standard cards and one picker-backed mythic card.
+- Black, Blue, Purple, Red, and Yellow each map `Standard4` to their matching monk prefab. The legacy `Default` faction retains a valid fifth standard entry.
+- Standard-slot monks have independent unlock, tier, timer, cost, and cadence state and do not read or mutate picker selection state.
+- Mythic picker enumeration and random AI picker selection use only the 16 Enemy Pack creatures.
+- Existing monk prefab, avatar, healing, audio, and balance behavior remain in scope; only production ownership changes.
+- The implementation has static checks, but no new scene or Play Mode verification is claimed. After Unity compiles, the user must run **Tools > Clash of Pantheons > Bind Production Card Views** for `SampleScene`, then verify six-card player/AI purchasing, monk production, picker contents, upgrades, cadence, match end, and restart in Play Mode.
+
+### Alternatives considered
+
+- Keep monks in the picker and also add them to factions: rejected because it duplicates the same support option across two ownership paths and makes purchase state ambiguous.
+- Replace one of the original four standard units with the monk: rejected because it removes an existing faction production option instead of adding the requested colour-owned monk.
+- Reclassify monks away from `UnitRole.Mythic`: rejected because production identity is already slot-keyed and a classification change would create unnecessary combat, balance, reporting, and compatibility work.
+- Make the monk a special non-production faction ability: rejected because it would introduce a new lifecycle and UI path when standard-slot production already provides the required behavior.
+
+### Related items
+
+- `GAME_DESIGN.md` — Unit roles and counterplay; Economy and production; Accepted mythic-roster test expansion
+- `ROADMAP.md` — Prototype planned outcomes and verification
+- `TODO.md` — Independent slot production; functional HUD; selectable mythic roster
+- `DEC-013` — Picker mechanics retained; monk-inclusive roster clause superseded
+- `DEC-018` — Ordered slot identity retained; exact-four-slot clause superseded
 - `Assets/Scripts/Factions/FactionData.cs`
 - `Assets/Scripts/Managers/ProductionStateController.cs`
 - `Assets/Scripts/Managers/UnitSpawnController.cs`

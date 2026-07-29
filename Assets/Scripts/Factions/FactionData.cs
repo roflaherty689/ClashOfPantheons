@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 [CreateAssetMenu(fileName = "New Faction", menuName = "Clash of Pantheons/Faction")]
 public class FactionData : ScriptableObject
 {
-    public const int StandardProductionSlotCount = 4;
+    public const int StandardProductionSlotCount = 5;
 
     [Header("Faction Info")]
     [SerializeField] private string factionName;
@@ -89,7 +89,7 @@ public class FactionData : ScriptableObject
                 continue;
             }
 
-            if (!System.Enum.IsDefined(typeof(UnitRole), entry.Role) || entry.Role == UnitRole.Mythic)
+            if (!System.Enum.IsDefined(typeof(UnitRole), entry.Role))
             {
                 AppendIssue(issues, $"standard slot {index} has invalid role {entry.Role}");
             }
@@ -110,8 +110,15 @@ public class FactionData : ScriptableObject
 
     private static int GetStandardSlotIndex(ProductionSlotId slotId)
     {
-        int index = (int)slotId;
-        return index >= 0 && index < StandardProductionSlotCount ? index : -1;
+        return slotId switch
+        {
+            ProductionSlotId.Standard0 => 0,
+            ProductionSlotId.Standard1 => 1,
+            ProductionSlotId.Standard2 => 2,
+            ProductionSlotId.Standard3 => 3,
+            ProductionSlotId.Standard4 => 4,
+            _ => -1
+        };
     }
 
     private static void AppendIssue(StringBuilder issues, string issue)

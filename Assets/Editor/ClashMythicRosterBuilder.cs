@@ -8,16 +8,10 @@ public static class ClashMythicRosterBuilder
     private const string RosterPath = ResourceRoot + "/MythicUnitRoster.asset";
     private const string MythicRoot = "Assets/Prefabs/Units/Factions/Base/Mythic";
     private const string AvatarRoot = "Assets/Tiny Swords - Enemy Pack/Enemy Avatars";
-    private const string HumanAvatarRoot = "Assets/Tiny Swords/UI Elements/Human Avatars";
     private const string DefaultIconPath = "Assets/Tiny Swords/UI Elements/Icons/Icon_05.png";
 
     private static readonly string[] UnitPaths =
     {
-        MythicRoot + "/Monk/BlackMonkUnit.prefab",
-        MythicRoot + "/Monk/BlueMonkUnit.prefab",
-        MythicRoot + "/Monk/PurpleMonkUnit.prefab",
-        MythicRoot + "/Monk/RedMonkUnit.prefab",
-        MythicRoot + "/Monk/YellowMonkUnit.prefab",
         MythicRoot + "/MeleeMythicAnimatedUnit.prefab",
         MythicRoot + "/EnemyPack/BearMythicUnit.prefab",
         MythicRoot + "/EnemyPack/GnollMythicUnit.prefab",
@@ -38,11 +32,8 @@ public static class ClashMythicRosterBuilder
 
     private static readonly int[] AvatarNumbers =
     {
-        0, 0, 0, 0, 0,
         9, 14, 10, 15, 3, 4, 13, 2, 12, 5, 1, 7, 11, 6, 16, 8
     };
-
-    private static readonly int[] MonkAvatarNumbers = { 24, 4, 19, 9, 14 };
 
     [MenuItem("Tools/Clash of Pantheons/Build Phase 3 Mythic Roster")]
     public static void BuildPhaseThreeRoster()
@@ -71,9 +62,8 @@ public static class ClashMythicRosterBuilder
             }
 
             units.GetArrayElementAtIndex(i).objectReferenceValue = prefab;
-            avatars.GetArrayElementAtIndex(i).objectReferenceValue = i < MonkAvatarNumbers.Length
-                ? LoadFirstSprite($"{HumanAvatarRoot}/Avatars_{MonkAvatarNumbers[i]:00}.png")
-                : LoadFirstSprite($"{AvatarRoot}/Enemy Avatars_{AvatarNumbers[i]:00}.png");
+            avatars.GetArrayElementAtIndex(i).objectReferenceValue =
+                LoadFirstSprite($"{AvatarRoot}/Enemy Avatars_{AvatarNumbers[i]:00}.png");
         }
 
         serializedRoster.FindProperty("defaultIcon").objectReferenceValue = LoadFirstSprite(DefaultIconPath);

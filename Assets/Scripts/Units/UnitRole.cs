@@ -9,9 +9,10 @@ public enum UnitRole
 
 public enum ProductionSlotId
 {
-    Standard0,
-    Standard1,
-    Standard2,
-    Standard3,
-    Mythic
+    Standard0 = 0,
+    Standard1 = 1,
+    Standard2 = 2,
+    Standard3 = 3,
+    Mythic = 4,
+    Standard4 = 5
 }

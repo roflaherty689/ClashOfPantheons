@@ -13,6 +13,7 @@ public sealed class ProductionCardPresenter
         ProductionSlotId.Standard1,
         ProductionSlotId.Standard2,
         ProductionSlotId.Standard3,
+        ProductionSlotId.Standard4,
         ProductionSlotId.Mythic
     };
 
@@ -83,8 +84,16 @@ public sealed class ProductionCardPresenter
             RefreshArt(binding, tier, gameManager);
 
             if (binding.TitleText != null &&
-                gameManager.TryGetProductionRole(playerTeam, binding.SlotId, out UnitRole role) &&
-                (!binding.HasPresentedRole || binding.PresentedRole != role))
+                binding.SlotId == ProductionSlotId.Standard4)
+            {
+                binding.TitleText.text = "MONK";
+            }
+            else if (binding.TitleText != null &&
+                     gameManager.TryGetProductionRole(
+                         playerTeam,
+                         binding.SlotId,
+                         out UnitRole role) &&
+                     (!binding.HasPresentedRole || binding.PresentedRole != role))
             {
                 binding.PresentedRole = role;
                 binding.HasPresentedRole = true;

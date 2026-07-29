@@ -33,7 +33,7 @@ There is no direct unit control. The prototype is primarily single-player agains
    - Excludes passive income with no meaningful tradeoffs.
 
 2. **Army composition and counterplay**
-   - Four ordered standard-production slots define a faction's composition, may repeat combat roles, and are supplemented by one separate mythic track. The five combat roles remain readable classifications with distinct strengths and weaknesses.
+   - Five ordered standard-production slots define a faction's composition, may repeat combat roles, and are supplemented by one separate mythic track. The five combat roles remain readable classifications with distinct strengths and weaknesses.
    - Excludes one dominant composition or cosmetic-only role differences.
 
 3. **Mythological faction identity**
@@ -57,12 +57,12 @@ There is no direct unit control. The prototype is primarily single-player agains
 
 ### Current prototype loop — implemented, not Play Mode verified in this pass
 
-1. Both sides begin with every production track locked. The player and AI spend their own gold to unlock independent cadences. The previously verified implementation keyed standard tracks by `UnitRole`; migration to the accepted ordered-slot roster is in progress and has not yet received complete Play Mode verification. A legacy free-spawn pattern remains available only for prototype/debug testing.
+1. Both sides begin with every production track locked. The player and AI spend their own gold to unlock independent cadences. Five ordered faction-owned standard tracks plus one separate picker-backed mythic track are implemented in source, but the six-card scene binding and complete Play Mode regression remain pending. A legacy free-spawn pattern remains available only for prototype/debug testing.
 2. Units march, acquire targets, and fight automatically.
 3. Workers independently mine and deposit gold.
 4. Destroying a base or reaching the time limit ends the match and displays the result.
 
-The player HUD presents live economy and stronghold state, a five-minute countdown, timeout results, restart, and production purchasing. Both teams start with locked tracks and spend their own gold to unlock or upgrade them. The user completed several clean end-to-end Play Mode matches through result and restart by 2026-07-28 under the earlier role-keyed standard roster. Earlier focused verification also covered AI purchasing, production scheduling, timeout branches, match stopping, and reset behavior. The ordered-slot migration, targeted regression automation, and a packaged player build remain incomplete.
+The player HUD presents live economy and stronghold state, a five-minute countdown, timeout results, restart, and production purchasing. Both teams start with locked tracks and spend their own gold to unlock or upgrade them. The user completed several clean end-to-end Play Mode matches through result and restart by 2026-07-28 under the earlier role-keyed standard roster. Earlier focused verification also covered AI purchasing, production scheduling, timeout branches, match stopping, and reset behavior. The five-standard-slot/six-card migration is implemented in source and statically checked, but scene rebinding, complete Play Mode regression, targeted automation, and a packaged player build remain incomplete.
 
 **Short-loop rhythm:** Worker trips and independent recurring production cadences. Buying a locked standard slot or the mythic track unlocks its continuous production; later purchases advance that same track to two and three stars.
 
@@ -73,7 +73,7 @@ The player HUD presents live economy and stronghold state, a five-minute countdo
 ## Player actions
 
 - **Buy a worker:** Spend gold to increase future income, limited by cost and worker capacity.
-- **Establish or improve production:** Spend gold on one of four ordered standard-production slots or the separate mythic track. Each track operates independently rather than through one shared FIFO queue.
+- **Establish or improve production:** Spend gold on one of five ordered standard-production slots or the separate mythic track. Each track operates independently rather than through one shared FIFO queue.
 - **Upgrade a production track:** Spend gold to advance that standard slot or mythic track through one-, two-, and three-star tiers.
 - **Read and adapt:** Observe gold, production, upgrades, time, base health, composition, and momentum.
 
@@ -87,9 +87,9 @@ The first purchase unlocks one continuously producing track. The second and thir
 
 ### Unit roles and counterplay
 
-The five accepted combat classifications are melee, archer, cavalry, siege, and mythic. `UnitRole` classifies combat behavior and counter relationships; it is not the identity or uniqueness key for a faction's standard-production roster. A faction instead owns four ordered standard slots, and multiple slots may use the same combat role (for example, two melee plus two archer slots). Each slot selects its own prefab and `UnitData` and retains independent unlock tier, timer, purchase cost, and production cadence. Mythic remains a separate fifth picker-backed production track outside standard faction-roster composition.
+The five accepted combat classifications are melee, archer, cavalry, siege, and mythic. `UnitRole` classifies combat behavior and counter relationships; it is not the identity or uniqueness key for a faction's standard-production roster. A faction owns five ordered standard slots, and multiple slots may use the same combat role. Each slot selects its own prefab and `UnitData` and retains independent unlock tier, timer, purchase cost, and production cadence. The separate picker-backed mythic track is a sixth production track outside standard faction-roster composition.
 
-The five supported colour factions and the legacy `Default` faction preserve their existing standard order—melee, archer, cavalry, siege—during migration, so the approved model does not itself change their current composition. The implemented first-pass counter triangle applies 1.2× damage for melee against cavalry, archers against melee, and cavalry against archers. Siege remains a structure specialist; mythics use melee, ranged, and support baselines without a role-wide counter bonus. Exact values remain subject to representative Play Mode tuning.
+The five supported colour factions use melee, archer, cavalry, siege, and their matching colour monk in `Standard0` through `Standard4`. The monk remains classified as `UnitRole.Mythic` for combat behavior and reporting, but its faction slot is purchased, upgraded, timed, and spawned as normal standard production. The legacy `Default` faction also has five ordered standard entries. The implemented first-pass counter triangle applies 1.2× damage for melee against cavalry, archers against melee, and cavalry against archers. Siege remains a structure specialist; mythics use melee, ranged, and support baselines without a role-wide counter bonus. Exact values remain subject to representative Play Mode tuning.
 
 | Role | Intended identity | Implementation status |
 |---|---|---|
@@ -97,7 +97,7 @@ The five supported colour factions and the legacy `Default` faction preserve the
 | Archer | Ranged support; intended strong versus melee and weak versus cavalry | Projectile role exists |
 | Cavalry | Fast pressure; intended strong versus archers and weak versus melee | Prototype role exists |
 | Siege | Structure specialist, vulnerable without support | Projectile role and building modifier exist |
-| Mythic | Expensive selectable power or support unit; the initial roster supports testing and counter-selection | A 21-option pre-purchase roster is implemented: 16 Enemy Pack creatures including Minotaur and five mechanically identical colour monks. Creature profiles, ranged projectiles, monk healing, atomic selection/purchase, and picker presentation are implemented and have received representative Play Mode review; broader balance and matchup testing remain. |
+| Mythic | Combat classification for exceptional creatures and support units; ownership depends on production track | The separate pre-purchase picker contains 16 Enemy Pack creatures, including Minotaur, and excludes monks. Each colour faction instead owns its matching monk in `Standard4`; monks retain `UnitRole.Mythic` combat behavior while using normal standard-slot purchasing. Creature profiles, ranged projectiles, monk healing, and picker mechanics are implemented; the revised six-track presentation still needs scene rebinding and Play Mode review. |
 
 Heroes and bosses are not prototype scope.
 
@@ -117,7 +117,7 @@ The result overlay identifies victory, defeat, or draw and its resolution condit
 
 **Implemented:** Workers repeatedly travel to a gold vein, mine, return, and deposit gold. Starting and maximum worker counts, worker cost, base gold per trip, and a future-facing income-upgrade multiplier are configurable on `WorkerManager`. The player starts with one worker in the active scene, and the live HUD can buy workers up to the five-worker capacity while displaying current gold, worker count, and aggregate income per trip.
 
-**Implemented under the earlier role-keyed roster and now being migrated:** Gold is the only prototype currency. It funds workers, four independent standard-production slots, the separate mythic track, and three star tiers of in-match upgrades for both the player and AI. Favour, essence, and shared-queue presentation are excluded from the functional battle HUD. Ordered duplicate-role slot verification, deterministic transaction tests, exhaustive track coverage, and targeted edge cases remain incomplete.
+**Implemented in source; revised scene flow awaits verification:** Gold is the only prototype currency. It funds workers, five independent standard-production slots, the separate mythic track, and three star tiers of in-match upgrades for both the player and AI. Favour, essence, and shared-queue presentation are excluded from the functional battle HUD. Six-card binding, ordered duplicate-role slot verification, deterministic transaction tests, exhaustive track coverage, and targeted edge cases remain incomplete.
 
 ### Progression and persistence
 
@@ -138,13 +138,13 @@ Campaign and persistent progression are deferred beyond the core prototype. No s
 
 ## AI and difficulty
 
-The AI uses the same worker, gold-spending, four standard-slot production, tier, separate mythic-selection, spawn, and match rules as the player. It must address standard production by slot so duplicate combat roles remain independently purchasable and upgradeable. Easy makes slower, partly idle/random decisions and receives no starting bonus. Medium establishes production before each early worker investment, then balances workers with varied production at a moderate cadence, and receives +50 starting gold. Hard makes faster decisions, requires a broader military opening before expanding its economy, and receives +150 starting gold. The bonus applies once to the enemy only. The AI randomly chooses a valid mythic and a configured faction other than the player's faction. The earlier role-keyed system was representatively Play Mode verified; the ordered-slot migration still requires verification. The three-star melee dominance report also shows that difficulty and purchasing policy require balance diagnosis. Online matchmaking remains deferred.
+The AI uses the same worker, gold-spending, five standard-slot production, tier, separate mythic-selection, spawn, and match rules as the player. It must address standard production by slot so repeated combat roles—including the faction monk in `Standard4`—remain independently purchasable and upgradeable. Easy makes slower, partly idle/random decisions and receives no starting bonus. Medium establishes production before each early worker investment, then balances workers with varied production at a moderate cadence, and receives +50 starting gold. Hard makes faster decisions, requires a broader military opening before expanding its economy, and receives +150 starting gold. The bonus applies once to the enemy only. The AI randomly chooses one of the 16 Enemy Pack picker mythics and a configured faction other than the player's faction. The earlier role-keyed system was representatively Play Mode verified; the revised six-track flow still requires verification. The three-star melee dominance report also shows that difficulty and purchasing policy require balance diagnosis. Online matchmaking remains deferred.
 
 ## UI and feedback
 
 **Implemented:** Units display world-space damage health bars. Stronghold health is shown as live current/maximum text and proportional bars in the battle HUD, without duplicate world-space bars above the bases. Base hits shake the base visual; animated attacks and projectile arcs provide combat feedback; victory text identifies the winning team.
 
-**Implemented and representatively Play Mode verified before the ordered-slot migration:** The redesigned scene HUD presents the accepted single-gold economy and five production cards. Its player gold, aggregate worker income, worker count, buy-worker button, production controls, locked/producing and tier states, affordability, greyed locked art, both stronghold-health displays, match timer, result overlay, resolution reason, and restart button are live. Under the accepted roster model, the first four cards represent ordered standard slots and the fifth remains the separate mythic track; card labels and interactions must derive from slot configuration rather than assuming unique roles. Focused presenter verification and several complete matches cover the earlier representative flow; duplicate-role presentation and interaction still require Play Mode regression.
+**Implemented in source and representatively Play Mode verified only before the latest roster migration:** The redesigned HUD supports the accepted single-gold economy and six production cards. Its player gold, aggregate worker income, worker count, buy-worker button, production controls, locked/producing and tier states, affordability, greyed locked art, both stronghold-health displays, match timer, result overlay, resolution reason, and restart button are live. The first five cards represent ordered faction-owned standard slots and the sixth is the separate mythic picker. Card labels and interactions derive from slot configuration rather than assuming unique roles. `SampleScene` still requires **Tools > Clash of Pantheons > Bind Production Card Views** after Unity compiles, followed by Play Mode regression of the six-card layout and interactions.
 
 The functional prototype HUD must communicate gold, worker purchase state, independent production, star tiers, remaining time, base health, and the final result. A results/restart flow is required. The accepted initial front-end flow is a title screen with Play and Exit, then a faction-selection screen whose clickable options are generated from configured `FactionData` assets. The chosen player faction must drive the existing faction-owned battle presentation and unit mappings. An in-game menu is now accepted scope; its exact actions and pause semantics remain to be finalized before implementation. Basic onboarding and most feedback remain unimplemented.
 
@@ -154,7 +154,7 @@ Unit health bars are faction-neutral: a black backing contains a health-state fi
 
 ## Audio and visual direction
 
-Use the colourful, humorous Tiny Swords pixel-art style as the prototype direction. Replacement or supplementary art should preserve that tone while using iconic mythological or cultural details where useful; strict historical accuracy is not the goal. Five mechanically identical Tiny Swords team-colour variants (black, blue, purple, red, and yellow) are available for prototype presentation. Each variant owns matching Castle and House3 hand-in sprites, an animated worker prefab, and animated melee/archer prefabs; cavalry, siege, and mythic remain shared. The selected faction drives its world presentation, HUD stronghold icon, and spawned worker colour. These palette variants are not five designed mythological factions. Final art and broad faction production remain deferred.
+Use the colourful, humorous Tiny Swords pixel-art style as the prototype direction. Replacement or supplementary art should preserve that tone while using iconic mythological or cultural details where useful; strict historical accuracy is not the goal. Five mechanically identical Tiny Swords team-colour variants (black, blue, purple, red, and yellow) are available for prototype presentation. Each variant owns matching Castle and House3 hand-in sprites, an animated worker prefab, animated melee/archer prefabs, and a matching colour monk in its fifth standard slot; cavalry, siege, and the separate Enemy Pack mythic picker remain shared. The selected faction drives its world presentation, HUD stronghold icon, and spawned worker colour. These palette variants are not five designed mythological factions. Final art and broad faction production remain deferred.
 
 **Implemented and accepted as a prototype first pass:** A persistent project-owned SFX service provides an initial feedback layer using the imported 400 Sounds Pack. It covers menu/UI input, purchases and rejections, worker deposits, unit spawning, role-aware attacks, deaths, monk healing, stronghold damage/destruction, and victory/defeat/draw. Repeated battlefield cues use category cooldowns, limited simultaneous voices, modest pitch variation, and partial spatial blending to preserve readability during large clashes. Sound-level and cue-selection refinements remain for a later audio pass.
 
@@ -176,7 +176,7 @@ The title screen should eventually use the same colourful Tiny Swords presentati
 
 - One complete economy → production → autonomous combat → result → restart loop against AI.
 - One shared horizontal lane and two strongholds.
-- Gold-funded workers, four ordered independent standard-production slots, one separate mythic track, and three star tiers per track.
+- Gold-funded workers, five ordered independent standard-production slots, one separate mythic track, and three star tiers per track.
 - Meaningful economy-versus-pressure and composition decisions.
 - Approximately five-minute matches with base-destruction and timeout results.
 - Minimal functional HUD and clear feedback.
@@ -193,15 +193,15 @@ The title screen should eventually use the same colourful Tiny Swords presentati
 
 - Additional factions or maps.
 - Battle-speed controls for solo play or testing.
-- Additional unit options if the four-standard-slot plus separate-mythic model proves insufficient.
+- Additional unit options if the five-standard-slot plus separate-mythic model proves insufficient.
 
 ### Accepted mythic-roster test expansion
 
-Unlocking mythic production opens a choice menu before gold is spent. Selecting an option atomically purchases the unlock; later purchases upgrade that chosen option for the rest of the match. Each option's `UnitData` owns its cost and production cadence. The initial menu includes every combat-capable Tiny Swords Enemy Pack unit with usable idle, movement, and attack-equivalent animation, plus the five colour monks, so the roster can be reduced after review and used to test counter-selection when the opponent reveals a mythic choice first.
+Unlocking the separate mythic production track opens a choice menu before gold is spent. Selecting an option atomically purchases the unlock; later purchases upgrade that chosen option for the rest of the match. Each option's `UnitData` owns its cost and production cadence. Following the initial 21-unit test, the current picker contains the 16 qualifying combat-capable Tiny Swords Enemy Pack creatures and excludes all monks. This preserves counter-selection testing without duplicating faction-owned monk production.
 
 The combat mythics use differentiated first-pass profiles rather than one shared Minotaur baseline. Small, agile creatures such as Gnome, Thief, Spider, and Snake are cheaper, weaker, and produced more frequently; the middle roster trades cadence for increasing durability and damage; Bear and Minotaur are premium bruisers; and Troll is the strongest, slowest-producing, uniquely highest-cost option. Turtle emphasizes durability over damage and speed. Gnoll, Harpoon Fish, and Shaman are ranged mythics with increasing cost and power, reduced building damage, and their supplied bone, harpoon, and shaman projectile art. Troll uses its Windup clip as its attack; Troll Recovery and club-breaking clips, Skull and Turtle guard clips, and Boat are excluded.
 
-All five monk colours reference the same `MonkUnitData` and are mechanically identical. Monks stop to heal the most-injured valid allied combat unit within range 2, excluding themselves, bases, dead units, and full-health units. They heal 5 health every 3 seconds at one star; heal amount follows the 1x/1.25x/1.5x tier curve while cadence stays fixed. Multiple monks may heal the same target, without overhealing, and resume movement when no valid ally in combat is in range.
+All five monk colours reference the same `MonkUnitData` and are mechanically identical. Each supported colour faction owns its matching monk in `Standard4`; it retains `UnitRole.Mythic` but follows the standard-slot purchase lifecycle rather than the picker lifecycle. Monks stop to heal the most-injured valid allied combat unit within range 2, excluding themselves, bases, dead units, and full-health units. They heal 5 health every 3 seconds at one star; heal amount follows the 1x/1.25x/1.5x tier curve while cadence stays fixed. Multiple monks may heal the same target, without overhealing, and resume movement when no valid ally in combat is in range.
 
 ### Deferred beyond the core prototype
 

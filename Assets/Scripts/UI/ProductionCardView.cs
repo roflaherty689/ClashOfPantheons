@@ -72,6 +72,7 @@ public sealed class ProductionCardView : MonoBehaviour
             ProductionSlotId.Standard2 => "CAVALRY",
             ProductionSlotId.Standard3 => "SIEGE",
             ProductionSlotId.Mythic => "MYTHIC",
+            ProductionSlotId.Standard4 => "MONK",
             _ => string.Empty
         };
 

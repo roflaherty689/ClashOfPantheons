@@ -13,11 +13,6 @@ MonoBehaviour:
   m_Name: MythicUnitRoster
   m_EditorClassIdentifier: Assembly-CSharp::MythicUnitRoster
   units:
-  - {fileID: 5412262610288804233, guid: ccc2ce1c6bf9dc347b9a3da1cb4f449c, type: 3}
-  - {fileID: 1784443589103289079, guid: 0283cb233a12f0a4badd9c0d2f77cda8, type: 3}
-  - {fileID: 7824250487751383096, guid: b64b9d12f83427b42b7dc4fa9cf46e40, type: 3}
-  - {fileID: 2663995538658959531, guid: 59803cbb5c5cb5848ba34b513b22999b, type: 3}
-  - {fileID: 2513708730362097459, guid: abeedb140e3593f48b252b89c741223e, type: 3}
   - {fileID: 7886269566354373400, guid: 4ca44712d4a677443889e9f30c89c515, type: 3}
   - {fileID: 3959232059997303059, guid: 6965ea14e4f146f40a31d4b4fa629e47, type: 3}
   - {fileID: 3405663731653394602, guid: 56efdebe1524acb4b9a4572f65fa425b, type: 3}
@@ -35,11 +30,6 @@ MonoBehaviour:
   - {fileID: 63326500277144551, guid: 4c9d4656a6219a448af9d5aa5e94db5f, type: 3}
   - {fileID: 2448449190081954329, guid: 04d208df228e3eb47ba780f39e22b548, type: 3}
   avatars:
-  - {fileID: 21300000, guid: 6d8cf840041c44fe49e9ac63926aada6, type: 3}
-  - {fileID: 21300000, guid: f846c6072ceb0445bbcb59c41b57a5cb, type: 3}
-  - {fileID: 21300000, guid: 7557544a270d14006afcede942e38074, type: 3}
-  - {fileID: 21300000, guid: 775bad7863ac5431e894540037985e03, type: 3}
-  - {fileID: 21300000, guid: 20bbae1856695438ea730a5a14e87865, type: 3}
   - {fileID: 21300000, guid: c71a51d7fffe3487db08e462fa5be6e3, type: 3}
   - {fileID: 21300000, guid: 3addccd9ed6334cf9b6fa384aba038d0, type: 3}
   - {fileID: 21300000, guid: c8770fe2a236a4dd4b51a7fa9eac9569, type: 3}

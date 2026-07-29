@@ -19,7 +19,7 @@ Git history remains the exact implementation record.
 - A post-faction difficulty screen defaulting to Easy, with enemy starting-gold bonuses of +0/+50/+150 for Easy/Medium/Hard.
 - Random opponent-faction selection that excludes the player's chosen faction to prevent colour conflicts.
 
-- A pre-purchase mythic picker in the right-side role details pane, backed by a build-safe roster containing all five monks, Minotaur, and all 15 qualifying Enemy Pack units.
+- The original pre-purchase mythic picker in the right-side role details pane, introduced with a build-safe 21-option roster containing all five monks, Minotaur, and all 15 qualifying Enemy Pack units.
 - Fifteen animation-complete Enemy Pack mythic prefabs with independent unit data, plus dedicated bone, harpoon, and shaman projectile prefabs for the ranged roster.
 - Phase 1 monk-healer runtime support for lowest-health allied combat targeting, tier-scaled healing on a fixed cadence, clamped health restoration, and recipient-positioned heal effects, plus an Editor builder for all five colour variants.
 - A decorative title-screen background layer with Tiny Swords green terrain, buildings, independently animated five-colour melee/archer units, expanded six-unit patrol groups in each side margin, and a smaller number of untinted minotaurs behind an inset wood panel.
@@ -39,17 +39,20 @@ Git history remains the exact implementation record.
 - Live result reasons and active-scene restart through the battle HUD.
 - Team-scoped unit-production purchasing with locked initial states, gold-funded unlocks, independent recurring timers, and three star tiers.
 - Live unlock, upgrade, maximum-tier, affordability, and locked-icon presentation for all five player production cards and the selected-role panel.
-- Black, blue, purple, red, and yellow prototype faction assets with matching animated melee and archer prefabs; cavalry, siege, and mythic remain shared.
+- Black, blue, purple, red, and yellow prototype faction assets originally introduced with matching animated melee and archer prefabs while cavalry, siege, and mythic were shared.
 - Matching Castle and House3 presentation references for all five prototype colour factions, applied to world buildings and stronghold HUD icons from the selected faction.
 - Black, blue, purple, red, and yellow animated worker prefabs owned by their matching faction assets.
 
 ### Changed
 
-- Standard faction production is now addressed as four ordered slots that may repeat combat roles, while mythic remains a separate fifth picker-backed track.
+- Expanded each faction from four to five ordered standard-production slots and assigned Black, Blue, Purple, Red, and Yellow `Standard4` to the matching colour monk; these monks retain `UnitRole.Mythic` combat classification while using normal standard-slot purchasing, tiers, timers, and spawning.
+- Expanded the production HUD contract from five to six independent cards/tracks: five faction-owned standard slots plus one separate picker-backed mythic track.
+- Reduced the active mythic picker roster to the 16 Enemy Pack creatures while preserving its atomic selection/purchase, upgrade, cadence, and presentation mechanics.
+- Established ordered faction-owned standard-slot identity that may repeat combat roles while keeping picker-backed mythic production separate; `DEC-019` later expanded the standard roster to five slots.
 - Reconciled project tracking with the source-integrated critical loop, AI, selectable mythic roster, HUD, timer/results, and restart implementation while preserving outstanding verification work.
 - Audited scene and prefab structure and recorded focused follow-up work for the duplicate Canvas hierarchy, reusable production-card/panel prefabs, mirrored gold-vein presentation, and third-party asset boundaries.
 
-- Expanded the animated title background to include every selectable mythic at least once: all 16 qualifying Enemy Pack creatures and all five colour monks, independently of the melee/archer decoration mix.
+- At the preceding 21-option roster stage, expanded the animated title background to include all 16 qualifying Enemy Pack creatures and all five colour monks, independently of the melee/archer decoration mix.
 
 - Mythic choices in the production picker are now ordered by ascending gold cost, with alphabetical ordering for equal-cost options.
 
@@ -116,12 +119,14 @@ Git history remains the exact implementation record.
 
 ### Removed
 
+- Removed all five colour monks from the global mythic picker roster; their prefabs and healer behavior remain in use through their matching factions' fifth standard slots.
 - Removed the legacy `MemeTeam1` and `MemeTeam2` faction assets and their complete unit/projectile prefab and portrait-image trees; the user confirmed the post-import Unity run looked correct.
 - Removed the wholly commented, unreferenced `ProductionSlot` script and its metadata.
 - Removed duplicate world-space health bars from bases and their obsolete serialized prefab/scene configuration; unit health bars and their shared assets remain in use.
 
 ### Technical
 
+- Extended slot-keyed production, spawning, AI, faction migration, and production-card tooling to five standard slots plus the separate mythic track. Static checks exist; after Unity compiles, `SampleScene` still requires **Tools > Clash of Pantheons > Bind Production Card Views** and complete six-card Play Mode regression.
 - Introduced slot-keyed faction lookup, production state, spawning, AI purchasing, HUD binding, and ordered migration of the five colour factions plus legacy `Default` through `ProductionSlotId`; `UnitRole` remains the spawned unit's combat classification. Unity import and duplicate-role Play Mode regression remain tracked.
 - User verified several complete end-to-end Play Mode matches through result and restart.
 - User accepted the current SFX layer as a prototype first pass; sound-level and cue-selection refinement remains later work.
@@ -139,7 +144,7 @@ Git history remains the exact implementation record.
 - Extracted both teams' production tiers, selected mythics, per-role timers, ready-role indices, and role mapping from `GameManager` into `ProductionStateController`; the user verified unlock, upgrade, cadence, mythic, AI, cap-resume, match-end, and restart behavior in Play Mode.
 - Consolidated mythic avatars, fallback sprites, display names, parchment, crossed-swords construction, visibility, and tinting into one shared artwork presenter; the user verified card, selected-role, picker, and restart presentation in Play Mode.
 - Extracted selected-role icon, title, status, tier, description, affordability, action text, and action-button ownership from `BattleEconomyUI`; the user verified the complete selected-role interaction in Play Mode.
-- Extracted the five production cards' bindings, hover/tap routing, affordability, tier/action text, mythic artwork, purchase listeners, and cleanup from `BattleEconomyUI`; the user verified the complete card behavior in Play Mode.
+- Extracted the earlier five production cards' bindings, hover/tap routing, affordability, tier/action text, mythic artwork, purchase listeners, and cleanup from `BattleEconomyUI`; the user verified that preceding five-card behavior in Play Mode.
 - Extracted runtime mythic-picker construction, ordering, affordability, purchase routing, and cleanup from `BattleEconomyUI` into a focused controller; the user verified the complete picker interaction in Play Mode.
 - Moved battle countdown formatting into the tested Core presentation rules; all 38 Core Edit Mode cases passed in Unity, including clamping and minute-boundary behavior.
 - Centralized the accepted 1x/1.25x/1.5x star-tier stat curve in the Core production rules; all 32 Core Edit Mode cases passed in Unity.

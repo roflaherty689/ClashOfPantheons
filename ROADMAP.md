@@ -17,14 +17,14 @@ Checked entry conditions are based on repository inspection, not a new Unity lau
 
 ### Exit criteria
 
-- [ ] A player can use gold to buy workers, establish four independent ordered standard-production slots plus the separate mythic track, and buy one-, two-, and three-star upgrades on each track. The earlier role-keyed flow was verified; the ordered-slot migration remains to be verified.
+- [ ] A player can use gold to buy workers, establish five independent ordered standard-production slots plus the separate mythic track, and buy one-, two-, and three-star upgrades on each track. The six-track implementation exists in source, but scene rebinding and Play Mode verification remain.
 - [x] An AI opponent makes economy, production, composition, and upgrade decisions under the same match rules.
 - [x] Units autonomously resolve combat on one shared lane and can destroy either stronghold.
 - [x] An approximately five-minute timer resolves matches by stronghold health, then lower total value of units lost when health is equal.
 - [x] The result is clearly presented and a new match can start without Editor intervention.
 - [x] The functional HUD accurately communicates gold, workers, production, upgrades, time, stronghold health, and result state in representative matches.
 - [x] Exact equality after both timeout comparisons produces a draw with no winner or loser.
-- [ ] The project compiles without known blocking errors and the complete slot-keyed critical path is verified in Play Mode. The earlier role-keyed path was verified; the ordered-slot migration is pending validation.
+- [ ] The project compiles without known blocking errors and the complete slot-keyed critical path is verified in Play Mode. Static checks exist for the six-track implementation; `SampleScene` still needs production-card rebinding and Play Mode validation.
 - [ ] Critical economy, production, and result rules have proportionate automated coverage or documented manual verification where automation is impractical.
 - [ ] Material assumptions and the next milestone's entry conditions are documented.
 
@@ -48,7 +48,7 @@ _No confirmed implementation blocker._
 
 - [x] Autonomous horizontal movement, target acquisition, melee/ranged combat, projectiles, health, and unit death are represented in source.
 - [x] Two strongholds and base-destruction victory handling are represented in source and the battle scene.
-- [x] Melee, archer, cavalry, siege, and mythic combat classifications and prototype assets exist; the supported factions currently map their four standard entries in melee/archer/cavalry/siege order and use the separate mythic roster.
+- [x] Melee, archer, cavalry, siege, and mythic combat classifications and prototype assets exist; the supported factions map five standard entries in melee/archer/cavalry/siege/matching-colour-monk order and use the separate 16-creature mythic roster.
 - [x] Workers can mine and deposit gold; the player HUD displays live worker economy state and can buy workers up to capacity.
 - [x] Faction data can map roles to faction-specific prefabs.
 - [x] Black, blue, purple, red, and yellow prototype faction assets map colour-specific animated worker, melee, and archer prefabs while sharing cavalry, siege, and mythic.
@@ -60,11 +60,11 @@ These checks confirm repository presence only. Their integrated runtime behavior
 ### Planned outcomes
 
 - [x] Accept the recurring three-purchase lifecycle originally recorded in `DEC-007` and carried forward per standard slot and separate mythic track by `DEC-018`.
-- [ ] Complete representative Play Mode verification of the source-integrated player gold, worker, four ordered standard-slot, duplicate-role, and separate mythic production paths. The earlier unique-role path is verified, but the accepted slot-keyed migration remains.
+- [ ] Complete representative Play Mode verification of the source-integrated player gold, worker, five ordered standard-slot, duplicate-role, and separate mythic production paths. The earlier unique-role path is verified; the six-card scene must be rebound before testing the revised flow.
 - [x] Implement an AI decision layer that participates in the same economy and production game, with three Play Mode-verified difficulties, same-rule purchasing, and random mythic/opponent selection.
 - [x] Complete targeted verification of the implemented five-minute timer, stronghold-health comparison, unit-loss-value tiebreaker, result states, and restart/reset flow.
 - [ ] Correct the dominant three-star melee strategy and establish credible mythic value through controlled balance diagnosis and tuning.
-- [ ] Preserve cost and recurring cadence ownership in each configured unit's `UnitData` while moving runtime unlock, tier, timer, and purchase identity from combat role to ordered standard slot. The earlier role-keyed values and spawn patterns were user-verified on 2026-07-16; duplicate-role slots and the global debug pattern require regression.
+- [ ] Preserve cost and recurring cadence ownership in each configured unit's `UnitData` while moving runtime unlock, tier, timer, and purchase identity from combat role to ordered standard slot. Five faction-owned slots plus the separate picker track are implemented in source; duplicate-role slots, the standard-slot monk, and the global debug pattern require regression.
 - [x] Validate the functional HUD at representative resolutions and across the complete critical path in Play Mode.
 - [ ] Add a minimal in-game menu with confirmed pause and navigation behavior.
 - [x] Add a player-facing title -> faction selection -> difficulty selection -> battle flow, verified in Play Mode; player-build coverage remains tracked separately.
@@ -72,7 +72,7 @@ These checks confirm repository presence only. Their integrated runtime behavior
 - [ ] Diagnose and retune the implemented role counters, mythic roster, star curve, and roster/base values across equal-gold, equal-time, mixed-composition, and tiered matchups.
 - [ ] Add focused tests for deterministic economy, production, and result rules; representative Play Mode critical-path verification is complete.
 - [x] Deliver the accepted selectable mythic test roster in sequence: five colour monk healers, reusable animated Enemy Pack melee/ranged prefabs, then a pre-purchase details-pane picker with per-match selection and data-owned balance.
-- [ ] Review the broad initial mythic roster after animation, balance, and counter-selection testing; do not let this expansion displace the AI and complete-match critical path.
+- [x] Reduce the broad initial picker from 21 options to the 16 Enemy Pack creatures and move each colour monk into its matching faction's fifth standard slot.
 
 ### Dependencies
 
@@ -242,3 +242,4 @@ Use this section only for major sequencing or scope changes.
 
 - 2026-07-16: Reconciled the Prototype milestone with the implemented foundations and accepted design direction. Replaced generic outcomes with the game-specific critical path and deferred non-prototype scope.
 - 2026-07-17: Accepted a test-oriented selectable mythic roster. Sequence monk healing and reusable animated prefabs before the HUD picker; AI and the complete match loop remain the milestone's primary blockers.
+- 2026-07-29: Expanded faction-owned standard production from four to five ordered slots, assigned each colour monk to its matching faction's fifth slot, and reduced the separate picker to 16 Enemy Pack creatures. Six-card scene binding and Play Mode regression remain required.

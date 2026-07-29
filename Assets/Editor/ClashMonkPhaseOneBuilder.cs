@@ -41,7 +41,8 @@ public static class ClashMonkPhaseOneBuilder
         foreach (MonkVariant variant in Variants)
         {
             ConfigureControllerAndClips(variant);
-            CreateMonkPrefab(variant, unitData, healEffectPrefab);
+            MonkUnit monkPrefab = CreateMonkPrefab(variant, unitData, healEffectPrefab);
+            AssignFactionProductionSlot(variant, monkPrefab);
         }
 
         AssetDatabase.SaveAssets();
@@ -279,6 +280,23 @@ public static class ClashMonkPhaseOneBuilder
         }
 
         throw new InvalidOperationException($"{clip.name} has no sprite frames.");
+    }
+
+    private static void AssignFactionProductionSlot(MonkVariant variant, MonkUnit monkPrefab)
+    {
+        string factionPath = $"Assets/ScriptableObjects/Factions/{variant.Colour}Faction.asset";
+        FactionData faction = RequireAsset<FactionData>(factionPath);
+        SerializedObject serializedFaction = new SerializedObject(faction);
+        SerializedProperty productionUnits = serializedFaction.FindProperty("productionUnits");
+        productionUnits.arraySize = FactionData.StandardProductionSlotCount;
+
+        SerializedProperty monkEntry =
+            productionUnits.GetArrayElementAtIndex(FactionData.StandardProductionSlotCount - 1);
+        monkEntry.FindPropertyRelative("role").enumValueIndex = (int)UnitRole.Mythic;
+        monkEntry.FindPropertyRelative("prefab").objectReferenceValue = monkPrefab;
+
+        serializedFaction.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(faction);
     }
 
     private static void SetLoop(AnimationClip clip, bool loop)

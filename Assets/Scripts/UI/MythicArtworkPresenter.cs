@@ -83,8 +83,9 @@ public static class MythicArtworkPresenter
         if (prefab == null) return "Unknown";
 
         return prefab.name
-            .Replace("MythicUnit", string.Empty)
             .Replace("MeleeMythicAnimatedUnit", "Minotaur")
+            .Replace("MeleeMythicUnit", "Minotaur")
+            .Replace("MythicUnit", string.Empty)
             .Replace("MonkUnit", " Monk")
             .Replace("Fish", " Fish")
             .Trim();

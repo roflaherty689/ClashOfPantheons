@@ -20,24 +20,75 @@ public static class ClashProductionCardBindingMigration
 
     public static void BindProductionCards()
     {
-        Scene scene = EditorSceneManager.OpenScene(BattleScenePath, OpenSceneMode.Single);
+        Scene scene = SceneManager.GetSceneByPath(BattleScenePath);
+        if (!scene.IsValid() || !scene.isLoaded)
+        {
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                Debug.Log("Production-card binding migration cancelled; no scenes were changed.");
+                return;
+            }
+
+            scene = EditorSceneManager.OpenScene(BattleScenePath, OpenSceneMode.Single);
+        }
+
         GameObject battleUi = FindRoot(scene, "Battle UI");
         Transform production = battleUi != null ? battleUi.transform.Find(ProductionPath) : null;
         if (production == null) throw new MissingReferenceException("The battle production-card hierarchy was not found.");
 
+        EnsureMonkCard(production);
         BindCard(production, ProductionSlotId.Standard0, "MELEE");
         BindCard(production, ProductionSlotId.Standard1, "ARCHER");
         BindCard(production, ProductionSlotId.Standard2, "CAVALRY");
         BindCard(production, ProductionSlotId.Standard3, "SIEGE");
+        BindCard(production, ProductionSlotId.Standard4, "MONK");
         BindCard(production, ProductionSlotId.Mythic, "MYTHIC");
+        LayoutCards(production);
 
         ProductionCardView[] views = production.GetComponentsInChildren<ProductionCardView>(true);
-        if (views.Length != 5) throw new InvalidOperationException($"Expected five bound production cards, found {views.Length}.");
+        if (views.Length != 6) throw new InvalidOperationException($"Expected six bound production cards, found {views.Length}.");
 
         EditorSceneManager.MarkSceneDirty(scene);
         if (!EditorSceneManager.SaveScene(scene))
             throw new InvalidOperationException("Unity could not save the production-card binding migration.");
-        Debug.Log("Bound all five production cards through serialized ProductionCardView references.");
+        Debug.Log("Bound all six production cards through serialized ProductionCardView references.");
+    }
+
+    private static void EnsureMonkCard(Transform production)
+    {
+        if (production.Find("MONK Production") != null) return;
+
+        Transform source = production.Find("SIEGE Production");
+        if (source == null) throw new MissingReferenceException("Cannot create the monk card without the SIEGE production card template.");
+
+        GameObject clone = UnityEngine.Object.Instantiate(source.gameObject, production);
+        clone.name = "MONK Production";
+        Transform card = clone.transform;
+
+        Transform art = card.Find("SIEGE Art");
+        if (art != null) art.name = "MONK Art";
+
+        Transform button = card.Find("Unlock SIEGE");
+        if (button != null) button.name = "Unlock MONK";
+
+        TextMeshProUGUI title = FindDirectText(card, "SIEGE");
+        if (title != null) title.text = "MONK";
+    }
+
+    private static void LayoutCards(Transform production)
+    {
+        string[] roles = { "MELEE", "ARCHER", "CAVALRY", "SIEGE", "MONK", "MYTHIC" };
+        for (int index = 0; index < roles.Length; index++)
+        {
+            RectTransform card = production.Find(roles[index] + " Production") as RectTransform;
+            if (card == null) continue;
+
+            card.anchoredPosition = new Vector2(-595f + index * 238f, -5f);
+            card.sizeDelta = new Vector2(218f, 274f);
+
+            RectTransform button = card.Find("Unlock " + roles[index]) as RectTransform;
+            if (button != null) button.sizeDelta = new Vector2(196f, 52f);
+        }
     }
 
     private static void BindCard(

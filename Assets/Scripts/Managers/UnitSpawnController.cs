@@ -10,6 +10,7 @@ public sealed class UnitSpawnController : IProductionSpawnContext
         ProductionSlotId.Standard1,
         ProductionSlotId.Standard2,
         ProductionSlotId.Standard3,
+        ProductionSlotId.Standard4,
         ProductionSlotId.Mythic
     };
 

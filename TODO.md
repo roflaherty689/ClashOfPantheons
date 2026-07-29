@@ -44,7 +44,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Acceptance criteria:**
 
-- [ ] Player gold is the authoritative currency for worker purchases, all four ordered standard-production slots, the separate mythic track, and their upgrades. The earlier role-keyed path is verified; the slot-keyed migration remains.
+- [ ] Player gold is the authoritative currency for worker purchases, all five ordered standard-production slots, the separate mythic track, and their upgrades. The earlier role-keyed path is verified; the six-track migration still needs scene and Play Mode verification.
 - [x] Buying a worker uses the existing worker limit and updates visible gold/worker state.
 - [ ] Every standard slot follows the approved independent recurring-production contract without a shared FIFO queue; duplicate combat roles do not share unlock, tier, timer, cost, cadence, or purchase state.
 - [ ] Each standard slot begins locked; its first purchase unlocks continuous one-star production and its next two purchases upgrade only future spawns from that slot to two and three stars. Mythic follows the same tier lifecycle on a separate picker-backed track.
@@ -58,9 +58,9 @@ Tasks are ordered by dependency and prototype value.
 
 **Relevant systems:** `WorkerManager`, `GameManager`, `ProductionStateController`, `UnitSpawnController`, `UnitData`, faction data, AI, battle UI, scene wiring
 
-**Dependencies:** `DEC-004` and `DEC-018`; initial values require balance tuning during implementation
+**Dependencies:** `DEC-004`, `DEC-018`, and `DEC-019`; initial values require balance tuning during implementation
 
-**Progress:** The earlier role-keyed implementation uses `UnitData` cost/cadence, atomic spending, fresh unlock timers, future-spawn tier snapshots, and a three-purchase cap. Its production cards, selected-role panel, cadence, simultaneous readiness, cap resume, failures, match-end stopping, restart, and complete matches received representative verification. Migration to four ordered slot identities with duplicate-role support is in progress and is not covered by those earlier checks. Existing Core tests cover tier transitions/scaling, but focused slot-keyed economy transactions and production scheduling tests remain. Balance is not accepted: the user reports three-star melee wins roughly 99% across all difficulties and mythics are too weak for their cost.
+**Progress:** The earlier role-keyed implementation uses `UnitData` cost/cadence, atomic spending, fresh unlock timers, future-spawn tier snapshots, and a three-purchase cap. Its production cards, selected-role panel, cadence, simultaneous readiness, cap resume, failures, match-end stopping, restart, and complete matches received representative verification. Five ordered faction-owned standard slots plus a separate picker-backed mythic track are now implemented in source; each colour faction's `Standard4` is its matching monk, still classified `UnitRole.Mythic` but purchased as standard production. Static checks exist, but `SampleScene` must be rebound through **Tools > Clash of Pantheons > Bind Production Card Views** after Unity compiles, then the six-card flow requires Play Mode regression. Existing Core tests cover tier transitions/scaling, but focused slot-keyed economy transactions and production scheduling tests remain. Balance is not accepted: the user reports three-star melee wins roughly 99% across all difficulties and mythics are too weak for their cost.
 
 **Status:** Partially implemented
 
@@ -71,7 +71,7 @@ Tasks are ordered by dependency and prototype value.
 **Acceptance criteria:**
 
 - [x] AI purchases consume its gold and respect the same costs, limits, and production rules.
-- [ ] AI can buy workers, purchase and upgrade all four standard slots independently even when roles repeat, and use the separate mythic track.
+- [ ] AI can buy workers, purchase and upgrade all five standard slots independently even when roles repeat, and use the separate mythic track.
 - [x] A simple documented strategy creates credible pressure within a five-minute match.
 - [x] AI stops on match end and resets on restart.
 - [x] AI decisions are observable enough to debug and tune.
@@ -81,7 +81,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** Task 1
 
-**Progress:** The earlier role-keyed `EnemyAIController` uses the shared worker, production, tier, and atomic mythic-purchase APIs. Easy/Medium/Hard change cadence and policy quality; enemy-only bonuses produce 200/250/350 initial totals. Medium and Hard gate early workers behind military production to resist rushes. The user verified that integrated flow in Play Mode on 2026-07-17. Slot-keyed duplicate-role purchasing and upgrades still require migration and regression.
+**Progress:** The earlier role-keyed `EnemyAIController` uses the shared worker, production, tier, and atomic mythic-purchase APIs. Easy/Medium/Hard change cadence and policy quality; enemy-only bonuses produce 200/250/350 initial totals. Medium and Hard gate early workers behind military production to resist rushes. The user verified that integrated flow in Play Mode on 2026-07-17. Five standard slots and the separate 16-creature picker are implemented in source, but the standard-slot monk and complete six-track AI purchasing path still require Play Mode regression.
 
 **Status:** Partially implemented
 
@@ -116,7 +116,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Acceptance criteria:**
 
-- [ ] HUD shows live gold, workers, four ordered standard-slot states plus a separate mythic state, per-track star tiers, timer, both stronghold health values, and results. The earlier five-role presentation is verified; slot-derived duplicate-role presentation remains.
+- [ ] HUD shows live gold, workers, five ordered standard-slot states plus a separate mythic state, per-track star tiers, timer, both stronghold health values, and results. The earlier five-card presentation is verified; the revised six-card scene binding and slot-derived presentation remain.
 - [x] Favour, essence, and shared FIFO queue presentation are removed or clearly excluded from the functional prototype UI.
 - [ ] Player purchase and upgrade controls provide success, failure, affordability, and cooldown/cadence feedback.
 - [x] Critical state does not rely on red/blue colour alone and text is readable at the chosen prototype resolutions.
@@ -127,7 +127,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Dependencies:** Tasks 1–3
 
-**Progress:** The editor-authored Tiny Swords battle HUD binds gold, workers, both strongholds, timer, results, restart, and five production cards. Focused verification covers the earlier unique-role presenters and interactions, and the user has completed several clean end-to-end Play Mode matches. The accepted model reinterprets the first four cards as ordered standard slots and keeps mythic as the separate fifth track; duplicate-role labels, art, purchase routing, and independent states remain to be verified. The attempted three-part stronghold health-bar frame remains deferred pending a later UI pass.
+**Progress:** The editor-authored Tiny Swords battle HUD supports gold, workers, both strongholds, timer, results, restart, five ordered standard cards, and one separate mythic card. Focused verification covers the earlier five-card presenters and interactions, and the user has completed several clean end-to-end Play Mode matches under that earlier layout. The revised model uses six cards: the first five are faction-owned standard slots and the sixth is the picker-backed mythic track. `SampleScene` still requires **Tools > Clash of Pantheons > Bind Production Card Views** after Unity compiles; standard-monk labels/art, purchase routing, independent state, picker exclusion, and the complete six-card layout then require Play Mode verification. The attempted three-part stronghold health-bar frame remains deferred pending a later UI pass.
 
 **Status:** Partially implemented
 
@@ -156,7 +156,7 @@ Tasks are ordered by dependency and prototype value.
 
 **Risks and manual Unity work:** Runtime builds cannot use `AssetDatabase` to discover ScriptableObjects, so available factions must be explicitly serialized or supplied through another build-safe content mechanism. Scene creation, Canvas layout, button references, Build Settings ordering, faction catalog contents, multi-resolution inspection, and Play Mode/player-build verification require Unity Editor validation.
 
-**Progress:** Coordinated and accepted in `DEC-012` and extended by `DEC-014`. The user verified the title, faction selection, Tiny Swords animated presentation, difficulty selection, distinct opponent faction, and transition into battle in Play Mode on 2026-07-17, and later accepted the implemented front-end menus as readable across the tested aspect ratios. Difficulty choices launch battle directly from a parchment-contained Tiny Swords menu. The title background includes all 21 selectable mythic actors. Player-build verification remains pending, so the parent task remains partially implemented.
+**Progress:** Coordinated and accepted in `DEC-012` and extended by `DEC-014`. The user verified the title, faction selection, Tiny Swords animated presentation, difficulty selection, distinct opponent faction, and transition into battle in Play Mode on 2026-07-17, and later accepted the implemented front-end menus as readable across the tested aspect ratios. Difficulty choices launch battle directly from a parchment-contained Tiny Swords menu. The title background retains all 16 Enemy Pack creatures and five colour monks as decorative actors, independently of the current 16-option picker. Player-build verification remains pending, so the parent task remains partially implemented.
 
 **Status:** Partially implemented
 
@@ -221,16 +221,17 @@ Tasks are ordered by dependency and prototype value.
 - [x] Use Troll Attack as its attack. Ignore Troll Windup, Recovery, and breaking-club animations, Skull/Turtle guard animations, and Boat.
 - [x] **Phase 3 - Mythic picker:** Open the right-side details picker before spending. Selection atomically purchases the configured unlock and remains locked for the match; cancellation spends nothing.
 - [x] Later purchases upgrade the selection without reopening the picker. Its `UnitData` controls cost and cadence, and all future mythic spawns use it.
-- [x] Initially populate all Phase 1-2 qualifying units. Preserve explicit opponent configuration until AI selection is implemented, while supporting later enemy-first reveal and counter-selection.
+- [x] Initially populate all Phase 1-2 qualifying units, then reduce the picker to the 16 Enemy Pack creatures after moving each monk into its matching faction's fifth standard slot.
 - [x] Differentiate combat mythics by creature identity, with cheaper/weaker options generally producing faster, Troll uniquely strongest and highest-cost, and all monk colours mechanically identical.
 - [x] Order the mythic picker by ascending gold cost, then alphabetically when costs match.
 - [x] Validate compilation/import, serialized-data migration, both teams/facings, animator references, restart reset, transaction behavior, representative resolutions, and Play Mode.
+- [ ] After the five-standard-slot migration, bind the six production-card views in `SampleScene` and verify monk standard purchasing, the 16-option picker, both teams, AI behavior, restart, and representative resolutions in Play Mode.
 
-**Dependencies/risks:** Mythic remains deliberately separate from the four-slot faction roster and continues to use its picker-backed per-match selection. Healing requires friendly targeting and current/max-health access without costly broad scans. This test expansion must not displace the incomplete AI/core-loop work.
+**Dependencies/risks:** The 16-creature mythic picker remains deliberately separate from the five-slot faction roster and continues to use its picker-backed per-match selection. Monks use the same Mythic combat classification while occupying faction-owned `Standard4`, so production code must preserve slot identity rather than routing them through the picker. Healing requires friendly targeting and current/max-health access without costly broad scans. This test expansion must not displace the incomplete AI/core-loop work.
 
-**Progress:** Phases 1-3 are complete. Runtime source provides ally-combat-state tracking, clamped healing, lowest-health ally selection, fixed-cadence tier-scaled monk healing, movement suppression, recipient-owned heal VFX, moving/healing friendly separation, enemy-proximity stopping, and a target-point stopping distance equal to heal range. The Editor builder normalized all five controllers and clip-loop settings, generated the shared `MonkUnitData`, one-shot heal-effect prefab, and five colour monk prefabs, and assigned each colour faction's mythic entry to its matching monk. Phase 2 provides 15 independent Enemy Pack mythic prefabs and `UnitData` assets, normalized Idle/Run-or-Walk/Attack controllers, and dedicated bone, harpoon, and shaman projectiles for the three ranged units. Phase 3 adds a build-safe 21-unit roster and a scrollable right-side picker whose selection and initial gold spend are atomic; the selected prefab's data controls upgrades and spawning for the remainder of the match, while cancellation and unaffordable options spend nothing. Combat mythics now have accepted creature-identity-driven health, damage, speed, cost, and cadence profiles; all monk colours share one profile, Troll is uniquely strongest and highest-cost, and picker options sort by ascending gold cost with alphabetical ties. Presentation maps all 16 Enemy Pack choices to their configured Enemy Avatars and all five monks to their colour-specific Human Avatars, shows portraits beside picker labels, switches the mythic slot and details portrait after selection, starts with greyed crossed swords on parchment, removes redundant picker chrome, and gives all standard faction archers the Tiny Swords arrow projectile. Static serialized-reference checks and both C# assembly builds pass; the user accepted the combined Phase 2-3 Play Mode review and the subsequent balance and sorting pass on 2026-07-17.
+**Progress:** Phases 1-3 were completed and accepted for the original 21-option test roster. Runtime source provides ally-combat-state tracking, clamped healing, lowest-health ally selection, fixed-cadence tier-scaled monk healing, movement suppression, recipient-owned heal VFX, moving/healing friendly separation, enemy-proximity stopping, and a target-point stopping distance equal to heal range. The Editor builder normalized all five controllers and clip-loop settings, generated the shared `MonkUnitData`, one-shot heal-effect prefab, and five colour monk prefabs. Phase 2 provides 15 independent Enemy Pack mythic prefabs plus Minotaur, normalized Idle/Run-or-Walk/Attack controllers, and dedicated bone, harpoon, and shaman projectiles for the three ranged units. The current build-safe picker roster is reduced to those 16 Enemy Pack creatures; each colour monk is assigned to its matching faction's `Standard4` and remains mechanically identical. Atomic picker purchase, data-owned upgrades/spawning, cost ordering, portraits, and crossed-swords presentation remain. Static implementation checks exist, but the revised six-card scene and Play Mode behavior are not yet verified.
 
-**Status:** Complete; Phases 1-3 implemented and accepted (`DEC-013`).
+**Status:** Partially re-opened for the `DEC-019` scene-binding and Play Mode regression; the underlying Phase 1-3 content and picker mechanics remain complete.
 
 ### Faction-driven prototype presentation
 

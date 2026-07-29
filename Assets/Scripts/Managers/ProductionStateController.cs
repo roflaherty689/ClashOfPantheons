@@ -9,7 +9,7 @@ public interface IProductionSpawnContext
 
 public sealed class ProductionStateController
 {
-    public const int SlotCount = 5;
+    public const int SlotCount = 6;
 
     private readonly int[,] tiers = new int[2, SlotCount];
     private readonly float[,] timers = new float[2, SlotCount];
@@ -62,7 +62,7 @@ public sealed class ProductionStateController
                 continue;
             }
 
-            ProductionSlotId slotId = (ProductionSlotId)slotIndex;
+            ProductionSlotId slotId = GetSlotId(slotIndex);
             if (!spawnContext.TryGetSpawnInterval(team, slotId, out float interval))
             {
                 continue;
@@ -102,8 +102,30 @@ public sealed class ProductionStateController
 
     public static int GetSlotIndex(ProductionSlotId slotId)
     {
-        int index = (int)slotId;
-        return index >= 0 && index < SlotCount ? index : -1;
+        return slotId switch
+        {
+            ProductionSlotId.Standard0 => 0,
+            ProductionSlotId.Standard1 => 1,
+            ProductionSlotId.Standard2 => 2,
+            ProductionSlotId.Standard3 => 3,
+            ProductionSlotId.Standard4 => 4,
+            ProductionSlotId.Mythic => 5,
+            _ => -1
+        };
+    }
+
+    private static ProductionSlotId GetSlotId(int slotIndex)
+    {
+        return slotIndex switch
+        {
+            0 => ProductionSlotId.Standard0,
+            1 => ProductionSlotId.Standard1,
+            2 => ProductionSlotId.Standard2,
+            3 => ProductionSlotId.Standard3,
+            4 => ProductionSlotId.Standard4,
+            5 => ProductionSlotId.Mythic,
+            _ => throw new ArgumentOutOfRangeException(nameof(slotIndex))
+        };
     }
 
     private void AdvanceUnlockedTimers(Team team, float deltaTime)

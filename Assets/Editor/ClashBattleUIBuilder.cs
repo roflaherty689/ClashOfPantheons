@@ -209,24 +209,42 @@ public static class ClashBattleUIBuilder
         RectTransform production = CreateRect("Independent Production", parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-35, 17), new Vector2(1460, 332));
         AddPanel(production.gameObject, new Color32(38, 38, 36, 248));
 
-        string[] roles = { "MELEE", "ARCHER", "CAVALRY", "SIEGE", "MYTHIC" };
-        string[] costs = { "50", "60", "100", "130", "220" };
+        ProductionSlotId[] slots =
+        {
+            ProductionSlotId.Standard0,
+            ProductionSlotId.Standard1,
+            ProductionSlotId.Standard2,
+            ProductionSlotId.Standard3,
+            ProductionSlotId.Standard4,
+            ProductionSlotId.Mythic
+        };
+        string[] roles = { "MELEE", "ARCHER", "CAVALRY", "SIEGE", "MONK", "MYTHIC" };
+        string[] costs = { "50", "60", "100", "130", "200", "220" };
         string[] artPaths =
         {
             UiRoot + "/Human Avatars/Avatars_01.png",
             UiRoot + "/Human Avatars/Avatars_03.png",
             UiRoot + "/Human Avatars/Avatars_02.png",
             "Assets/Tiny Swords - Enemy Pack/Enemy Avatars/Enemy Avatars_16.png",
+            UiRoot + "/Human Avatars/Avatars_24.png",
             UiRoot + "/Icons/Icon_05.png"
         };
-        string[] artSprites = { "Avatars_01_0", "Avatars_03_0", "Avatars_02_0", "Enemy Avatars_16_0", "Icon_05_0" };
+        string[] artSprites =
+        {
+            "Avatars_01_0",
+            "Avatars_03_0",
+            "Avatars_02_0",
+            "Enemy Avatars_16_0",
+            "Avatars_24_0",
+            "Icon_05_0"
+        };
 
         for (int i = 0; i < roles.Length; i++)
         {
-            float x = -568 + i * 284;
+            float x = -595 + i * 238;
             CreateRoleCard(
                 production,
-                (ProductionSlotId)i,
+                slots[i],
                 roles[i],
                 costs[i],
                 artPaths[i],
@@ -244,7 +262,7 @@ public static class ClashBattleUIBuilder
         string artSprite,
         Vector2 pos)
     {
-        RectTransform card = CreateRect(role + " Production", parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), pos, new Vector2(258, 274));
+        RectTransform card = CreateRect(role + " Production", parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), pos, new Vector2(218, 274));
         Image cardImage = AddPanel(card.gameObject, Panel);
         AddBorder(card, new Color32(126, 109, 75, 255), 3);
 
@@ -264,7 +282,7 @@ public static class ClashBattleUIBuilder
         TextMeshProUGUI statusText = AddText(card, "LOCKED", 21, TextAlignmentOptions.Center, new Vector2(0, -47), new Vector2(210, 30), Gold);
         TextMeshProUGUI tierText = AddText(card, "0 / 3 STARS", 17, TextAlignmentOptions.Center, new Vector2(0, -74), new Vector2(210, 26), Muted);
 
-        RectTransform button = CreateRect("Unlock " + role, card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -111), new Vector2(218, 52));
+        RectTransform button = CreateRect("Unlock " + role, card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -111), new Vector2(196, 52));
         Image buttonImage = AddSpriteOrPanel(button.gameObject, UiRoot + "/Buttons/BigBlueButton_Regular.png", "BigBlueButton_Regular_4", new Color32(43, 102, 127, 255), false);
         Button selectable = button.gameObject.AddComponent<Button>();
         selectable.targetGraphic = buttonImage;
